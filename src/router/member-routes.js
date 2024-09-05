@@ -4,13 +4,12 @@
  설명 : 로그인 컴포넌트
  ---------------------
  2024.08.30 박요한 | 라우터 설계
- 2024.09.05 김호영 | 라우터 수정,개선
+ 2024.09.05 김호영 | 라우터 통합,수정,개선
  */
 
 //import MemberMainLayout from '@/components/member/MemberMainLayout.vue';
 import MemberLoginPage from '../components/member/auth/MemberLoginPage.vue';
-// import MemberSignUpPage from '../components/MemberSignUpPage.vue';
-// import MemberMainLayout from '../components/MemberMainLayout.vue';
+import MemberSignUpPage from '../components/member/auth/MemberSignUpPage.vue';
 // import HomePage from '../components/HomePage/HomePage.vue';
 // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
 // import FCommunityBoard from '../components/BoardPage/FCommunityBoard.vue';
@@ -32,7 +31,7 @@ import MemberLoginPage from '../components/member/auth/MemberLoginPage.vue';
 
 const MemberRoutes = [
     { path: '/login', component: MemberLoginPage, name: 'Login' },
-    //  { path: 'signup', component: MemberSignUpPage, name: 'SignUp' }
+    { path: '/signup', component: MemberSignUpPage, name: 'SignUp' }
 //    {
 //     path: '/',
 //     component: MemberMainLayout,
@@ -51,7 +50,7 @@ const MemberRoutes = [
 //     //     component: MyPage,
 //     //     name: 'MyPage',
 //     //     children: [
-//     //       { path: 'activities/progileEdit', component: ProfileEdit, name: 'ProfileEdit' },
+//     //       { path: 'activities/profileEdit', component: ProfileEdit, name: 'ProfileEdit' },
 //     //       { path: 'activities/review', component: ReviewManagement, name: 'ReviewManagement' },
 //     //       { path: 'activities/post', component: PostManagement, name: 'PostManagement' },
 //     //       { path: 'activities/donation', component: DonationManagement, name: 'DonationManagement' },

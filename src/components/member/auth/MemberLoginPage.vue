@@ -34,9 +34,9 @@
 
     <!-- 링크 컨테이너 -->
     <div class="link-container">
-      <a href="#"><strong>이메일 찾기</strong></a> | 
-      <a href="#"><strong>비밀번호 찾기</strong></a> | 
-      <a href="#"><strong>회원가입</strong></a>
+      <!-- <a href="#"><strong>이메일 찾기</strong></a> | -->
+      <!-- <a href="#"><strong>비밀번호 찾기</strong></a> |  --> 
+      <a @click="goSign"><strong>아직 회원이 아니신가요?</strong></a>
     </div>
 
     <!-- 간편 로그인 타이틀 -->
@@ -64,7 +64,10 @@ export default {
   },
   methods: {
     goHome() {
-      this.$router.push('/'); // / 경로로 이동
+      this.$router.push('/'); // / 홈으로 이동
+    },
+    goSign() {
+      this.$router.push('/signup'); // 회원가입 이동
     },
   login() {
     // 아이디(이메일) 입력 확인
@@ -161,6 +164,7 @@ input {
   color: rgb(87, 87, 87);
   font-weight: 00; 
   text-align: center;
+  cursor: pointer;
 }
 
 .link-container a {
