@@ -1,18 +1,21 @@
 <template>
-  <div class="my-page-content">
-    <!-- 콘텐츠 영역 -->
-    <slot></slot>
-  </div>
+  <!-- <ProfileEdit></ProfileEdit> -->
+  <!-- <PostManagement></PostManagement> -->
+  <DonationManagement></DonationManagement>
 </template>
 
 <script>
+import DonationManagement from "./my-activities/DonationManagement.vue";
+// import PostManagement from "./my-activities/PostManagement.vue";
+// import ProfileEdit from "./my-activities/ProfileEdit.vue";
+
 export default {
-  name: "MyPageContent",
+  components: {
+    // ProfileEdit,
+    // PostManagement,
+    DonationManagement,
+  },
 };
 </script>
 
-<style scoped>
-.my-page-content {
-  /* 스타일 설정 */
-}
-</style>
+<style scoped></style>
