@@ -1,21 +1,18 @@
 <template>
-  <!-- <ProfileEdit></ProfileEdit> -->
-  <!-- <PostManagement></PostManagement> -->
-  <DonationManagement></DonationManagement>
+  <div class="mypage-content">
+    <!-- 자식 컴포넌트들이 렌더링될 위치 -->
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>
-import DonationManagement from "./my-activities/DonationManagement.vue";
-// import PostManagement from "./my-activities/PostManagement.vue";
-// import ProfileEdit from "./my-activities/ProfileEdit.vue";
-
 export default {
-  components: {
-    // ProfileEdit,
-    // PostManagement,
-    DonationManagement,
-  },
+  // 필요 시 로직 추가
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.mypage-content {
+  padding: 20px;
+}
+</style>

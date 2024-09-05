@@ -80,7 +80,7 @@ export default {
 <style scoped>
 .profile-edit {
   padding: 20px;
-  background-color: #fff9f0;
+  background-color: white;
   border-radius: 5px;
 }
 

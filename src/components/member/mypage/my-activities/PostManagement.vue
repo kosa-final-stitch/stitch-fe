@@ -44,17 +44,17 @@
       </thead>
       <!-- 테이블 바디 -->
       <tbody>
-        <tr>
+        <tr v-for="(post, index) in infoPosts" :key="index">
           <!-- 체크박스 -->
           <td><input type="checkbox" /></td>
           <!-- 게시글 번호 -->
-          <td>1</td>
+          <td>{{ index + 1 }}</td>
           <!-- 게시글 내용 -->
-          <td>로그인이 왜 안되죠</td>
+          <td>{{ post.content }}</td>
           <!-- 작성일 -->
-          <td>2024-09-01</td>
+          <td>{{ post.date }}</td>
           <!-- 최종수정일 -->
-          <td>2024-09-01</td>
+          <td>{{ post.lastdate }}</td>
         </tr>
       </tbody>
     </table>
@@ -108,6 +108,13 @@ export default {
     return {
       // 선택된 탭 상태 (초기값은 'info')
       selectedTab: "info",
+      infoPosts: [
+        {
+          content: "로그인이 왜 안되죠",
+          createdAt: "2024-09-01",
+          updatedAt: "2024-09-01",
+        },
+      ],
     };
   },
 };

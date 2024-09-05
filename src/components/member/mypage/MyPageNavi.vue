@@ -1,12 +1,29 @@
 <template>
   <div class="my-page-navi">
     <ul>
-      <li><router-link to="/">회원 정보 수정</router-link></li>
-      <li><router-link to="/comment-management">게시글 관리</router-link></li>
-      <li><router-link to="/review-management">수강평 관리</router-link></li>
-      <li><router-link to="/donation-management">후원 관리</router-link></li>
-      <li><router-link to="/inquiry-management">문의 관리</router-link></li>
-      <li><router-link to="/certification">수료 인증 등록</router-link></li>
+      <li>
+        <router-link to="/mypage/activities/profileEdit"
+          >회원 정보 수정</router-link
+        >
+      </li>
+      <li>
+        <router-link to="/mypage/activities/post">게시글 관리</router-link>
+      </li>
+      <li>
+        <router-link to="/mypage/activities/review">수강평 관리</router-link>
+      </li>
+      <li>
+        <router-link to="/mypage/activities/donation">후원 관리</router-link>
+      </li>
+      <li>
+        <router-link to="/mypage/activities/inquiry">문의 관리</router-link>
+      </li>
+      <!-- 예시: 수료 인증 등록이 필요한 경우 여기에 추가 -->
+      <li>
+        <router-link to="/mypage/certification/list"
+          >수료 인증 관리</router-link
+        >
+      </li>
     </ul>
   </div>
 </template>

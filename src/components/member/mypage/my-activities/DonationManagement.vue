@@ -5,8 +5,7 @@
     <p>회원님께서 후원해주신 내역입니다.</p>
 
     <!-- 정보공유 게시판 테이블 -->
-    <!-- selectedTab이 'info'일 때만 표시 -->
-    <table v-if="selectedTab === 'info'">
+    <table>
       <!-- 테이블 헤더 -->
       <thead>
         <tr>
@@ -19,57 +18,17 @@
       </thead>
       <!-- 테이블 바디 -->
       <tbody>
-        <tr>
+        <tr v-for="(donation, index) in donations" :key="index">
           <!-- 체크박스 -->
           <td><input type="checkbox" /></td>
           <!-- 게시글 번호 -->
-          <td>1</td>
+          <td>{{ index + 1 }}</td>
           <!-- 후원날짜 -->
-          <td>2024-09-01</td>
+          <td>{{ donation.date }}</td>
           <!-- 후원 금액 -->
-          <td>카드</td>
+          <td>{{ donation.amount }}</td>
           <!-- 후원 방식 -->
-          <td>계좌이체</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Q&A 게시판 테이블 -->
-    <!-- selectedTab이 'qna'일 때만 표시 -->
-    <table v-if="selectedTab === 'qna'">
-      <thead>
-        <tr>
-          <th></th>
-          <th>번호</th>
-          <th>내용</th>
-          <th>작성일</th>
-          <th>최종 수정일</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Q&A 게시판 내용 (현재는 예시로 빈 내용) -->
-        <tr>
-          <td colspan="5">Q&A 내용이 여기에 표시됩니다.</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- 자유게시판 테이블 -->
-    <!-- selectedTab이 'free'일 때만 표시 -->
-    <table v-if="selectedTab === 'free'">
-      <thead>
-        <tr>
-          <th></th>
-          <th>번호</th>
-          <th>내용</th>
-          <th>작성일</th>
-          <th>최종 수정일</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- 자유게시판 내용 (현재는 예시로 빈 내용) -->
-        <tr>
-          <td colspan="5">자유게시판 내용이 여기에 표시됩니다.</td>
+          <td>{{ donation.method }}</td>
         </tr>
       </tbody>
     </table>
@@ -81,8 +40,19 @@ export default {
   // 컴포넌트 데이터
   data() {
     return {
-      // 선택된 탭 상태 (초기값은 'info')
-      selectedTab: "info",
+      donations: [
+        {
+          date: "2024-09-01", // 후원 날짜
+          amount: "10000원", // 후원 금액
+          method: "카드", // 후원 방식
+        },
+        {
+          date: "2024-09-02",
+          amount: "20000원",
+          method: "계좌이체",
+        },
+        // 필요한 만큼 추가로 후원 객체를 추가할 수 있음
+      ],
     };
   },
 };

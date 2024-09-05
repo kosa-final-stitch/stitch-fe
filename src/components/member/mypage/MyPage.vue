@@ -4,9 +4,9 @@
     <MemberInfoHeader />
     <div class="my-page-body">
       <!-- 좌측 네비게이션 -->
-      <MyPageNavi />
+      <MyPageNavi class="my-page-navi" />
       <!-- 메인 콘텐츠 영역 -->
-      <MyPageContent />
+      <MyPageContent class="my-page-content" />
     </div>
   </div>
 </template>
@@ -37,16 +37,12 @@ export default {
   flex: 1;
 }
 
-.my-page-body > * {
-  flex: 1;
+.my-page-navi {
+  flex: 0 0 300px; /* 네비게이션 고정 너비를 150px로 설정 */
 }
 
-.my-page-body > MyPageNavi {
-  flex: 0 0 200px; /* 네비게이션 고정 너비 */
-}
-
-.my-page-body > MyPageContent {
-  flex: 1; /* 콘텐츠 영역이 남은 공간 차지 */
+.my-page-content {
+  flex: 1; /* 콘텐츠 영역이 남은 공간을 차지하도록 설정 */
   padding: 20px; /* 콘텐츠 영역 내부 여백 */
 }
 </style>
