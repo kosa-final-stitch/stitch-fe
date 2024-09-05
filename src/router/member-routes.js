@@ -4,13 +4,15 @@
  설명 : 로그인 컴포넌트
  ---------------------
  2024.08.30 박요한 | 라우터 설계
- 2024.09.05 김호영 | 라우터 수정,개선
+ 2024.09.05 김호영 | 라우터 통합,수정,개선
  */
 
+
+//import MemberMainLayout from '@/components/member/MemberMainLayout.vue';
+import MemberLoginPage from '../components/member/auth/MemberLoginPage.vue';
+import MemberSignUpPage from '../components/member/auth/MemberSignUpPage.vue';
 import MemberMainLayout from "@/components/member/MemberMainLayout.vue";
 import MemberLoginPage from "../components/member/auth/MemberLoginPage.vue";
-// import MemberSignUpPage from '../components/MemberSignUpPage.vue';
-// import MemberMainLayout from "../components/MemberMainLayout.vue";
 // import HomePage from '../components/HomePage/HomePage.vue';
 // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
 // import FCommunityBoard from '../components/BoardPage/FCommunityBoard.vue';
@@ -33,8 +35,8 @@ import CertificateList from "../components/member/mypage/certification/Certifica
 // import DonationPage from "../components/MyPage/DonationPage.vue";
 
 const MemberRoutes = [
-  { path: "/login", component: MemberLoginPage, name: "Login" },
-  //  { path: 'signup', component: MemberSignUpPage, name: 'SignUp' }
+    { path: '/login', component: MemberLoginPage, name: 'Login' },
+    { path: '/signup', component: MemberSignUpPage, name: 'SignUp' }
   {
     path: "/",
     component: MemberMainLayout,
