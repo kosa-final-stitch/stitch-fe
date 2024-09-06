@@ -7,10 +7,10 @@
  2024.09.05 김호영 | 라우터 통합,수정,개선
  */
 
- import MemberMainLayout from "@/components/member/MemberMainLayout.vue";
+import MemberMainLayout from "@/components/member/MemberMainLayout.vue";
 import MemberLoginPage from '../components/member/auth/MemberLoginPage.vue';
 import MemberSignUpPage from '../components/member/auth/MemberSignUpPage.vue';
-// import HomePage from '../components/HomePage/HomePage.vue';
+import HomePage from '../components/member/home-page/HomePage.vue';
 // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
 // import FCommunityBoard from '../components/BoardPage/FCommunityBoard.vue';
 // import QnABoard from '../components/BoardPage/QnABoard.vue';
@@ -38,7 +38,7 @@ const MemberRoutes = [
     path: "/",
     component: MemberMainLayout,
     children: [
-      // //       { path: '', component: HomePage, name: 'Home' },
+           { path: '', component: HomePage, name: 'Home' },
       //     //   { path: 'board/info-share', component: InfoShareBoard, name: 'InfoShareBoard' },
       //     //   { path: 'board/free-community', component: FCommunityBoard, name: 'FCommunityBoard' },
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },

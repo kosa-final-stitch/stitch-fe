@@ -431,6 +431,7 @@ input, select {
   color: white;
   cursor: pointer;
   margin-top: 10px;
+  transition: background-color 0.5s ease;
 }
 
 
@@ -440,6 +441,7 @@ input, select {
 
 .signup-btn:hover {
   background-color: #f5812e;
+  transition: background-color 0.2s ease;
 }
 
 .error-message {

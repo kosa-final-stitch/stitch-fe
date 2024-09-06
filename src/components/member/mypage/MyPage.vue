@@ -1,4 +1,5 @@
 <template>
+  <MemberHeader></MemberHeader>
   <div class="my-page">
     <!-- 상단 정보 헤더 -->
     <MemberInfoHeader />
@@ -15,9 +16,11 @@
 import MemberInfoHeader from "./mypage-header/MemberInfoHeader.vue";
 import MyPageNavi from "./MyPageNavi.vue";
 import MyPageContent from "./MyPageContent.vue";
+import MemberHeader from "../member-header/MemberHeader.vue";
 
 export default {
   components: {
+    MemberHeader,
     MemberInfoHeader,
     MyPageNavi,
     MyPageContent,
