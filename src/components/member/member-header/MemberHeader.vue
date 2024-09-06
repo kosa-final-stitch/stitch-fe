@@ -110,7 +110,7 @@ export default {
   }
 
 .nav-menu {
-  width: 100%;
+  width: 95%;
   display: flex;
   justify-content: space-between; /* 왼쪽과 오른쪽으로 배치 */
   margin-bottom: 0px;
@@ -124,7 +124,7 @@ export default {
   list-style: none;
   display: flex;
   gap: 30px;
-  font-size: 16px;
+  font-size: 18px;
 
   margin: 0; /* 혹시 기본 마진이 있을 수 있으니 0으로 설정 */
 }
