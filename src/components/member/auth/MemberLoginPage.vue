@@ -102,7 +102,8 @@ export default {
 <style scoped>
 /* 로그인 컨테이너 */
 .login-container {
-  width: 30%;
+  width: 80%;
+  max-width: 500px;
   margin: 0 auto;
   padding: 20px;
   text-align: center;
@@ -129,6 +130,12 @@ h1 {
   margin-bottom: 20px;
 }
 
+/* 입력 필드 포커스 스타일 */
+input:focus {
+  outline: none; /* 기본 아웃라인 제거 */
+  border-color: #F8A060; /* 포커스 시 테두리 색상 변경 */
+}
+
 /* 입력 필드 스타일 */
 input {
   width: 100%;
@@ -138,6 +145,7 @@ input {
   border-radius: 12px;
   box-sizing: border-box;
 }
+
 
 /* 로그인 버튼 스타일 */
 .login-btn {
