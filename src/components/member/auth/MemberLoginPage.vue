@@ -34,8 +34,6 @@
 
     <!-- 링크 컨테이너 -->
     <div class="link-container">
-      <!-- <a href="#"><strong>이메일 찾기</strong></a> | -->
-      <!-- <a href="#"><strong>비밀번호 찾기</strong></a> |  --> 
       <a @click="goSign"><strong>아직 회원이 아니신가요?</strong></a>
     </div>
 
@@ -55,54 +53,68 @@
 </template>
 
 <script>
+import { useMemberStore } from '@/store/member-store'; // Pinia store import
+import { useRouter } from 'vue-router';
+
 export default {
   data() {
     return {
       useremail: '',
-      password: ''
+      password: '',
+      allowedUsers: [ // 로그인 가능한 계정 목록
+        { email: 'test@test.com', password: 'test123' },
+        { email: 'user2@example.com', password: 'password456' },
+        { email: 'admin@example.com', password: 'admin123' },
+      ]
     };
+  },
+  setup() {
+    const memberStore = useMemberStore(); // Pinia store 사용
+    const router = useRouter(); // Vue router 사용
+    return { memberStore, router };
   },
   methods: {
     goHome() {
-      this.$router.push('/'); // / 홈으로 이동
+      this.$router.push('/'); // 홈으로 이동
     },
     goSign() {
-      this.$router.push('/signup'); // 회원가입 이동
+      this.$router.push('/signup'); // 회원가입 페이지로 이동
     },
-  login() {
-    // 아이디(이메일) 입력 확인
-    if (!this.useremail) {
-      alert('아이디를 입력해주세요.');
-      return;
-    }
+    login() {
+      // 아이디(이메일) 입력 확인
+      if (!this.useremail) {
+        alert('아이디를 입력해주세요.');
+        return;
+      }
 
-    // 비밀번호 입력 확인
-    if (!this.password) {
-      alert('비밀번호를 입력해주세요.');
-      return;
-    }
+      // 비밀번호 입력 확인
+      if (!this.password) {
+        alert('비밀번호를 입력해주세요.');
+        return;
+      }
 
-    // 여기서 실제 아이디와 비밀번호 검증 로직이 들어가야 합니다.
-    // 예를 들어, 서버로부터 받은 아이디와 비밀번호가 일치하는지 확인하는 부분.
+      // 로그인 가능한 계정 확인
+      const user = this.allowedUsers.find(
+        u => u.email === this.useremail && u.password === this.password
+      );
 
-    const correctEmail = "test@example.com";  // 가정된 올바른 이메일
-    const correctPassword = "123456";  // 가정된 올바른 비밀번호
-
-    if (this.useremail !== correctEmail || this.password !== correctPassword) {
-      alert('아이디와 비밀번호를 확인해주세요.');
-    } else {
-      alert(`이메일: ${this.useremail}, 비밀번호: ${this.password}`);
-      // 실제 로그인 로직(API 호출 등)을 여기에 추가
+      if (user) {
+        // 로그인 성공 시 상태 업데이트 및 리디렉션
+        this.memberStore.setMember({ email: this.useremail }); // 로그인 상태로 업데이트
+        this.router.push('/'); // 홈 페이지로 이동
+      } else {
+        alert('아이디와 비밀번호를 확인해주세요.');
+      }
     }
   }
-}
 };
 </script>
 
 <style scoped>
 /* 로그인 컨테이너 */
 .login-container {
-  width: 30%;
+  width: 80%;
+  max-width: 500px;
   margin: 0 auto;
   padding: 20px;
   text-align: center;
@@ -129,6 +141,12 @@ h1 {
   margin-bottom: 20px;
 }
 
+/* 입력 필드 포커스 스타일 */
+input:focus {
+  outline: none; /* 기본 아웃라인 제거 */
+  border-color: #F8A060; /* 포커스 시 테두리 색상 변경 */
+}
+
 /* 입력 필드 스타일 */
 input {
   width: 100%;
@@ -138,6 +156,7 @@ input {
   border-radius: 12px;
   box-sizing: border-box;
 }
+
 
 /* 로그인 버튼 스타일 */
 .login-btn {
