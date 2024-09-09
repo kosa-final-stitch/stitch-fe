@@ -75,12 +75,12 @@ export default {
   data() {
     return {
       reviews: [
-        { title: "강의평가", rating: 1, comment: "" },
-        { title: "강사평가", rating: 1, comment: "" },
-        { title: "학원평가", rating: 1, comment: "" },
-        { title: "사후평가", rating: 1, comment: "" },
-        { title: "후추후", rating: 1, comment: "" },
-        { title: "", rating: 1, comment: "" },
+        { title: "강의", rating: 1, comment: "" },
+        { title: "강사", rating: 1, comment: "" },
+        { title: "시설", rating: 1, comment: "" },
+        { title: "반 분위기", rating: 1, comment: "" },
+        { title: "행정", rating: 1, comment: "" },
+        { title: "취업관련", rating: 1, comment: "" },
       ],
       chart: null, // 차트 객체를 저장할 변수
     };

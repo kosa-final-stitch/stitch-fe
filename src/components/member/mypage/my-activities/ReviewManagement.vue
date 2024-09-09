@@ -1,20 +1,24 @@
 <template>
-  <div class="review-detail-page">
+  <div class="review-list-page">
     <h2>리뷰 리스트</h2>
+    <div class="rating">
+      <span
+        v-for="n in 5"
+        :key="n"
+        class="star"
+        :class="{ filled: n <= averageRating }"
+        >★</span
+      >
+    </div>
     <div class="review-list">
       <div class="review-header">
-        <span>{{ reviewerName }}</span>
-        <div class="rating">
-          <span
-            v-for="n in 5"
-            :key="n"
-            class="star"
-            :class="{ filled: n <= averageRating }"
-            >★</span
-          >
-        </div>
+        <span>{{ academy }}</span>
+        <!-- 학원 정보 -->
+        <span>{{ className }}</span>
+        <!-- 클래스 정보 -->
       </div>
 
+      <!-- 리뷰 리스트 -->
       <div
         v-for="(review, index) in reviews"
         :key="index"
@@ -23,15 +27,18 @@
       >
         <div class="review-content">
           <div class="review-title">{{ review.title }}</div>
-          <div class="review-rating-bar">
-            <div class="rating-bar">
-              <div
-                class="filled-bar"
-                :style="{ width: review.rating * 20 + '%' }"
-              ></div>
-            </div>
+          <div class="review-rating">
+            <span
+              v-for="n in 5"
+              :key="n"
+              class="star"
+              :class="{ filled: n <= review.rating }"
+              >★</span
+            >
           </div>
-          <div class="review-comment">{{ review.comment }}</div>
+        </div>
+        <div class="review-comment">
+          <p>{{ review.comment }}</p>
         </div>
       </div>
     </div>
@@ -42,14 +49,16 @@
 export default {
   data() {
     return {
-      reviewerName: "박쓸개",
-      averageRating: 4,
+      academy: "한국 소프트웨어 산업협회",
+      className: "MSA 4차",
+      averageRating: 3.5, // 평균 별점
       reviews: [
-        { title: "숨긴 기회 및 가능성", rating: 4, comment: "최고" },
-        { title: "복제 및 끈어", rating: 2, comment: "이건 좀 별로 없음" },
-        { title: "업무와 삶의 균형", rating: 3, comment: "실망" },
-        { title: "사내문화", rating: 3, comment: "" },
-        { title: "경영진", rating: 3, comment: "" },
+        { title: "강의", rating: 4, comment: "aa" },
+        { title: "강사", rating: 2, comment: "bb" },
+        { title: "시설", rating: 3, comment: "cc" },
+        { title: "반 분위기", rating: 3, comment: "dd" },
+        { title: "행정", rating: 3, comment: "ee" },
+        { title: "취업관련", rating: 3, comment: "ff" },
       ],
     };
   },
@@ -60,15 +69,20 @@ export default {
   },
 };
 </script>
+
 <style scoped>
-.review-detail-page {
-  max-width: 800px;
-  margin: 20px auto;
+.review-list-page {
+  max-width: 500px;
+  margin: 20px;
+  border: 1px solid #ddd; /* 테두리 두께를 1px로 설정하고 색상을 연한 회색으로 지정 */
+  padding: 20px; /* 내부 여백 추가 */
+  border-radius: 8px; /* 모서리를 약간 둥글게 만듭니다 */
 }
 
 .review-header {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* 학원명과 클래스 정보가 양쪽 끝으로 가도록 설정 */
   margin-bottom: 20px;
 }
 
@@ -95,6 +109,7 @@ export default {
   margin-bottom: 20px;
   padding: 10px 0;
   border-bottom: 1px solid #ddd;
+  cursor: pointer; /* 클릭할 수 있다는 것을 보여주기 위해 커서를 포인터로 변경 */
 }
 
 .review-content {
@@ -110,26 +125,13 @@ export default {
   flex: 1;
 }
 
-.review-rating-bar {
-  flex: 1;
-  margin-left: 10px;
-}
-
-.rating-bar {
-  width: 100%;
-  height: 8px;
-  background-color: #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.filled-bar {
-  height: 100%;
-  background-color: #ffa500;
+.review-rating {
+  flex: 0 0 auto;
 }
 
 .review-comment {
   color: #666;
   margin-top: 5px;
+  font-size: 14px;
 }
 </style>
