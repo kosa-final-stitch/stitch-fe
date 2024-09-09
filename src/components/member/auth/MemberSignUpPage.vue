@@ -103,8 +103,8 @@
           </div>
 
           <div class="input-container">
-            <label for="region">지역</label>
-            <select v-model="region" id="region" required>
+            <label for="address">지역</label>
+            <select v-model="address" id="address" required>
               <option disabled value="">지역</option>
               <option value="서울특별시">서울특별시</option>
               <option value="경기도">경기도</option>
@@ -169,6 +169,8 @@
   </div>
 </template>
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
@@ -180,9 +182,11 @@ export default {
       confirmPassword: '',
       passwordError: '',
       name: '',
+      nameError: '',
       phoneNumber: '',
+      phoneError: '',
       birth: '',
-      region: '',
+      address: '',
       gender: '',
       acceptTerms: {
         all: false,
@@ -198,11 +202,11 @@ export default {
         this.nickname &&
         this.password &&
         this.confirmPassword &&
-        !this.passwordsDoNotMatch &&
+        this.password === this.confirmPassword &&
         this.name &&
         this.phoneNumber &&
         this.birth &&
-        this.region &&
+        this.address &&
         this.gender &&
         this.acceptTerms.personalInfo &&
         this.acceptTerms.contentAgreement
@@ -210,6 +214,47 @@ export default {
     },
   },
   methods: {
+    signUp() {
+      // 유효성 검사 수행
+      const isEmailValid = this.validateEmail();
+      const isPasswordValid = this.validatePassword();
+      const isNicknameValid = this.validateNickname();
+
+      if (!isEmailValid || !isPasswordValid || !isNicknameValid) {
+        return;
+      }
+
+      // 사용자 데이터 구성
+      const userData = {
+        email: this.email,
+        nickname: this.nickname,
+        password: this.password,
+        name: this.name,
+        phone: this.phoneNumber,  // AddMemberRequest에 맞춘 필드 이름 사용
+        birth: new Date(this.birth),
+        address: this.address,     // 'address' 필드로 매핑
+        gender: this.gender === '남' ? 0 : 1,  // 성별 매핑 (남: 0, 여: 1)
+      };
+
+      // 서버에 회원가입 요청 전송
+      axios.post('/api/member/signup', userData)
+          .then(() => {
+            alert('회원가입이 완료되었습니다.');
+            this.$router.push("/member/login");  // 로그인 페이지로 리다이렉트
+          })
+          .catch((error) => {
+            console.error('회원가입 실패:', error);
+            if (error.response && error.response.data) {
+              this.emailError = error.response.data.message || '회원가입 중 오류가 발생했습니다.';
+            }
+            alert('회원가입에 실패했습니다.');
+          });
+    },
+
+    goLogin() {
+      this.$router.push('/member/login');
+    },
+
     validateEmail() {
       const regPassed = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(this.email);
       if (!regPassed) {
@@ -259,34 +304,6 @@ export default {
           this.acceptTerms.all = false;
         }
       }
-    },
-    signUp() {
-      const isEmailValid = this.validateEmail();
-      const isPasswordValid = this.validatePassword();
-      const isNicknameValid = this.validateNickname();
-
-      if (!isEmailValid || !isPasswordValid || !isNicknameValid) {
-        return;
-      }
-
-      // 임시로 콘솔에 데이터 출력 (서버로 보내지 않고 확인)
-      console.log({
-        email: this.email,
-        nickname: this.nickname,
-        password: this.password,
-        name: this.name,
-        phoneNumber: this.phoneNumber,
-        birth: this.birth,
-        region: this.region,
-        gender: this.gender,
-      });
-
-      alert('회원가입이 완료되었습니다.');
-      this.$router.push("/");
-    },
-
-    goLogin() {
-      this.$router.push('/login'); // 회원가입 이동
     },
   },
 };

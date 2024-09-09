@@ -5,7 +5,6 @@
  ---------------------
  2024.09.04 김호영 | 기능 담을 디자인 구현
  -->
-
  <template>
   <div class="login-container">
     <img @click="goHome" src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
@@ -55,6 +54,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -67,36 +68,43 @@ export default {
       this.$router.push('/'); // / 홈으로 이동
     },
     goSign() {
-      this.$router.push('/signup'); // 회원가입 이동
+      this.$router.push('/member/signup'); // 회원가입 이동
     },
-  login() {
-    // 아이디(이메일) 입력 확인
-    if (!this.useremail) {
-      alert('아이디를 입력해주세요.');
-      return;
-    }
+    async login() {
+      // 아이디(이메일) 입력 확인
+      if (!this.useremail) {
+        alert('아이디를 입력해주세요.');
+        return;
+      }
 
-    // 비밀번호 입력 확인
-    if (!this.password) {
-      alert('비밀번호를 입력해주세요.');
-      return;
-    }
+      // 비밀번호 입력 확인
+      if (!this.password) {
+        alert('비밀번호를 입력해주세요.');
+        return;
+      }
+      try {
+        // 비동기 요청을 처리 (async/await 사용)
+        await axios.post('http://localhost:8080/member/loginProcess', {
+          email: this.useremail,
+          password: this.password
+        }, {
+          withCredentials: true  // 세션 쿠키 전송 설정
+        });
 
-    // 여기서 실제 아이디와 비밀번호 검증 로직이 들어가야 합니다.
-    // 예를 들어, 서버로부터 받은 아이디와 비밀번호가 일치하는지 확인하는 부분.
+        alert('로그인 성공');
+        this.$router.push('/member/home'); // 로그인 성공 후 이동할 페이지
 
-    const correctEmail = "test@example.com";  // 가정된 올바른 이메일
-    const correctPassword = "123456";  // 가정된 올바른 비밀번호
-
-    if (this.useremail !== correctEmail || this.password !== correctPassword) {
-      alert('아이디와 비밀번호를 확인해주세요.');
-    } else {
-      alert(`이메일: ${this.useremail}, 비밀번호: ${this.password}`);
-      // 실제 로그인 로직(API 호출 등)을 여기에 추가
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          alert('아이디와 비밀번호를 확인해주세요.');
+        } else {
+          alert('로그인 중 문제가 발생했습니다.');
+        }
+      }
     }
   }
-}
 };
+
 </script>
 
 <style scoped>

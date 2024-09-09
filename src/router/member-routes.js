@@ -32,8 +32,8 @@ import CertificateList from "../components/member/mypage/certification/Certifica
 // import DonationPage from "../components/MyPage/DonationPage.vue";
 
 const MemberRoutes = [
-    { path: '/login', component: MemberLoginPage, name: 'Login' },
-    { path: '/signup', component: MemberSignUpPage, name: 'SignUp' },
+    { path: '/member/login', component: MemberLoginPage, name: 'Login' },
+    { path: '/member/signup', component: MemberSignUpPage, name: 'SignUp' },
   {
     path: "/",
     component: MemberMainLayout,
