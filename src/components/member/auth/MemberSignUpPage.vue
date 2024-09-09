@@ -304,7 +304,7 @@ export default {
 
 h1 {
   font-size: 30px;
-  margin-bottom: 120px;
+  margin-bottom: 80px;
 }
 
 h3 {
@@ -404,7 +404,7 @@ label {
 /* p 태그로 텍스트만 처리 */
 p {
   margin: 0;
-  font-size: 14px;
+  font-size: 11px;
   color: #333;
   line-height: 1.5;
   max-width: 450px;
