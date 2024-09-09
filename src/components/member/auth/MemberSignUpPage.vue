@@ -344,6 +344,12 @@ h3 {
   text-align: left; /* 입력 필드 및 라벨 왼쪽 정렬 */
 }
 
+/* 입력 필드 포커스 스타일 */
+input:focus {
+  outline: none; /* 기본 아웃라인 제거 */
+  border-color: #F8A060; /* 포커스 시 테두리 색상 변경 */
+}
+
 /* 라벨과 입력 필드 사이에 간격 추가 */
 label {
   flex-grow: 1;
@@ -442,6 +448,7 @@ input, select {
   color: white;
   cursor: pointer;
   margin-top: 10px;
+  transition: background-color 0.5s ease;
 }
 
 
@@ -451,6 +458,7 @@ input, select {
 
 .signup-btn:hover {
   background-color: #f5812e;
+  transition: background-color 0.2s ease;
 }
 
 .error-message {
