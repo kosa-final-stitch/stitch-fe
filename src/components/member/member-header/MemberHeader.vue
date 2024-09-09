@@ -110,10 +110,11 @@ export default {
       }
     },
     logout() {
-      const store = useMemberStore();
-      store.logout();
-      alert('로그아웃되었습니다.');
-    },
+  const store = useMemberStore();
+  store.logout(); // Pinia 스토어의 로그아웃 메서드 호출
+  alert('로그아웃되었습니다.');
+  this.$router.push('/'); // 메인 페이지로 리다이렉트
+},
     showDropdown() {
       this.isDropdownVisible = true;
       document.body.classList.add('blurred'); // 블러 효과 적용

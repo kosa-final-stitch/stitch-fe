@@ -18,8 +18,9 @@ export const useMemberStore = defineStore('memberStore', {
       this.isAuthenticated = true; // 로그인 상태로 전환
     },
     logout() {
-      this.member = null;
-      this.isAuthenticated = false; // 로그아웃 상태로 전환
+      this.isAuthenticated = false; // 인증 상태 초기화
+      this.memberInfo = null;       // 사용자 정보 초기화
+      localStorage.removeItem('token'); // 로컬스토리지에서 토큰 삭제 등
     },
   },
   persist: {
