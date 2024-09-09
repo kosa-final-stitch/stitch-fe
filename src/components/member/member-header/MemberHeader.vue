@@ -1,4 +1,11 @@
-<template>
+<!-- 
+ 담당자: 김호영 
+ 시작 일자: 2024.09.06
+ 설명 : 헤더 컴포넌트 설정
+ ---------------------
+ 2024.09.06 김호영 | 기능 담을 디자인 구현, 각 페이지 연결, 로그인 정보 위해 pinia 설정 
+ -->
+ <template>
   <header class="member-header">
     <nav class="nav-menu">
       <div class="left-side">
@@ -26,22 +33,22 @@
               <a>교육과정 정보</a>
               <a>게시판</a>
             </div>
-            <div v-show="isDropdownVisible" class="dropdown-container" @mouseover="showDropdown" @mouseout="hideDropdown">
+            <div :class="{'dropdown-container': true, 'show': isDropdownVisible}">
               <div class="dropdown-section">
-                <h4>문의하기</h4>
+                <h3>문의하기</h3>
                 <ul>
                   <li><a href="/inquiry">1:1 문의 하러가기</a></li>
                 </ul>
               </div>
               <div class="dropdown-section">
-                <h4>교육과정 정보</h4>
+                <h3>교육과정 정보</h3>
                 <ul>
                   <li><a href="/course/AcademyInfoList">학원 정보</a></li>
                   <li><a href="/course/CourseInfoList">교육과정 정보</a></li>
                 </ul>
               </div>
               <div class="dropdown-section">
-                <h4>게시판</h4>
+                <h3>게시판</h3>
                 <ul>
                   <li><a href="/board/InfoShareBoard">정보 공유</a></li>
                   <li><a href="/board/FCommunityBoard">자유 게시판</a></li>
@@ -72,7 +79,7 @@ export default {
   data() {
     return {
       searchText: '', // 검색창에 입력된 텍스트를 관리하는 변수
-      isDropdownVisible: false, // 전체 드롭다운 상태
+      isDropdownVisible: false, // 드롭다운 상태
     };
   },
   computed: {
@@ -108,9 +115,11 @@ export default {
     },
     showDropdown() {
       this.isDropdownVisible = true;
+      document.body.classList.add('blurred'); // 블러 효과 적용
     },
     hideDropdown() {
       this.isDropdownVisible = false;
+      document.body.classList.remove('blurred'); // 블러 효과 제거
     },
   },
 };
@@ -130,6 +139,9 @@ export default {
   left: 0;
   z-index: 1000;
 }
+.logout-link {
+  cursor: pointer;
+}
 
 .nav-menu {
   width: 95%;
@@ -139,7 +151,8 @@ export default {
   margin-right: 50px;
 }
 
-.left-side, .right-side {
+.left-side,
+.right-side {
   display: flex;
   flex-wrap: nowrap;
 }
@@ -169,9 +182,10 @@ export default {
 
 .nav-items li a:hover,
 .nav-item li a:hover {
-  color: #F8A060;
+  color: #f8a060;
 }
 
+/* 드롭다운 애니메이션 */
 .dropdown-container {
   position: absolute;
   top: 44px;
@@ -179,19 +193,27 @@ export default {
   right: 0;
   background-color: white;
   box-shadow: 0 12px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+
   display: flex;
   justify-content: space-around;
   z-index: 999;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease; /* 부드러운 애니메이션 */
+}
+
+
+.dropdown-container.show {
+  max-height: 400px; /* 드롭다운 최대 높이 */
 }
 
 .dropdown-section {
   flex-grow: 1;
-  margin: 0 50px;
+  margin: 20px 80px 20px 0px;
   text-align: right; /* 텍스트 오른쪽 정렬 */
 }
 
-.dropdown-section h4 {
+.dropdown-section h3 {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 10px;
@@ -210,10 +232,17 @@ export default {
 .dropdown-section li a {
   color: rgb(61, 61, 61);
   text-decoration: none;
+  font-size: 14px;
 }
 
 .dropdown-section li a:hover {
-  color: #F8A060;
+  color: #f8a060;
+}
+
+/* 배경 블러 효과 */
+.blurred {
+  backdrop-filter: blur(5px); /* 블러 효과 */
+  transition: backdrop-filter 0.3s ease; /* 부드러운 전환 */
 }
 
 .logo-container {
