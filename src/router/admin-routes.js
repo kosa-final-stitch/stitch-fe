@@ -8,13 +8,13 @@
  */
 import AdminApp from '../components/admin/AdminApp.vue';
 import AdminMainLayout from '../components/admin/AdminMainLayout.vue';
-//import DashboardLayout from '../components/admin/content/DashboardLayout.vue';
-//import UserInfoManagement from '../components/admin/content/UserInfoManagement.vue';
-//import PostManagement from '../components/admin/content/PostManagement.vue';
-//import ReviewManagement from '../components/admin/content/ReviewManagement.vue';
-//import ReportInquiryManagement from '../components/admin/content/ReportInquiryManagement.vue';
-//import DirectInquiryManagement from '../components/admin/content/DirectInquiryManagement.vue';
-//import AnnouncementManagement from '../components/admin/content/AnnouncementManagement.vue';
+import DashboardLayout from '../components/admin/content/DashboardLayout.vue';
+import MemberInfoManagement from '../components/admin/content/MemberInfoMangement.vue';
+import PostManagement from '../components/admin/content/PostManagement.vue';
+import ReviewManagement from '../components/admin/content/ReviewManagement.vue';
+import ReportInquiryManagement from '../components/admin/content/ReportInquiryManagement.vue';
+import DirectInquiryManagement from '../components/admin/content/DirectInquiryManagement.vue';
+import AnnouncementManagement from '../components/admin/content/AnnouncementManagement.vue';
 
 const adminRoutes = [
   {
@@ -22,45 +22,45 @@ const adminRoutes = [
     component: AdminApp,
     children: [
       {
-        path: '',
+        path: 'ContentArea',
         component: AdminMainLayout,
         meta: { requiresAuth: true },
         children: [
-        //   {
-        //     path: 'dashboard',
-        //     name: 'Dashboard',
-        //     component: DashboardLayout,
-        //   },
-        //   {
-        //     path: 'user-info',
-        //     name: 'UserInfoManagement',
-        //     component: UserInfoManagement,
-        //   },
-        //   {
-        //     path: 'post-management',
-        //     name: 'PostManagement',
-        //     component: PostManagement,
-        //   },
-        //   {
-        //     path: 'review-management',
-        //     name: 'ReviewManagement',
-        //     component: ReviewManagement,
-        //   },
-        //   {
-        //     path: 'report-inquiry',
-        //     name: 'ReportInquiryManagement',
-        //     component: ReportInquiryManagement,
-        //   },
-        //   {
-        //     path: 'direct-inquiry',
-        //     name: 'DirectInquiryManagement',
-        //     component: DirectInquiryManagement,
-        //   },
-        //   {
-        //     path: 'announcement',
-        //     name: 'AnnouncementManagement',
-        //     component: AnnouncementManagement,
-        //   },
+          {
+            path: 'dashboard',
+            name: 'Dashboard',
+            component: DashboardLayout,
+          },
+          {
+            path: 'user-info',
+            name: 'UserInfoManagement',
+            component: MemberInfoManagement,
+          },
+          {
+            path: 'post-management',
+            name: 'PostManagement',
+            component: PostManagement,
+          },
+          {
+            path: 'review-management',
+            name: 'ReviewManagement',
+            component: ReviewManagement,
+          },
+          {
+            path: 'report-inquiry',
+            name: 'ReportInquiryManagement',
+            component: ReportInquiryManagement,
+          },
+          {
+            path: 'direct-inquiry',
+            name: 'DirectInquiryManagement',
+            component: DirectInquiryManagement,
+          },
+          {
+            path: 'announcement',
+            name: 'AnnouncementManagement',
+            component: AnnouncementManagement,
+          },
         ],
       },
     ],
