@@ -312,7 +312,7 @@ border-color: #F8A060; /* 검색창에 포커스가 있을 때 테두리 색상 
   }
 }
 .search-input {
-    font-size: 10px; /* 화면이 좁아질 때 입력창의 글씨 크기를 줄이기 */
+    font-size: 15px; 
   }
   .search-input::placeholder {
     font-size: 12px; /* 화면이 좁아질 때 placeholder 크기 줄이기 */
