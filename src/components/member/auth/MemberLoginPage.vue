@@ -1,5 +1,5 @@
 <!--
- 담당자: 김호영
+ 담당자: 김호영, 박주희
  시작 일자: 2024.09.04
  설명: 로그인 컴포넌트
  ---------------------
@@ -55,17 +55,13 @@
 <script>
 import { useMemberStore } from '@/store/member-store'; // Pinia store import
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 export default {
   data() {
     return {
       useremail: '',
       password: '',
-      allowedUsers: [ // 로그인 가능한 계정 목록
-        { email: 'test@test.com', password: 'test123' },
-        { email: 'user2@example.com', password: 'password456' },
-        { email: 'admin@example.com', password: 'admin123' },
-      ]
     };
   },
   setup() {
@@ -80,7 +76,7 @@ export default {
     goSign() {
       this.router.push('/signup'); // 회원가입 페이지로 이동
     },
-    login() {
+    async login() {
       // 아이디(이메일) 입력 확인
       if (!this.useremail) {
         alert('아이디를 입력해주세요.');
@@ -91,15 +87,22 @@ export default {
         alert('비밀번호를 입력해주세요.');
         return;
       }
-      // 로그인 가능한 계정 확인
-      const user = this.allowedUsers.find(
-        u => u.email === this.useremail && u.password === this.password
-      );
-      if (user) {
-        // 로그인 성공 시 상태 업데이트 및 리디렉션
-        this.memberStore.setMember({ email: this.useremail }); // 로그인 상태로 업데이트
-        this.router.push('/'); // 홈 페이지로 이동
-      } else {
+      try {
+        // 서버로 로그인 요청
+        const response = await axios.post('/api/login', {
+          email: this.useremail,
+          password: this.password
+        });
+
+        // 서버의 응답이 성공이면
+        if (response.status === 200) {
+          // 로그인 성공 시 상태 업데이트 및 리디렉션
+          this.memberStore.setMember({ email: this.useremail }); // 로그인 상태로 업데이트
+          this.router.push('/'); // 홈 페이지로 이동
+        }
+      } catch (error) {
+        // 로그인 실패 시 처리
+        console.error(error);
         alert('아이디와 비밀번호를 확인해주세요.');
       }
     }

@@ -1,5 +1,5 @@
 <!--
- 담당자: 김호영
+ 담당자: 김호영, 박주희
  시작 일자: 2024.09.05
  설명: 회원가입 컴포넌트
  ---------------------
@@ -72,13 +72,13 @@
             <p class="error-message" v-if="nameError">{{ nameError }}</p>
           </div>
           <div class="input-container">
-            <label for="phoneNumber">전화번호</label>
+            <label for="phone">전화번호</label>
             <input
               type="text"
-              v-model="phoneNumber"
-              id="phoneNumber"
+              v-model="phone"
+              id="phone"
               placeholder="전화번호를 입력해 주세요."
-              @input="formatPhoneNumber"
+              @input="formatPhone"
               maxlength="13"
               required
             />
@@ -94,8 +94,8 @@
             />
           </div>
           <div class="input-container">
-            <label for="region">지역</label>
-            <select v-model="region" id="region" required>
+            <label for="address">지역</label>
+            <select v-model="address" id="address" required>
               <option disabled value="">지역</option>
               <option value="서울특별시">서울특별시</option>
               <option value="경기도">경기도</option>
@@ -154,7 +154,11 @@
   </div>
 </template>
 
+회원가입 axios 처리시
+
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -166,9 +170,11 @@ export default {
       confirmPassword: '',
       passwordError: '',
       name: '',
-      phoneNumber: '',
+      nameError: '',
+      phone: '',
+      phoneError: '',
       birth: '',
-      region: '',
+      address: '',
       gender: '',
       acceptTerms: {
         all: false,
@@ -180,30 +186,40 @@ export default {
   computed: {
     formIsValid() {
       return (
-        this.email &&
-        this.nickname &&
-        this.password &&
-        this.confirmPassword &&
-        !this.passwordsDoNotMatch &&
-        this.name &&
-        this.phoneNumber &&
-        this.birth &&
-        this.region &&
-        this.gender &&
-        this.acceptTerms.personalInfo &&
-        this.acceptTerms.contentAgreement
+          this.email &&
+          this.nickname &&
+          this.password &&
+          this.confirmPassword &&
+          !this.passwordsDoNotMatch &&
+          this.name &&
+          this.phone &&
+          this.birth &&
+          this.address &&
+          this.gender &&
+          this.acceptTerms.personalInfo &&
+          this.acceptTerms.contentAgreement
       );
     },
   },
   methods: {
-    validateEmail() {
+    async validateEmail() {
       const regPassed = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(this.email);
       if (!regPassed) {
         this.emailError = '올바른 이메일 형식이 아닙니다.';
         return false;
       }
-      this.emailError = '';
-      return true;
+      try {
+        const res = await axios.post('/api/validate-email', { email: this.email });
+        if (!res.data.isValid) {
+          this.emailError = '이미 사용 중인 이메일입니다.';
+          return false;
+        }
+        this.emailError = '';
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
     },
     validatePassword() {
       const passwordPattern = /^[a-zA-Z0-9!@#$%^&*]{8,15}$/;
@@ -211,24 +227,38 @@ export default {
         this.passwordError = '비밀번호는 8자 이상 15자 이하이며 영문/숫자/특수문자를 포함해야 합니다.';
         return false;
       }
+      if (this.password !== this.confirmPassword) {
+        this.passwordError = '비밀번호가 일치하지 않습니다.';
+        return false;
+      }
       this.passwordError = '';
       return true;
     },
-    validateNickname() {
+    async validateNickname() {
       const nicknamePattern = /^[a-zA-Z가-힣0-9]{2,12}$/;
       if (!nicknamePattern.test(this.nickname)) {
         this.nicknameError = '닉네임은 2~12자의 한글, 영문, 숫자만 가능합니다.';
         return false;
       }
-      this.nicknameError = '';
-      return true;
+      try {
+        const res = await axios.post('/api/validate-nickname', { nickname: this.nickname });
+        if (!res.data.isValid) {
+          this.nicknameError = '이미 사용 중인 닉네임입니다.';
+          return false;
+        }
+        this.nicknameError = '';
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
     },
-    formatPhoneNumber() {
-      let cleaned = this.phoneNumber.replace(/\D/g, '');
+    formatPhone() {
+      let cleaned = this.phone.replace(/\D/g, '');
       if (cleaned.length <= 10) {
-        this.phoneNumber = cleaned.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3');
+        this.phone = cleaned.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3');
       } else {
-        this.phoneNumber = cleaned.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        this.phone = cleaned.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
       }
     },
     toggleCheck(type) {
@@ -246,29 +276,40 @@ export default {
         }
       }
     },
-    signUp() {
-      const isEmailValid = this.validateEmail();
+    async signUp() {
+      const isEmailValid = await this.validateEmail();
       const isPasswordValid = this.validatePassword();
-      const isNicknameValid = this.validateNickname();
+      const isNicknameValid = await this.validateNickname();
+
       if (!isEmailValid || !isPasswordValid || !isNicknameValid) {
+        alert('유효성 검사를 통과하지 못했습니다. 다시 시도해 주세요.');
         return;
       }
-      // 임시로 콘솔에 데이터 출력 (서버로 보내지 않고 확인)
-      console.log({
+
+      // gender 값을 0 또는 1로 변환
+      const genderValue = this.gender === '남' ? 0 : 1;
+
+      const reqData = {
         email: this.email,
         nickname: this.nickname,
         password: this.password,
         name: this.name,
-        phoneNumber: this.phoneNumber,
+        phone: this.phone,
         birth: this.birth,
-        region: this.region,
-        gender: this.gender,
-      });
-      alert('회원가입이 완료되었습니다.');
-      this.$router.push("/");
-    },
-    goLogin() {
-      this.$router.push('/login'); // 로그인 이동
+        address: this.address,
+        gender: genderValue,
+      };
+
+      try {
+        await axios.post('/api/signup', reqData, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        alert('회원가입이 완료되었습니다.');
+        this.$router.push('/login');
+      } catch (error) {
+        console.error(error);
+        alert('회원가입에 실패했습니다. 다시 시도해 주세요.');
+      }
     },
   },
 };
