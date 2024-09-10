@@ -6,7 +6,6 @@
  2024.09.04 김호영 | 기능 담을 디자인 구현
  2024.09.10 김호영 | git 해결
  -->
-
  <template>
   <div class="login-container">
     <img @click="goHome" src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
@@ -35,6 +34,8 @@
 
     <!-- 링크 컨테이너 -->
     <div class="link-container">
+      <!-- <a href="#"><strong>이메일 찾기</strong></a> | -->
+      <!-- <a href="#"><strong>비밀번호 찾기</strong></a> |  --> 
       <a @click="goSign"><strong>아직 회원이 아니신가요?</strong></a>
     </div>
 
@@ -54,34 +55,23 @@
 </template>
 
 <script>
-import { useMemberStore } from '@/store/member-store'; // Pinia store import
-import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 export default {
   data() {
     return {
       useremail: '',
-      password: '',
-      allowedUsers: [ // 로그인 가능한 계정 목록
-        { email: 'test@test.com', password: 'test123' },
-        { email: 'user2@example.com', password: 'password456' },
-        { email: 'admin@example.com', password: 'admin123' },
-      ]
+      password: ''
     };
-  },
-  setup() {
-    const memberStore = useMemberStore(); // Pinia store 사용
-    const router = useRouter(); // Vue router 사용
-    return { memberStore, router };
   },
   methods: {
     goHome() {
-      this.$router.push('/'); // 홈으로 이동
+      this.$router.push('/'); // / 홈으로 이동
     },
     goSign() {
-      this.$router.push('/signup'); // 회원가입 페이지로 이동
+      this.$router.push('/member/signup'); // 회원가입 이동
     },
-    login() {
+    async login() {
       // 아이디(이메일) 입력 확인
       if (!this.useremail) {
         alert('아이디를 입력해주세요.');
@@ -93,29 +83,35 @@ export default {
         alert('비밀번호를 입력해주세요.');
         return;
       }
+      try {
+        // 비동기 요청을 처리 (async/await 사용)
+        await axios.post('http://localhost:8080/member/loginProcess', {
+          email: this.useremail,
+          password: this.password
+        }, {
+          withCredentials: true  // 세션 쿠키 전송 설정
+        });
 
-      // 로그인 가능한 계정 확인
-      const user = this.allowedUsers.find(
-        u => u.email === this.useremail && u.password === this.password
-      );
+        alert('로그인 성공');
+        this.$router.push('/member/home'); // 로그인 성공 후 이동할 페이지
 
-      if (user) {
-        // 로그인 성공 시 상태 업데이트 및 리디렉션
-        this.memberStore.setMember({ email: this.useremail }); // 로그인 상태로 업데이트
-        this.router.push('/'); // 홈 페이지로 이동
-      } else {
-        alert('아이디와 비밀번호를 확인해주세요.');
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          alert('아이디와 비밀번호를 확인해주세요.');
+        } else {
+          alert('로그인 중 문제가 발생했습니다.');
+        }
       }
     }
   }
 };
+
 </script>
 
 <style scoped>
 /* 로그인 컨테이너 */
 .login-container {
-  width: 80%;
-  max-width: 500px;
+  width: 30%;
   margin: 0 auto;
   padding: 20px;
   text-align: center;
@@ -142,12 +138,6 @@ h1 {
   margin-bottom: 20px;
 }
 
-/* 입력 필드 포커스 스타일 */
-input:focus {
-  outline: none; /* 기본 아웃라인 제거 */
-  border-color: #F8A060; /* 포커스 시 테두리 색상 변경 */
-}
-
 /* 입력 필드 스타일 */
 input {
   width: 100%;
@@ -157,7 +147,6 @@ input {
   border-radius: 12px;
   box-sizing: border-box;
 }
-
 
 /* 로그인 버튼 스타일 */
 .login-btn {
