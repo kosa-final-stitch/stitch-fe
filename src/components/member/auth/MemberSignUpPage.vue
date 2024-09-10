@@ -1,16 +1,14 @@
-<!-- 
- 담당자: 김호영 
+<!--
+ 담당자: 김호영
  시작 일자: 2024.09.05
- 설명 : 회원가입 컴포넌트
+ 설명: 회원가입 컴포넌트
  ---------------------
  2024.09.05 김호영 | 기능 담을 디자인 구현
+-->
 
- -->
-
- <template>
+<template>
   <div class="signup-container">
     <h1>회원가입</h1>
-
     <form @submit.prevent="signUp">
       <div class="form-grid">
         <div class="left-side">
@@ -25,7 +23,6 @@
             />
             <p class="error-message" v-if="emailError">{{ emailError }}</p>
           </div>
-
           <div class="input-container">
             <label for="nickname">닉네임</label>
             <input
@@ -37,7 +34,6 @@
             />
             <p class="error-message" v-if="nicknameError">{{ nicknameError }}</p>
           </div>
-
           <div class="input-container">
             <label for="password">비밀번호</label>
             <input
@@ -49,7 +45,6 @@
             />
             <p class="error-message" v-if="passwordError">{{ passwordError }}</p>
           </div>
-
           <div class="input-container">
             <label for="confirmPassword">비밀번호 확인</label>
             <input
@@ -60,11 +55,10 @@
               required
             />
             <p class="error-message" v-if="password !== confirmPassword && confirmPassword">
-    비밀번호가 일치하지 않습니다.
-  </p>
+              비밀번호가 일치하지 않습니다.
+            </p>
           </div>
         </div>
-
         <div class="right-side">
           <div class="input-container">
             <label for="name">이름</label>
@@ -77,7 +71,6 @@
             />
             <p class="error-message" v-if="nameError">{{ nameError }}</p>
           </div>
-
           <div class="input-container">
             <label for="phoneNumber">전화번호</label>
             <input
@@ -91,20 +84,18 @@
             />
             <p class="error-message" v-if="phoneError">{{ phoneError }}</p>
           </div>
-
           <div class="input-container">
             <label for="birthDate">생년월일</label>
             <input
-              type="date" 
-              v-model="birth" 
-              id="birth" 
-              required 
+              type="date"
+              v-model="birth"
+              id="birth"
+              required
             />
           </div>
-
           <div class="input-container">
-            <label for="address">지역</label>
-            <select v-model="address" id="address" required>
+            <label for="region">지역</label>
+            <select v-model="region" id="region" required>
               <option disabled value="">지역</option>
               <option value="서울특별시">서울특별시</option>
               <option value="경기도">경기도</option>
@@ -115,7 +106,6 @@
               <option value="충청도">충청도</option>
             </select>
           </div>
-
           <div class="input-container">
             <label for="gender">성별</label>
             <select v-model="gender" id="gender" required>
@@ -126,7 +116,6 @@
           </div>
         </div>
       </div>
-
       <div class="terms-container">
         <div class="terms-box">
           <h3>이용약관</h3>
@@ -142,23 +131,19 @@
             <div class="custom-checkbox" :class="{ 'checked': acceptTerms.contentAgreement }"></div>
             <p>(필수) 사용자는 본 서비스에 게시하는 모든 콘텐츠에 대한 저작권을 보유합니다.
               단, 사용자는 콘텐츠를 제출함으로써, 본 서비스가 해당 콘텐츠를 상업적 목적으로 사용,
-            수정, 배포할 수 있는 권한을 부여합니다.* </p>
+              수정, 배포할 수 있는 권한을 부여합니다.* </p>
           </div>
         </div>
       </div>
-
       <button type="submit" class="signup-btn" :disabled="!formIsValid">회원가입</button>
     </form>
-
     <div class="link-container">
-    <a @click="goLogin"><strong>이미 회원이신가요 ?</strong></a>
+      <a @click="goLogin"><strong>이미 회원이신가요?</strong></a>
     </div>
-
-        <!-- 간편 로그인 타이틀 -->
-        <div class="social-login-separator">
+    <!-- 간편 로그인 타이틀 -->
+    <div class="social-login-separator">
       <span class="separator-text">간편 로그인</span>
     </div>
-
     <!-- 소셜 로그인 아이콘 -->
     <div class="social-login mt-4">
       <div class="social-icons flex justify-center space-x-4">
@@ -168,9 +153,8 @@
     </div>
   </div>
 </template>
-<script>
-import axios from "axios";
 
+<script>
 export default {
   data() {
     return {
@@ -182,11 +166,9 @@ export default {
       confirmPassword: '',
       passwordError: '',
       name: '',
-      nameError: '',
       phoneNumber: '',
-      phoneError: '',
       birth: '',
-      address: '',
+      region: '',
       gender: '',
       acceptTerms: {
         all: false,
@@ -202,11 +184,11 @@ export default {
         this.nickname &&
         this.password &&
         this.confirmPassword &&
-        this.password === this.confirmPassword &&
+        !this.passwordsDoNotMatch &&
         this.name &&
         this.phoneNumber &&
         this.birth &&
-        this.address &&
+        this.region &&
         this.gender &&
         this.acceptTerms.personalInfo &&
         this.acceptTerms.contentAgreement
@@ -214,47 +196,6 @@ export default {
     },
   },
   methods: {
-    signUp() {
-      // 유효성 검사 수행
-      const isEmailValid = this.validateEmail();
-      const isPasswordValid = this.validatePassword();
-      const isNicknameValid = this.validateNickname();
-
-      if (!isEmailValid || !isPasswordValid || !isNicknameValid) {
-        return;
-      }
-
-      // 사용자 데이터 구성
-      const userData = {
-        email: this.email,
-        nickname: this.nickname,
-        password: this.password,
-        name: this.name,
-        phone: this.phoneNumber,  // AddMemberRequest에 맞춘 필드 이름 사용
-        birth: new Date(this.birth),
-        address: this.address,     // 'address' 필드로 매핑
-        gender: this.gender === '남' ? 0 : 1,  // 성별 매핑 (남: 0, 여: 1)
-      };
-
-      // 서버에 회원가입 요청 전송
-      axios.post('/api/member/signup', userData)
-          .then(() => {
-            alert('회원가입이 완료되었습니다.');
-            this.$router.push("/member/login");  // 로그인 페이지로 리다이렉트
-          })
-          .catch((error) => {
-            console.error('회원가입 실패:', error);
-            if (error.response && error.response.data) {
-              this.emailError = error.response.data.message || '회원가입 중 오류가 발생했습니다.';
-            }
-            alert('회원가입에 실패했습니다.');
-          });
-    },
-
-    goLogin() {
-      this.$router.push('/member/login');
-    },
-
     validateEmail() {
       const regPassed = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(this.email);
       if (!regPassed) {
@@ -305,64 +246,77 @@ export default {
         }
       }
     },
+    signUp() {
+      const isEmailValid = this.validateEmail();
+      const isPasswordValid = this.validatePassword();
+      const isNicknameValid = this.validateNickname();
+      if (!isEmailValid || !isPasswordValid || !isNicknameValid) {
+        return;
+      }
+      // 임시로 콘솔에 데이터 출력 (서버로 보내지 않고 확인)
+      console.log({
+        email: this.email,
+        nickname: this.nickname,
+        password: this.password,
+        name: this.name,
+        phoneNumber: this.phoneNumber,
+        birth: this.birth,
+        region: this.region,
+        gender: this.gender,
+      });
+      alert('회원가입이 완료되었습니다.');
+      this.$router.push("/");
+    },
+    goLogin() {
+      this.$router.push('/login'); // 로그인 이동
+    },
   },
 };
 </script>
 
 <style scoped>
 .signup-container {
-  width: 50%;
+  width: 60%;
   height: 100%;
   margin: 0 auto;
   padding: 20px;
   text-align: center;
   margin-bottom: 100px;
+  max-width: 700px;
 }
-
 h1 {
   font-size: 30px;
-  margin-bottom: 120px;
+  margin-bottom: 70px;
 }
-
 h3 {
   text-align: left;
   margin-bottom: 30px;
 }
-
 /* 좌우로 영역을 나누는 스타일 */
 .form-grid {
   display: flex;
   justify-content: space-between;
 }
-
 .left-side, .right-side {
-  width: 48%;  /* 좌우로 각각 48%씩 차지하게 함 */
+  width: 48%;
 }
-
 .input-container {
   margin-bottom: 15px;
-  text-align: left; /* 입력 필드 및 라벨 왼쪽 정렬 */
+  text-align: left;
 }
-
 /* 입력 필드 포커스 스타일 */
 input:focus {
-  outline: none; /* 기본 아웃라인 제거 */
-  border-color: #F8A060; /* 포커스 시 테두리 색상 변경 */
+  outline: none;
+  border-color: #F8A060;
 }
-
-/* 라벨과 입력 필드 사이에 간격 추가 */
 label {
-  flex-grow: 1;
   display: block;
-  margin-bottom: 8px; /* 라벨과 입력 필드 사이의 간격 */
+  margin-bottom: 8px;
   font-size: 14px;
   font-weight: bold;
   color: #333;
   margin-left: 5px;
-  text-align: left;
 }
-
-/* 이용 약관 부분 */
 .terms-container {
   margin: 10px 0;
   text-align: center;
@@ -370,42 +324,34 @@ label {
   flex-direction: column;
   align-items: center;
 }
-
 .terms-box {
   width: 100%;
   max-width: 400px;
-  padding: 10px;
   text-align: left;
 }
-
-/* 체크박스와 텍스트를 가운데 정렬하고 텍스트만 표시 */
 .checkbox-container {
   display: flex;
   align-items: flex-start;
   cursor: pointer;
   margin-bottom: 15px;
-  justify-content: left; /* 체크박스와 텍스트를 가운데 정렬 */
+  justify-content: left;
   text-align: left;
 }
-
 .custom-checkbox {
   width: 20px;
   height: 20px;
-  min-width: 20px; /* 체크박스 크기 고정 */
+  min-width: 20px;
   border: 1px solid #b0b0b0;
   border-radius: 4px;
   margin-right: 10px;
   position: relative;
   background-color: white;
-  flex-shrink: 0; /* 텍스트 길이에 따라 체크박스가 찌그러지지 않도록 고정 */
+  flex-shrink: 0;
 }
-
-/* 체크된 상태일 때의 스타일 */
 .custom-checkbox.checked {
   background-color: #F8A060;
   border: 1px solid #F8A060;
 }
-
 .custom-checkbox.checked::after {
   content: '';
   position: absolute;
@@ -417,18 +363,13 @@ label {
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
-
-/* p 태그로 텍스트만 처리 */
 p {
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   color: #333;
   line-height: 1.5;
   max-width: 450px;
 }
-
-
-
 input, select {
   width: 100%;
   padding: 10px;
@@ -437,7 +378,6 @@ input, select {
   border-radius: 5px;
   box-sizing: border-box;
 }
-
 .signup-btn {
   width: 80%;
   padding: 12px;
@@ -450,27 +390,21 @@ input, select {
   margin-top: 10px;
   transition: background-color 0.5s ease;
 }
-
-
 .signup-btn:disabled {
   background-color: #ddd;
 }
-
 .signup-btn:hover {
   background-color: #f5812e;
   transition: background-color 0.2s ease;
 }
-
 .error-message {
   color: red;
   font-size: 12px;
 }
-
 .password-guideline {
   font-size: 12px;
   color: #777;
 }
-
 /* 간편 로그인 타이틀 스타일 */
 .social-login-separator {
   display: flex;
@@ -479,51 +413,42 @@ input, select {
   margin-top: 30px;
   margin-bottom: 20px;
 }
-
 .social-login-separator::before,
 .social-login-separator::after {
   content: '';
   flex: 1;
   border-bottom: 1px solid #ddd;
 }
-
 .social-login-separator::before {
   margin-right: 10px;
 }
-
 .social-login-separator::after {
   margin-left: 10px;
 }
-
 .separator-text {
   color: #aaa;
   font-size: 14px;
-  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+  white-space: nowrap;
 }
-
 /* 소셜 로그인 아이콘 */
 .social-icons img {
   width: 50px;
   height: 50px;
   margin: 0 15px;
-  cursor: pointer; 
+  cursor: pointer;
 }
-
 /* 링크 컨테이너 */
 .link-container {
   margin-top: 15px;
   font-size: 14px;
   color: rgb(87, 87, 87);
-  font-weight: 00; 
   text-align: center;
   cursor: pointer;
 }
-
 .link-container a {
   text-decoration: none;
   color: inherit;
 }
-
 .link-container a:hover {
   text-decoration: underline;
   color: rgb(0, 0, 0);
