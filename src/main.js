@@ -4,6 +4,7 @@
 //  ---------------------
 //  2024.09.04 김호영 | MemberApp에 대한 라우터 설정
 //  2024.09.06 김호영 | member-store 테스트를 위한 pinia 설정 
+//  2024.09.10 김호영 | git 해결
 
 import { createApp } from 'vue';
 import MemberApp from './components/member/MemberApp.vue'; // MemberApp 사용

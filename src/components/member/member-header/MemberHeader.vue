@@ -5,6 +5,7 @@
  ---------------------
  2024.09.06 김호영 | 기능 담을 디자인 구현, 각 페이지 연결, 로그인 정보 위해 pinia 설정 
  2024.09.09 김호영 | 헤더 완.
+ 2024.09.10 김호영 | git 해결
  -->
  <template>
   <header class="member-header">
@@ -274,7 +275,17 @@ export default {
   font-size: 18px;
   padding: 5px;
 }
-
+/* 검색창의 input에 포커스가 들어올 때 search-container의 스타일을 변경 */
+.search-input:focus + .clear-btn, /* 추가적으로 clear-btn의 스타일을 변경하고 싶으면 사용 */
+.search-input:focus {
+outline: none; /* 기본 아웃라인 제거 */
+}
+.search-input:focus {
+border-color: #F8A060; /* 포커스 시 테두리 색상 변경 */
+}
+.search-container:focus-within {
+border-color: #F8A060; /* 검색창에 포커스가 있을 때 테두리 색상 변경 */
+}
 .clear-btn {
   background-color: transparent;
   border: none;
@@ -286,5 +297,41 @@ export default {
 
 .clear-btn:hover {
   color: #333;
+}
+
+/* 반응형 처리를 위한 추가 */
+@media (max-width: 800px) {
+  .search-container {
+    width: 80%; /* 화면이 좁아지면 검색창을 80%로 설정 */
+  }
+  .nav-items {
+    gap: 15px; /* 화면이 좁아질 때 항목 간 간격도 줄이기 */
+  }
+  .nav-items li a {
+    font-size: 14px; /* 화면이 작아질 때 글씨 크기를 줄이기 */
+  }
+}
+.search-input {
+    font-size: 10px; /* 화면이 좁아질 때 입력창의 글씨 크기를 줄이기 */
+  }
+  .search-input::placeholder {
+    font-size: 12px; /* 화면이 좁아질 때 placeholder 크기 줄이기 */
+  }
+@media (max-width: 400px) {
+  .search-container {
+    width: 80%; /* 화면이 더 좁아지면 검색창을 100%로 설정 */
+  }
+  .nav-items {
+    gap: 15px; /* 더 좁아지면 항목 간 간격도 더 줄이기 */
+  }
+  .nav-items li a {
+    font-size: 8px; /* 더 좁아지면 글씨 크기를 더 줄이기 */
+  }
+  .search-input {
+    font-size: 10px; /* 더 좁아지면 입력창의 글씨 크기를 더 줄이기 */
+  }
+  .search-input::placeholder {
+    font-size: 10px; /* 더 좁아지면 placeholder 크기를 더 줄이기 */
+  }
 }
 </style>
