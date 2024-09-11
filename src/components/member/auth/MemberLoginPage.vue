@@ -1,14 +1,15 @@
-<!-- 
- 담당자: 김호영 
+<!--
+ 담당자: 김호영, 박주희
  시작 일자: 2024.09.04
- 설명 : 로그인 컴포넌트
+ 설명: 로그인 컴포넌트
  ---------------------
  2024.09.04 김호영 | 기능 담을 디자인 구현
- -->
+-->
 
- <template>
+<template>
   <div class="login-container">
     <img @click="goHome" src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
+
     <h1>로그인</h1>
     <form @submit.prevent="login"> <!-- 페이지 새로고침 방지 -->
       <div class="input-container">
@@ -41,7 +42,6 @@
     <div class="social-login-separator">
       <span class="separator-text">간편 로그인</span>
     </div>
-
     <!-- 소셜 로그인 아이콘 -->
     <div class="social-login mt-4">
       <div class="social-icons flex justify-center space-x-4">
@@ -55,17 +55,13 @@
 <script>
 import { useMemberStore } from '@/store/member-store'; // Pinia store import
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 export default {
   data() {
     return {
       useremail: '',
       password: '',
-      allowedUsers: [ // 로그인 가능한 계정 목록
-        { email: 'test@test.com', password: 'test123' },
-        { email: 'user2@example.com', password: 'password456' },
-        { email: 'admin@example.com', password: 'admin123' },
-      ]
     };
   },
   setup() {
@@ -75,34 +71,38 @@ export default {
   },
   methods: {
     goHome() {
-      this.$router.push('/'); // 홈으로 이동
+      this.router.push('/'); // 홈으로 이동
     },
     goSign() {
-      this.$router.push('/signup'); // 회원가입 페이지로 이동
+      this.router.push('/signup'); // 회원가입 페이지로 이동
     },
-    login() {
+    async login() {
       // 아이디(이메일) 입력 확인
       if (!this.useremail) {
         alert('아이디를 입력해주세요.');
         return;
       }
-
       // 비밀번호 입력 확인
       if (!this.password) {
         alert('비밀번호를 입력해주세요.');
         return;
       }
+      try {
+        // 서버로 로그인 요청
+        const response = await axios.post('/api/login', {
+          email: this.useremail,
+          password: this.password
+        });
 
-      // 로그인 가능한 계정 확인
-      const user = this.allowedUsers.find(
-        u => u.email === this.useremail && u.password === this.password
-      );
-
-      if (user) {
-        // 로그인 성공 시 상태 업데이트 및 리디렉션
-        this.memberStore.setMember({ email: this.useremail }); // 로그인 상태로 업데이트
-        this.router.push('/'); // 홈 페이지로 이동
-      } else {
+        // 서버의 응답이 성공이면
+        if (response.status === 200) {
+          // 로그인 성공 시 상태 업데이트 및 리디렉션
+          this.memberStore.setMember({ email: this.useremail }); // 로그인 상태로 업데이트
+          this.router.push('/'); // 홈 페이지로 이동
+        }
+      } catch (error) {
+        // 로그인 실패 시 처리
+        console.error(error);
         alert('아이디와 비밀번호를 확인해주세요.');
       }
     }
@@ -119,34 +119,28 @@ export default {
   padding: 20px;
   text-align: center;
 }
-
 /* 로고 스타일 */
 .logo {
   width: 150px;
   margin: 20px auto 30px;
   display: block;
-  cursor: pointer; 
+  cursor: pointer;
 }
-
-
 /* 제목 스타일 */
 h1 {
   font-size: 24px;
   margin-bottom: 60px;
   font-weight: bold;
 }
-
 /* 입력 필드 컨테이너 */
 .input-container {
   margin-bottom: 20px;
 }
-
 /* 입력 필드 포커스 스타일 */
 input:focus {
   outline: none; /* 기본 아웃라인 제거 */
   border-color: #F8A060; /* 포커스 시 테두리 색상 변경 */
 }
-
 /* 입력 필드 스타일 */
 input {
   width: 100%;
@@ -156,8 +150,6 @@ input {
   border-radius: 12px;
   box-sizing: border-box;
 }
-
-
 /* 로그인 버튼 스타일 */
 .login-btn {
   width: 100%;
@@ -171,31 +163,25 @@ input {
   margin-top: 15px;
   transition: background-color 0.5s ease;
 }
-
 .login-btn:hover {
   background-color: #f5812e;
 }
-
 /* 링크 컨테이너 */
 .link-container {
   margin-top: 15px;
   font-size: 14px;
   color: rgb(87, 87, 87);
-  font-weight: 00; 
   text-align: center;
   cursor: pointer;
 }
-
 .link-container a {
   text-decoration: none;
   color: inherit;
 }
-
 .link-container a:hover {
   text-decoration: underline;
   color: rgb(0, 0, 0);
 }
-
 /* 간편 로그인 타이틀 스타일 */
 .social-login-separator {
   display: flex;
@@ -204,34 +190,28 @@ input {
   margin-top: 30px;
   margin-bottom: 20px;
 }
-
 .social-login-separator::before,
 .social-login-separator::after {
   content: '';
   flex: 1;
   border-bottom: 1px solid #ddd;
 }
-
 .social-login-separator::before {
   margin-right: 10px;
 }
-
 .social-login-separator::after {
   margin-left: 10px;
 }
-
 .separator-text {
   color: #aaa;
   font-size: 14px;
   white-space: nowrap; /* 텍스트 줄바꿈 방지 */
 }
-
 /* 소셜 로그인 아이콘 */
 .social-icons img {
   width: 50px;
   height: 50px;
   margin: 0 15px;
-  cursor: pointer; 
-
+  cursor: pointer;
 }
 </style>

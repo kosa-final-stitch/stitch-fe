@@ -5,6 +5,7 @@
  ---------------------
  2024.09.06 김호영 | 헤더 영역 패딩 적용 ( 로그인 로그아웃 제외)
  -->
+ 
 <template>
   <div :class="{'has-padding': !isAuthPage}">
     <router-view />

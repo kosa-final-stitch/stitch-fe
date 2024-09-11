@@ -1,7 +1,7 @@
 /*
  담당자: 박요한, 김호영
  시작 일자: 2024.08.30
- 설명 : 로그인 컴포넌트
+ 설명 : member 라우터 컴포넌트
  ---------------------
  2024.08.30 박요한 | 라우터 설계
  2024.09.05 김호영 | 라우터 통합,수정,개선
@@ -11,13 +11,13 @@ import MemberMainLayout from "@/components/member/MemberMainLayout.vue";
 import MemberLoginPage from "../components/member/auth/MemberLoginPage.vue";
 import MemberSignUpPage from "../components/member/auth/MemberSignUpPage.vue";
 import HomePage from "../components/member/home-page/HomePage.vue";
+import FCommunityBoard from "../components/member/board-page/FCommunityBoard.vue";
 // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
-// import FCommunityBoard from '../components/BoardPage/FCommunityBoard.vue';
 // import QnABoard from '../components/BoardPage/QnABoard.vue';
 // import PostDetail from '../components/BoardPage/PostDetail.vue';
 // import PostForm from '../components/BoardPage/PostForm.vue';
-import AcademyInfoList from "@/components/member/rating-info-page/AcademyInfoList.vue";
-import CourseInfoList from "@/components/member/rating-info-page/CourseInfoList.vue";
+import AcademyInfoList from "../components/RatingInfoPage/AcademyInfoList.vue";
+import CourseInfoList from "../components/RatingInfoPage/CourseInfoList.vue";
 // import ReviewForm from '../components/RatingInfoPage/ReviewForm.vue';
 import MyPage from "../components/member/mypage/MyPage.vue";
 import ProfileEdit from "../components/member/mypage/my-activities/ProfileEdit.vue";
@@ -40,10 +40,15 @@ const MemberRoutes = [
     children: [
       { path: "", component: HomePage, name: "Home" },
       //     //   { path: 'board/info-share', component: InfoShareBoard, name: 'InfoShareBoard' },
-      //     //   { path: 'board/free-community', component: FCommunityBoard, name: 'FCommunityBoard' },
+      {
+        path: "board/free-community",
+        component: FCommunityBoard,
+        name: "FCommunityBoard",
+      },
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
       //     //   { path: 'board/post/:id', component: PostDetail, name: 'PostDetail', props: true },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
+      //     //   { path: 'review-form', component: ReviewForm, name: 'ReviewForm' },
       {
         path: "academies", // 학원 목록 페이지
         component: AcademyInfoList,
@@ -57,7 +62,6 @@ const MemberRoutes = [
       },
 
       { path: "courses", component: CourseInfoList, name: "CourseInfoList" },
-      //     //   { path: 'review-form', component: ReviewForm, name: 'ReviewForm' },
       {
         path: "mypage",
         component: MyPage,

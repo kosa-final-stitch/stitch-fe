@@ -4,18 +4,31 @@
 //  ---------------------
 //  2024.09.04 김호영 | MemberApp에 대한 라우터 설정
 //  2024.09.06 김호영 | member-store 테스트를 위한 pinia 설정 
+//  2024.09.10 김호영 | admin 라우터 설정
 
 import { createApp } from 'vue';
-import MemberApp from './components/member/MemberApp.vue'; // MemberApp 사용
-import router from './router/member-index'; // 라우터 파일
-import { createPinia } from 'pinia'; // Pinia를 import
+import { createRouter, createWebHistory } from 'vue-router';
+import memberRoutes from './router/member-routes';  // member 라우터
+import adminRoutes from './router/admin-routes';    // admin 라우터
+import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+import MemberApp from './components/member/MemberApp.vue'; // 기본 앱은 MemberApp
 
-
-const pinia = createPinia(); // Pinia 인스턴스를 생성
+// Pinia 설정
+const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
-const app = createApp(MemberApp); // MemberApp을 Vue 인스턴스로 사용
-app.use(router);
-app.use(pinia); // Pinia를 Vue 애플리케이션에 등록
-app.mount('#app'); // 애플리케이션을 #app에 마운트
+// member와 admin 라우터 통합
+const routes = [...memberRoutes, ...adminRoutes];
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+});
+
+// Vue 앱 생성 및 설정
+const app = createApp(MemberApp); // 기본 앱으로 MemberApp 사용
+app.use(router); // 라우터 적용
+app.use(pinia);  // Pinia 적용
+
+app.mount('#app'); // #app에 마운트
