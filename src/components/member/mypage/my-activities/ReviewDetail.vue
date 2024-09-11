@@ -147,15 +147,19 @@ export default {
     },
     // 리뷰 데이터를 서버로 전송하는 함수
     saveReviewData() {
-      // 예시 API 호출
+      // 서버에 데이터를 전송하는 POST 요청
       axios
         .post("http://localhost:8080/api/reviews", this.reviews)
-        .then(() => {
+        .then((response) => {
+          // 요청이 성공했을 때 실행될 코드
           alert("리뷰가 성공적으로 저장되었습니다.");
-          // 필요한 후처리 수행
+          console.log("서버 응답:", response);
+          // 필요한 후처리 (예: 페이지 이동 또는 상태 초기화 등)
         })
         .catch((error) => {
+          // 요청이 실패했을 때 실행될 코드
           console.error("리뷰 저장 중 오류가 발생했습니다.", error);
+          alert("리뷰 저장 중 오류가 발생했습니다. 다시 시도해 주세요.");
         });
     },
   },
