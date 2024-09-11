@@ -5,7 +5,7 @@
  ---------------------
  2024.08.30 박요한 | 라우터 설계
  2024.09.10 김호영 | 라우터 통합,수정,개선
- 2024.09.11 김호영 | admin, memeber App 라우터 통합 결정중..
+ 2024.09.11 김호영 | admin, memeber App 라우터 통합 결정중.. post,review 라우트 이름 변경 
  */
 
  //import AdminApp from '../components/admin/AdminApp.vue';
@@ -41,12 +41,12 @@
           },
           {
             path: 'post-management',
-            name: 'PostManagement',
+            name: 'AdminPostManagement',
             component: PostManagement,
           },
           {
             path: 'review-management',
-            name: 'ReviewManagement',
+            name: 'AdminReviewManagement',
             component: ReviewManagement,
           },
           {

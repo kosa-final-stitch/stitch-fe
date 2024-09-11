@@ -9,7 +9,6 @@
 
 <template>
     <h3>대시보드
-      대시보드 맞나
     </h3>
   </template>
   
