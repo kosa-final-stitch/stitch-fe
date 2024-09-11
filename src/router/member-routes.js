@@ -16,8 +16,8 @@ import FCommunityBoard from "../components/member/board-page/FCommunityBoard.vue
 // import QnABoard from '../components/BoardPage/QnABoard.vue';
 // import PostDetail from '../components/BoardPage/PostDetail.vue';
 // import PostForm from '../components/BoardPage/PostForm.vue';
-import AcademyInfoList from "../components/RatingInfoPage/AcademyInfoList.vue";
-import CourseInfoList from "../components/RatingInfoPage/CourseInfoList.vue";
+import AcademyInfoList from "@/components/member/rating-info-page/AcademyInfoList.vue";
+import CourseInfoList from "@/components/member/rating-info-page/CourseInfoList.vue";
 // import ReviewForm from '../components/RatingInfoPage/ReviewForm.vue';
 import MyPage from "../components/member/mypage/MyPage.vue";
 import ProfileEdit from "../components/member/mypage/my-activities/ProfileEdit.vue";
