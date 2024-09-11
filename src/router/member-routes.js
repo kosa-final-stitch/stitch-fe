@@ -10,9 +10,9 @@
  import MemberLoginPage from '../components/member/auth/MemberLoginPage.vue';
  import MemberSignUpPage from '../components/member/auth/MemberSignUpPage.vue';
  import HomePage from '../components/member/home-page/HomePage.vue';
- // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
- // import FCommunityBoard from '../components/BoardPage/FCommunityBoard.vue';
- // import QnABoard from '../components/BoardPage/QnABoard.vue';
+ import FCommunityBoard from '../components/member/board-page/FCommunityBoard.vue'
+// import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
+// import QnABoard from '../components/BoardPage/QnABoard.vue';
  // import PostDetail from '../components/BoardPage/PostDetail.vue';
  // import PostForm from '../components/BoardPage/PostForm.vue';
  // import AcademyInfoList from '../components/RatingInfoPage/AcademyInfoList.vue';
@@ -39,7 +39,7 @@
      children: [
             { path: '', component: HomePage, name: 'Home' },
        //     //   { path: 'board/info-share', component: InfoShareBoard, name: 'InfoShareBoard' },
-       //     //   { path: 'board/free-community', component: FCommunityBoard, name: 'FCommunityBoard' },
+                   { path: 'board/free-community', component: FCommunityBoard, name: 'FCommunityBoard' },
        //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
        //     //   { path: 'board/post/:id', component: PostDetail, name: 'PostDetail', props: true },
        //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
