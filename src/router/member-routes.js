@@ -8,16 +8,16 @@
  */
 
 import MemberMainLayout from "@/components/member/MemberMainLayout.vue";
-import MemberLoginPage from '../components/member/auth/MemberLoginPage.vue';
-import MemberSignUpPage from '../components/member/auth/MemberSignUpPage.vue';
-import HomePage from '../components/member/home-page/HomePage.vue';
+import MemberLoginPage from "../components/member/auth/MemberLoginPage.vue";
+import MemberSignUpPage from "../components/member/auth/MemberSignUpPage.vue";
+import HomePage from "../components/member/home-page/HomePage.vue";
 // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
 // import FCommunityBoard from '../components/BoardPage/FCommunityBoard.vue';
 // import QnABoard from '../components/BoardPage/QnABoard.vue';
 // import PostDetail from '../components/BoardPage/PostDetail.vue';
 // import PostForm from '../components/BoardPage/PostForm.vue';
-// import AcademyInfoList from '../components/RatingInfoPage/AcademyInfoList.vue';
-// import CourseInfoList from '../components/RatingInfoPage/CourseInfoList.vue';
+import AcademyInfoList from "@/components/member/rating-info-page/AcademyInfoList.vue";
+import CourseInfoList from "@/components/member/rating-info-page/CourseInfoList.vue";
 // import ReviewForm from '../components/RatingInfoPage/ReviewForm.vue';
 import MyPage from "../components/member/mypage/MyPage.vue";
 import ProfileEdit from "../components/member/mypage/my-activities/ProfileEdit.vue";
@@ -32,20 +32,31 @@ import CertificateList from "../components/member/mypage/certification/Certifica
 // import DonationPage from "../components/MyPage/DonationPage.vue";
 
 const MemberRoutes = [
-    { path: '/login', component: MemberLoginPage, name: 'Login' },
-    { path: '/signup', component: MemberSignUpPage, name: 'SignUp' },
+  { path: "/login", component: MemberLoginPage, name: "Login" },
+  { path: "/signup", component: MemberSignUpPage, name: "SignUp" },
   {
     path: "/",
     component: MemberMainLayout,
     children: [
-           { path: '', component: HomePage, name: 'Home' },
+      { path: "", component: HomePage, name: "Home" },
       //     //   { path: 'board/info-share', component: InfoShareBoard, name: 'InfoShareBoard' },
       //     //   { path: 'board/free-community', component: FCommunityBoard, name: 'FCommunityBoard' },
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
       //     //   { path: 'board/post/:id', component: PostDetail, name: 'PostDetail', props: true },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
-      //     //   { path: 'academies', component: AcademyInfoList, name: 'AcademyInfoList' },
-      //     //   { path: 'courses', component: CourseInfoList, name: 'CourseInfoList' },
+      {
+        path: "academies", // 학원 목록 페이지
+        component: AcademyInfoList,
+        name: "AcademyInfoList",
+      },
+      {
+        path: "academies/academy/:id", // 특정 학원의 상세 정보
+        component: AcademyInfoList,
+        name: "AcademyInfoDetail",
+        props: true, // URL 매개변수를 props로 전달
+      },
+
+      { path: "courses", component: CourseInfoList, name: "CourseInfoList" },
       //     //   { path: 'review-form', component: ReviewForm, name: 'ReviewForm' },
       {
         path: "mypage",
