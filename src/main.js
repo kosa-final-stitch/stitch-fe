@@ -13,6 +13,10 @@ import adminRoutes from './router/admin-routes';    // admin 라우터
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import MemberApp from './components/member/MemberApp.vue'; // 기본 앱은 MemberApp
+import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/js/all.js';
+
+
 
 // Pinia 설정
 const pinia = createPinia();
