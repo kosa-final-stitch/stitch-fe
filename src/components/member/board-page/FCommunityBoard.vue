@@ -81,6 +81,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import MemberHeader from '../member-header/MemberHeader.vue';
 
 export default {
@@ -93,41 +94,7 @@ export default {
       categories: ["취업정보", "시험정보", "공부방법", "기업정보", "국비정보"],
       activeTab: 0, // 현재 선택된 탭을 관리하는 변수
       activeSort: 'recent',
-      items: [
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '공부 할 때 GPT 사용 괜찮을까요?', author: '박쓸개', date: '2024-09-02' },
-        { title: '오늘 면접 보고 왔습니다.', author: '김땅콩', date: '2024-08-31' },
-        // 더 많은 데이터 추가
-      ],
+      items: [],
       currentPage: 1,
       itemsPerPage: 10, // 한 페이지에 10개 항목
     };
@@ -141,13 +108,26 @@ export default {
     totalPages() {
       return Math.ceil(this.items.length / this.itemsPerPage);
     },
+    emptyRows() {
+      const rows = this.itemsPerPage - this.paginatedData.length;
+      return rows > 0 ? rows : 0; // 남은 빈 줄을 계산
+    },
   },
   methods: {
+    async fetchPosts() {
+      try {
+        const response = await axios.get('/api/member/community/all');
+        this.items = response.data; // API로부터 받은 데이터를 items에 저장
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    },
     goToPostForm() {
-      this.$router.push('/board/PostForm'); // Vue Router를 사용하여 페이지 이동
+      this.$router.push('/member/board/PostForm'); // Vue Router를 사용하여 페이지 이동
     },
     setActiveSort(sortType) {
       this.activeSort = sortType;
+      // 정렬 로직을 추가할 수 있음
     },
     previousPage() {
       if (this.currentPage > 1) {
@@ -159,6 +139,9 @@ export default {
         this.currentPage++;
       }
     },
+  },
+  mounted() {
+    this.fetchPosts(); // 컴포넌트가 마운트될 때 게시글 목록을 가져옴
   },
 };
 </script>

@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import MemberHeader from '../member-header/MemberHeader.vue';
 
 export default {
@@ -63,12 +64,27 @@ export default {
       category: '',
       title: '',
       content: '',
+      tag: '', // 선택 사항
     };
   },
   methods: {
-    submitPost() {
+    async submitPost() {
       if (this.title && this.content && this.category) {
+        try {
+          await axios.post('/api/member/community/create', {
+            category: this.category,
+            title: this.title,
+            content: this.content,
+            tag: this.tag || null,  // tag 필드가 비어 있으면 null로 보냄
+            memberId: 1, // 임시로 1번 회원 아이디를 넣습니다.
+          });
         alert('게시글이 등록되었습니다.');
+          this.$router.push('/member/board/free-community'); // 작성 후 게시판 목록으로 이동
+        } catch (error) {
+          console.error("Error creating post:", error);
+        }
+      } else {
+        alert('모든 필드를 입력해 주세요.');
         // 실제 게시글 등록 로직을 추가하세요
       }
     },
@@ -76,6 +92,7 @@ export default {
       this.title = '';
       this.content = '';
       this.category = '';
+      this.tag = ''; // 선택 사항 리셋
     },
   },
 };

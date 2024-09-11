@@ -54,7 +54,7 @@
                 <h3>게시판</h3>
                 <ul>
                   <li><a href="/board/InfoShareBoard">정보 공유</a></li>
-                  <li><a href="/board/free-community">자유 게시판</a></li>
+                  <li><a href="/member/board/free-community">자유 게시판</a></li>
                   <li><a href="/board/QnABoard">Q&A</a></li>
                 </ul>
               </div>

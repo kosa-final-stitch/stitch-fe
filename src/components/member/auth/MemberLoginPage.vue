@@ -15,8 +15,8 @@
       <div class="input-container">
         <input
           type="text"
-          v-model="useremail"
-          id="useremail"
+          v-model="email"
+          id="email"
           placeholder="이메일을 입력해주세요."
           required
         />
@@ -60,7 +60,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      useremail: '',
+      email: '',
       password: '',
     };
   },
@@ -78,7 +78,7 @@ export default {
     },
     async login() {
       // 아이디(이메일) 입력 확인
-      if (!this.useremail) {
+      if (!this.email) {
         alert('아이디를 입력해주세요.');
         return;
       }
@@ -87,17 +87,22 @@ export default {
         alert('비밀번호를 입력해주세요.');
         return;
       }
+
+      console.log("Vue에서 넘기는 이메일:", this.email);
+      console.log("보내는 비밀번호:", this.password);
+
       try {
         // 서버로 로그인 요청
         const response = await axios.post('/api/login', {
-          email: this.useremail,
+          username: this.email,
           password: this.password
+        },{withCredentials:true
         });
 
         // 서버의 응답이 성공이면
         if (response.status === 200) {
           // 로그인 성공 시 상태 업데이트 및 리디렉션
-          this.memberStore.setMember({ email: this.useremail }); // 로그인 상태로 업데이트
+          this.memberStore.setMember({ email: this.email }); // 로그인 상태로 업데이트
           this.router.push('/'); // 홈 페이지로 이동
         }
       } catch (error) {
