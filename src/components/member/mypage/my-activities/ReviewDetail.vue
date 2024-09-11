@@ -44,12 +44,15 @@
     <!-- 버튼 영역 -->
     <div class="buttons">
       <button class="cancel-btn">취소</button>
-      <button class="submit-btn" @click="generateChart">등록</button>
+      <button class="submit-btn" @click="handleButtonClick">
+        {{ buttonText }}
+      </button>
     </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 import {
   Chart,
   RadarController,
@@ -83,6 +86,8 @@ export default {
         { title: "취업관련", rating: 1, comment: "" },
       ],
       chart: null, // 차트 객체를 저장할 변수
+      isChartGenerated: false, // 버튼 클릭 상태를 저장할 변수
+      buttonText: "등록", // 버튼에 표시할 텍스트
     };
   },
   methods: {
@@ -130,11 +135,35 @@ export default {
         },
       });
     },
+    // 버튼 클릭 시 차트 생성 또는 DB 저장 실행
+    handleButtonClick() {
+      if (!this.isChartGenerated) {
+        this.generateChart(); // 차트 생성
+        this.buttonText = "저장"; // 버튼 텍스트를 '저장'으로 변경
+        this.isChartGenerated = true; // 차트가 생성되었음을 기록
+      } else {
+        this.saveReviewData(); // DB에 데이터 저장
+      }
+    },
+    // 리뷰 데이터를 서버로 전송하는 함수
+    saveReviewData() {
+      // 예시 API 호출
+      axios
+        .post("http://localhost:8080/api/reviews", this.reviews)
+        .then(() => {
+          alert("리뷰가 성공적으로 저장되었습니다.");
+          // 필요한 후처리 수행
+        })
+        .catch((error) => {
+          console.error("리뷰 저장 중 오류가 발생했습니다.", error);
+        });
+    },
   },
 };
 </script>
 
 <style scoped>
+/* 동일한 스타일 유지 */
 .review-page {
   max-width: 1200px;
   margin: 20px auto;
