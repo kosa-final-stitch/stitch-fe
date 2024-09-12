@@ -6,6 +6,7 @@
  2024.09.06 김호영 | 기능 담을 디자인 구현, 각 페이지 연결, 로그인 정보 위해 pinia 설정 
  2024.09.09 김호영 | 헤더 완.
  2024.09.10 김호영 | git 해결
+ 2024.09.11 김호영 | 마이페이지 버튼 출력 수정.
  -->
 <template>
   <header class="member-header">
@@ -59,7 +60,7 @@
                 <h3>게시판</h3>
                 <ul>
                   <li><a href="/board/InfoShareBoard">정보 공유</a></li>
-                  <li><a href="/board/FCommunityBoard">자유 게시판</a></li>
+                  <li><a href="/board/free-community">자유 게시판</a></li>
                   <li><a href="/board/QnABoard">Q&A</a></li>
                 </ul>
               </div>
@@ -107,7 +108,7 @@ export default {
       return store.isAuthenticated;
     },
     isMyPage() {
-      return this.$route && this.$route.path === "/mypage";
+      return this.$route && this.$route.path.startsWith("/mypage");
     },
   },
   methods: {

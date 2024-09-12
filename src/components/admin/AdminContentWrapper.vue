@@ -7,22 +7,45 @@
 
  -->
 
-<template>
-  <div>
-<admin-header></admin-header>
-<content-area></content-area>
-</div>
+ <template>
+  <div class="content-wrapper">
+    
+    <admin-header class="header"></admin-header> <!-- 상단 헤더 -->
+    <content-area class="content-area"></content-area> <!-- 메인 컨텐츠 영역 -->
+  </div>
 </template>
 
 <script>
 import AdminHeader from './admin-header/AdminHeader.vue';
 import ContentArea from './content/ContentArea.vue';
+
+
 export default {
-components: { AdminHeader, ContentArea, },
-name: 'AdminContentWrapper',
+  components: { AdminHeader, ContentArea },
+  name: 'AdminContentWrapper',
 };
 </script>
 
-<style>
+<style scoped>
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* 부모로부터 전체 높이 차지 */
+}
 
+.header {
+  height: 60px; /* 헤더 높이 고정 */
+  background-color: blue; /* 임시 색상 */
+  text-align: center;
+  padding: 20px;
+  color: white;
+}
+
+.content-area {
+  flex-grow: 1;
+  background-color: green; /* 임시 색상 */
+  padding: 20px;
+  overflow: auto; /* 컨텐츠가 길어지면 스크롤 가능 */
+  text-align: center;
+}
 </style>

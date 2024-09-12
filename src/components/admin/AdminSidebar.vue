@@ -1,26 +1,28 @@
 <!--
  담당자: 김호영
  시작 일자: 2024.09.10
- 설명 : AdminSidebar 구현
+ 설명 : adminSidebar 구현
  ---------------------
  2024.09.10 김호영 | template 초기 설정 및 디자인, 라우터 연결
 
  -->
 
-<template>
+ <template>
   <div class="sidebar">
     <div class="logo-container">
       <img src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
     </div>
 
-    <div class="menu">
-      <button class="menu-item" :class="{ active: isActive('/dashboard') }" @click="navigateTo('/dashboard')">대시보드</button>
-      <button class="menu-item" :class="{ active: isActive('/user-info') }" @click="navigateTo('/user-info')">사용자 정보</button>
-      <button class="menu-item" :class="{ active: isActive('/post-management') }" @click="navigateTo('/post-management')">게시판 글 관리</button>
-      <button class="menu-item" :class="{ active: isActive('/review-management') }" @click="navigateTo('/review-management')">수강평 관리</button>
-      <button class="menu-item" :class="{ active: isActive('/report-management') }" @click="navigateTo('/report-management')">신고 문의 관리</button>
-      <button class="menu-item" :class="{ active: isActive('/inquiry') }" @click="navigateTo('/inquiry')">1:1 문의</button>
-      <button class="menu-item" :class="{ active: isActive('/notice-management') }" @click="navigateTo('/notice-management')">공지사항 관리</button>
+    <div class="menu-container">
+      <div class="menu">
+        <button class="menu-item" :class="{ active: isActive('admin/dashboard') }" @click="navigateTo('admin/dashboard')">대시보드</button>
+      <button class="menu-item" :class="{ active: isActive('admin/user-info') }" @click="navigateTo('admin/user-info')">사용자 정보</button>
+      <button class="menu-item" :class="{ active: isActive('admin/post-management') }" @click="navigateTo('admin/post-management')">게시판 글 관리</button>
+      <button class="menu-item" :class="{ active: isActive('admin/review-management') }" @click="navigateTo('admin/review-management')">수강평 관리</button>
+      <button class="menu-item" :class="{ active: isActive('admin/report-inquiry') }" @click="navigateTo('admin/report-inquiry')">신고 문의 관리</button>
+      <button class="menu-item" :class="{ active: isActive('admin/direct-inquiry') }" @click="navigateTo('admin/direct-inquiry')">1:1 문의</button>
+      <button class="menu-item" :class="{ active: isActive('admin/announcement') }" @click="navigateTo('admin/announcement')">공지사항 관리</button>
+      </div>
 
       <div class="logout-container">
         <button class="logout-btn" @click="logout">로그아웃</button>
@@ -31,25 +33,23 @@
 
 <script>
 export default {
-  name: 'AdminSidebar',
+  name: 'adminSidebar',
   methods: {
-    navigateTo(route) {
-      this.$router.push(route);
-    },
-    isActive(route) {
-      return this.$route.path === route;
-    },
-    logout() {
-      this.$router.push('/login');
-    }
+  navigateTo(route) {
+    this.$router.push(`/${route}`);  // 앞에 / 추가
+  },
+  isActive(route) {
+    return this.$route.path === `/${route}`;  // 앞에 / 추가
+  },
+  logout() {
+    this.$router.push('/login');
   }
+}
 };
 </script>
 
 <style scoped>
 .sidebar {
-  width: 250px; /* 전체 너비 */
-  height: 100vh; /* 전체 높이 */
   background-color: #ffffff;
   padding: 20px;
   display: flex;
@@ -68,28 +68,32 @@ export default {
   height: auto;
 }
 
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 상단 메뉴와 하단 로그아웃 버튼 사이 간격 조정 */
+  height: 80%; /* 부모의 전체 높이 차지 */
+  width:100%;
+}
+
 .menu {
-  flex-grow: 1;
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  
 }
 
 .menu-item {
   width: 100%;
-  padding: 12px;
+  padding: 9px;
   background-color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   text-align: center;
-  font-size: 16px;
+  font-size: 12px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   box-shadow: 0px 4px 4px 1px rgba(0, 0, 0, 0.1);
 }
-
 
 .menu-item:hover {
   background-color: #ffe5d1;
@@ -101,19 +105,19 @@ export default {
 }
 
 .logout-container {
-  margin-top: 400px;
+  margin-bottom: 20px; /* 바닥에서 약간 띄움 */
 }
 
 .logout-btn {
   width: 100%;
-  padding: 12px;
+  padding: 9px;
   background-color: #555;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 9px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  box-shadow: 0px 4px 4px 1px rgb(202, 202, 202) /* 그림자 추가 */
+  box-shadow: 0px 4px 4px 1px rgb(202, 202, 202); /* 그림자 추가 */
 }
 
 .logout-btn:hover {
@@ -123,7 +127,7 @@ export default {
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
   .sidebar {
-    width: 250px; /* 전체 너비 유지 */
+    width: 250px;
     padding: 15px;
   }
 
@@ -139,7 +143,7 @@ export default {
 
 @media (max-width: 768px) {
   .sidebar {
-    width: 200px; /* 전체 너비 유지 */
+    width: 200px;
     padding: 10px;
   }
 
@@ -160,7 +164,7 @@ export default {
 
 @media (max-width: 480px) {
   .sidebar {
-    width: 200px; /* 전체 너비 유지 */
+    width: 200px;
     padding: 5px;
   }
 
