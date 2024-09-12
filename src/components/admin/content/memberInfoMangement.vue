@@ -12,9 +12,36 @@
     <!-- 상단 검색창 -->
     <div class="search-bar">
       <div class="search-wrapper search-container">
-        <!-- 검색 아이콘을 input 안에 추가 -->
-        <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="search-icon" />
-        <input type="text" v-model="searchQuery" placeholder="Search" class="search-input" />
+        <!-- 카테고리 선택 -->
+        <div class="category-container">
+          <select v-model="selectedCategory" class="search-category"
+            @focus="isDropdownOpen = true"
+            @blur="isDropdownOpen = false"
+            @change="isDropdownOpen = false">
+            <option value="All">전체</option>
+            <option value="email">이메일</option>
+            <option value="name">이름</option>
+            <option value="nickname">닉네임</option>
+            <option value="address">주소</option>
+            <option value="gender">성별</option>
+            <option value="birth">생년월일</option>
+            <option value="phone">전화번호</option>
+            <option value="signupdate">등록일자</option>
+            <option value="editdate">최종 수정일자</option>
+          </select>
+          <font-awesome-icon 
+            :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" 
+            class="dropdown-icon" 
+          />
+        </div>
+      
+
+
+        <!-- 검색 icon + 검색창 -->
+         <div class="search-input-container">
+          <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="search-icon" />
+          <input type="text" v-model="searchQuery" placeholder="Search" class="search-input" />
+        </div>
       </div>
     </div>
 
@@ -22,7 +49,7 @@
     <table class="user-list-table">
       <thead>
         <tr>
-          <th><input type="checkbox" /></th>
+          <th>순번</th>
           <th>사용자 이메일</th>
           <th>이름</th>
           <th>닉네임</th>
@@ -36,8 +63,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="user in paginatedUsers" :key="user.email">
-          <td><input type="checkbox" /></td>
+        <tr v-for="(user, index) in paginatedUsers" :key="user.email">
+          <td>{{  (currentPage -1) * usersPerPage + index + 1 }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.name }}</td>
           <td>{{ user.nickname }}</td>
@@ -56,11 +83,11 @@
 
     <!-- 페이지네이션 -->
     <div class="pagination">
-      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">Previous</button>
+      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">이전</button>
       <span v-for="page in totalPages" :key="page">
         <button @click="goToPage(page)" :class="{ active: currentPage === page }">{{ page }}</button>
       </span>
-      <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">Next</button>
+      <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">다음</button>
     </div>
   </div>
 </template>
@@ -75,17 +102,30 @@ export default {
   data() {
     return {
       searchQuery: '',
+      selectedCategory: 'All',
       currentPage: 1,
-      usersPerPage: 10,
+      usersPerPage: 12,
+      isDropdownOpen: false,
       users: [
         {
-          email: 'test@test.com',
+          email: 'testtest@test.com',
           name: '김호영',
-          nickname: '닉네임',
+          nickname: '닉네임은최대몇까지',
           address: '서울특별시',
           gender: '남',
-          birth: '2024-09-12',
+          birth: '2024-10-12',
           phone: '010-9330-0253',
+          signupdate: '2024-09-10 16:52:24',
+          editdate: '2024-09-11 16:52:24',
+        },
+        {
+          email: 'test@test.com',
+          name: '이호영',
+          nickname: '별명',
+          address: '제주도',
+          gender: '여',
+          birth: '2024-09-12',
+          phone: '010-9330-0252',
           signupdate: '2024-09-10',
           editdate: '2024-09-11',
         },
@@ -98,18 +138,7 @@ export default {
           birth: '2024-09-12',
           phone: '010-9330-0253',
           signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
+          editdate: '2020-09-11',
         },
         {
           email: 'test@test.com',
@@ -251,11 +280,23 @@ export default {
     // 필터된 사용자 목록
     filteredUsers() {
       return this.users.filter((user) => {
-        return (
-          user.email.includes(this.searchQuery) ||
-          user.name.includes(this.searchQuery) ||
-          user.nickname.includes(this.searchQuery)
-        );
+        if (this.selectedCategory === 'All') {
+          // 모든 필드를 검색할 경우
+          return (
+            user.email.includes(this.searchQuery) ||
+            user.name.includes(this.searchQuery) ||
+            user.nickname.includes(this.searchQuery) ||
+            user.address.includes(this.searchQuery) ||
+            user.gender.includes(this.searchQuery) ||
+            user.birth.includes(this.searchQuery) ||
+            user.phone.includes(this.searchQuery) ||
+            user.signupdate.includes(this.searchQuery) ||
+            user.editdate.includes(this.searchQuery)
+          );
+        } else {
+          // 특정 카테고리 검색
+          return user[this.selectedCategory] && user[this.selectedCategory].includes(this.searchQuery);
+        }
       });
     },
     // 현재 페이지에 표시할 사용자들
@@ -327,22 +368,53 @@ export default {
 
 .pagination button:disabled {
   background-color: #ddd;
-  cursor: not-allowed;
 }
 
 .pagination button:hover:not(.active):not(:disabled) {
   background-color: #ffe5d1;
 }
 
-/* 검색창 스타일 */
+/* 검색창 스타일------------------------------------------------------------------ */
+.category-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.search-category {
+  appearance: none; /* 기본 브라우저 스타일 제거 */
+  margin-right: 20px;
+  background-color: #ffffff; /* 배경색 */
+  border: 1px solid #ccc; /* 경계선 */
+  border-radius: 5px; /* 둥근 모서리 */
+  padding: 8px 30px 8px 10px; /* 좌우 패딩 수정 (왼쪽 10px, 오른쪽 20px) */
+  font-size: 12px; /* 폰트 크기 */
+  font-weight: 500;
+  color: #7b7b7b; /* 글자 색상 */
+  cursor: pointer; /* 마우스 포인터 변경 */
+  outline: none; /* 포커스 아웃라인 제거 */
+  height: 100%; /* 높이 조절 */
+  text-align: left; /* 텍스트 정렬을 왼쪽으로 */
+}
+
+.dropdown-icon {
+  position: absolute;
+  right: 30px; /* 아이콘을 오른쪽에 배치 */
+  font-size: 14px;
+  color: #7b7b7b;
+}
+
+
 .search-bar {
   margin-bottom: 20px;
 }
 
 .search-wrapper {
-  position: relative;
-  width: 30%; /* 검색창의 너비 */
+  display: flex; /* 검색창이랑 카테고리 가로로 배치 */
+  align-items: center;
+  width: 60%; /* 검색창 + 카테고리 창의 너비 */
 }
+
 
 .search-wrapper input {
   width: 100%;
@@ -369,6 +441,13 @@ export default {
 }
 
 /* 검색 아이콘 스타일 */
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 .search-icon {
   position: absolute;
   left: 10px; /* 아이콘의 왼쪽 위치 */
@@ -380,7 +459,7 @@ export default {
 
 
 
-/* 사용자 목록 테이블 스타일 */
+/* 사용자 목록 테이블 스타일 ---------------------------------------------------------*/
 .user-list-table {
   width: 100%;
   border-collapse: collapse;
