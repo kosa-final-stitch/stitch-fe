@@ -35,15 +35,12 @@ export default {
 
 .header {
   height: 60px; /* 헤더 높이 고정 */
-  background-color: blue; /* 임시 색상 */
   text-align: center;
-  padding: 20px;
-  color: white;
+  padding: 15px;
 }
 
 .content-area {
   flex-grow: 1;
-  background-color: green; /* 임시 색상 */
   padding: 20px;
   overflow: auto; /* 컨텐츠가 길어지면 스크롤 가능 */
   text-align: center;
