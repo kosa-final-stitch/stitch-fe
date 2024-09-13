@@ -6,27 +6,14 @@
  2024.09.06 김호영 | 헤더 template 추가
  -->
 
-
 <template>
-  <MemberHeader></MemberHeader>
-
+  <div>홈</div>
 </template>
 
 <script>
-import MemberHeader from '../member-header/MemberHeader.vue';
-
 export default {
-    name: "MemberApp",
-    components: {
-        MemberHeader,
-    }
-
+  components: {},
 };
-
 </script>
 
-<style>
-
-
-
-</style>
+<style></style>
