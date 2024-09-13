@@ -153,7 +153,7 @@ export default {
         .then((response) => {
           // 요청이 성공했을 때 실행될 코드
           alert("리뷰가 성공적으로 저장되었습니다.");
-          console.log("서버 응답:", response);
+          console.log("리뷰디테일 서버 응답:", response);
           // 필요한 후처리 (예: 페이지 이동 또는 상태 초기화 등)
         })
         .catch((error) => {

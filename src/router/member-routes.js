@@ -16,9 +16,8 @@ import FCommunityBoard from "../components/member/board-page/FCommunityBoard.vue
 // import QnABoard from '../components/BoardPage/QnABoard.vue';
 // import PostDetail from '../components/BoardPage/PostDetail.vue';
 // import PostForm from '../components/BoardPage/PostForm.vue';
-// import AcademyInfoList from "@/components/member/rating-info-page/AcademyInfoList.vue";
-// import CourseInfoList from "@/components/member/rating-info-page/CourseInfoList.vue";
-// import ReviewForm from '../components/RatingInfoPage/ReviewForm.vue';
+import AcademyInfoList from "@/components/member/rating-info-page/AcademyInfoList.vue";
+import CourseInfoList from "@/components/member/rating-info-page/CourseInfoList.vue";
 import MyPage from "../components/member/mypage/MyPage.vue";
 import ProfileEdit from "../components/member/mypage/my-activities/ProfileEdit.vue";
 import DonationManagement from "../components/member/mypage/my-activities/DonationManagement.vue";
@@ -28,6 +27,9 @@ import CertificateList from "../components/member/mypage/certification/Certifica
 import ReviewDetail from "@/components/member/mypage/my-activities/ReviewDetail.vue";
 import MyPostManagement from "@/components/member/mypage/my-activities/MyPostManagement.vue";
 import MyReviewManagement from "@/components/member/mypage/my-activities/MyReviewManagement.vue";
+import AcademyInfoDetail from "@/components/member/rating-info-page/AcademyInfoDetail.vue";
+import CourseInfoDetail from "@/components/member/rating-info-page/CourseInfoDetail.vue";
+import ReviewForm from "@/components/member/rating-info-page/ReviewForm.vue";
 
 // import CertificateRequest from "../components/mypage/Certification/CertificateRequest.vue";
 // import DonationPage from "../components/MyPage/DonationPage.vue";
@@ -49,19 +51,36 @@ const MemberRoutes = [
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
       //     //   { path: 'board/post/:id', component: PostDetail, name: 'PostDetail', props: true },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
-      //     //   { path: 'review-form', component: ReviewForm, name: 'ReviewForm' },
+      { path: "review-form", component: ReviewForm, name: "ReviewForm" },
+      {
+        path: "academies", // 학원 목록 페이지
+        component: AcademyInfoList,
+        name: "AcademyInfoList",
+      },
+      {
+        path: "courses", //강의 목록 페이지
+        component: CourseInfoList,
+        name: "CourseInfoList",
+      },
       // {
-      //   path: "academies", // 학원 목록 페이지
-      //   component: AcademyInfoList,
-      //   name: "AcademyInfoList",
+      //   path: "courses/:courseId", // 특정 강의의 상세 정보 (학원 ID 없이)
+      //   component: CourseInfoDetail,
+      //   name: "CourseInfoDetail",
+      //   props: true, // URL 매개변수를 props로 전달
       // },
-      // {
-      //   path: "academies/academy/:id", // 특정 학원의 상세 정보
-      //   component: AcademyInfoList,
-      //   name: "AcademyInfoDetail",
-      // },
+      {
+        path: "academies/academy/:academyId", // 특정 학원의 상세 정보
+        component: AcademyInfoDetail,
+        name: "AcademyInfoDetail",
+        props: true, // URL 매개변수를 props로 전달
+      },
+      {
+        path: "academies/academy/:academyId/courses/:courseId", // 특정 학원의 상세 정보
+        component: CourseInfoDetail,
+        name: "CourseInfoDetail",
+        props: true, // URL 매개변수를 props로 전달
+      },
 
-      // { path: "courses", component: CourseInfoList, name: "CourseInfoList" },
       {
         path: "mypage",
         component: MyPage,

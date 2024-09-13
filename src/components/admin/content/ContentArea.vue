@@ -4,14 +4,11 @@
  설명 : contentArea 구현
  ---------------------
  2024.09.10 김호영 | template 초기 설정 및 라우터 연결 준비
-
  -->
 
-
  <template>
-  <div>
-    <!-- 여기에 라우터에 따라 컴포넌트가 보여지게 함 -->
-  
+  <div class="content-area">
+    <router-view></router-view> <!-- 이곳에서 라우트된 컴포넌트가 렌더링됨 -->
   </div>
 </template>
 
@@ -22,5 +19,10 @@ export default {
 </script>
 
 <style scoped>
-/* ContentArea 스타일 추가 */
+.content-area {
+  flex-grow: 1;
+  background-color: #fff;
+  padding: 20px;
+  overflow-y: auto;
+}
 </style>

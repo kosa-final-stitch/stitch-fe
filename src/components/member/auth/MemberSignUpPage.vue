@@ -4,6 +4,7 @@
  설명: 회원가입 컴포넌트
  ---------------------
  2024.09.05 김호영 | 기능 담을 디자인 구현
+ 2024.09.11 김호영 | "이미 회원이신가요?" 누르면 로그인화면으로 이동 추가시킴 (1줄)
 -->
 
 <template>
@@ -202,6 +203,9 @@ export default {
     },
   },
   methods: {
+    goLogin() {
+    this.$router.push('/login'); // '/login' 경로로 이동
+  },
     async validateEmail() {
       const regPassed = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(this.email);
       if (!regPassed) {

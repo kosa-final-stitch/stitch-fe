@@ -63,7 +63,7 @@ export default {
       axios
         .get("http://localhost:8080/api/reviews") // 실제 API 경로를 입력
         .then((response) => {
-          console.log("서버 응답:", response); // 응답 데이터를 확인하기 위해 로그 출력
+          console.log("리뷰 서버 응답:", response); // 응답 데이터를 확인하기 위해 로그 출력
           this.reviews = response.data; // 서버에서 받아온 리뷰 데이터를 설정
         })
         .catch((error) => {
