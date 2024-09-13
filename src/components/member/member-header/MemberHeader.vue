@@ -7,7 +7,8 @@
  2024.09.09 김호영 | 헤더 완.
  2024.09.10 김호영 | git 해결
  2024.09.11 김호영 | 마이페이지 버튼 출력 수정.
- 2024.09.12 박요한 | 학원 정보, 교육 정보 네비 경로 수정
+ 2024.09.12 박요한 | 학원 정보, 교육 정보 네비 경로 수정.
+ 2024.09.13 박요한 | a 태그 router-link로 수정, router에 맞춰서 경로 수정.
  -->
 <template>
   <header class="member-header">
@@ -15,54 +16,48 @@
       <div class="left-side">
         <ul class="nav-items">
           <li v-if="isAuthenticated && !isMyPage">
-            <a href="/mypage">마이페이지</a>
+            <router-link to="/mypage">마이페이지</router-link>
           </li>
           <li v-else-if="!isAuthenticated && !isMyPage">
-            <a href="/login">로그인</a>
+            <router-link to="/login">로그인</router-link>
           </li>
           <li v-if="isAuthenticated">
             <a @click="confirmLogout" class="logout-link">로그아웃</a>
           </li>
           <li v-else>
-            <a href="/signup">회원가입</a>
+            <router-link to="/signup">회원가입</router-link>
           </li>
         </ul>
       </div>
 
       <div class="right-side">
         <ul class="nav-items">
-          <li
-            class="nav-item"
-            @mouseover="showDropdown"
-            @mouseout="hideDropdown"
-          >
+          <li class="nav-item" @mouseover="showDropdown" @mouseout="hideDropdown">
             <div class="nav-menu">
-              <a>문의하기</a>
-              <a>교육과정 정보</a>
-              <a>게시판</a>
+              <div>문의하기</div>
+              <div>교육과정 정보</div>
+              <div>게시판</div>
             </div>
-            <div
-              :class="{ 'dropdown-container': true, show: isDropdownVisible }"
-            >
+            <div :class="{ 'dropdown-container': true, show: isDropdownVisible }">
               <div class="dropdown-section">
                 <h3>문의하기</h3>
                 <ul>
-                  <li><a href="/inquiry">1:1 문의 하러가기</a></li>
+                  <li><router-link to="/inquiry">1:1 문의 하러가기</router-link></li>
                 </ul>
               </div>
               <div class="dropdown-section">
                 <h3>교육과정 정보</h3>
                 <ul>
-                  <li><a href="/academies">학원 정보</a></li>
-                  <li><a href="/courses">교육과정 정보</a></li>
+                  <li><router-link to="/academies">학원 정보</router-link></li>
+                  <li><router-link to="/courses">교육과정 정보</router-link></li>
                 </ul>
               </div>
               <div class="dropdown-section">
                 <h3>게시판</h3>
                 <ul>
-                  <li><a href="/board/InfoShareBoard">정보 공유</a></li>
-                  <li><a href="/board/free-community">자유 게시판</a></li>
-                  <li><a href="/board/QnABoard">Q&A</a></li>
+                  <li><router-link to="/board/info-share">정보 공유</router-link></li>
+                  <li><router-link to="/board/free-community">자유 게시판</router-link></li>
+                  <li><router-link to="/board/qna">Q&A</router-link></li>
                 </ul>
               </div>
             </div>
@@ -72,12 +67,7 @@
     </nav>
 
     <div class="logo-container">
-      <img
-        @click="goHome"
-        src="@/assets/full-logo.jpg"
-        alt="Stitch 로고"
-        class="logo"
-      />
+      <img @click="goHome" src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
     </div>
 
     <div class="search-container">
