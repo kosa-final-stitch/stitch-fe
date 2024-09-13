@@ -26,16 +26,21 @@
  
  const adminRoutes = [
   {
-    path: '/admin',
-    component: AdminMainLayout,  // AdminApp이 최상위 레이아웃 역할
-    redirect: '/admin/dashboard',
+    path: "/admin",
+    component: AdminMainLayout, // AdminApp이 최상위 레이아웃 역할
+    redirect: "/admin/dashboard",
     children: [
+      {
+        path: "dashboard",
+        name: "Dashboard",
+        component: DashboardLayout,
+      },
 
-          {
-            path: 'dashboard',
-            name: 'Dashboard',
-            component: DashboardLayout,
-          },
+      {
+        path: "dashboard",
+        name: "Dashboard",
+        component: DashboardLayout,
+      },
 
           {
             path: 'user-info',
