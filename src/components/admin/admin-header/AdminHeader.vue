@@ -4,17 +4,17 @@
  설명 : admin 헤더 기능 구현 및 디자인 개발
  ---------------------
  2024.09.10 김호영 | 헤더 초기 설정
-
+ 2024.09.11 김호영 | 초기 헤더 완료.
  -->
 
  <template>
-    <div class="header-container">
-      <h3>{{ currentPage }}</h3> <!-- 선택된 페이지 이름 -->
-      <span class="admin-name">{{ adminName }}</span> <!-- 로그인된 관리자 이름 -->
-    </div>
-  </template>
-  
-  <script>
+  <div class="header-container">
+    <div class="page-title">{{ currentPage }}</div> <!-- 선택된 페이지 이름 -->
+    <span class="admin-name">{{ adminName }}</span> <!-- 로그인된 관리자 이름 -->
+  </div>
+</template>
+
+<script>
   import { useMemberStore } from '@/store/member-store'; // Pinia 스토어로 로그인 정보 가져오기
   
   export default {
@@ -49,29 +49,70 @@
           '/admin/report-inquiry': '신고 문의 관리',
           '/admin/direct-inquiry': '1:1 문의',
           '/admin/announcement': '공지사항 관리',
+          '/admin/pay-management': '결제정보 관리',
         };
         this.currentPage = routeMap[route.path] || '대시보드';
       },
     },
   };
-  </script>
+</script>
+
+<style scoped>
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: white;
+  z-index: 900;
+  border-bottom: 1.3px solid #575757;
+  /* box-shadow: -2px 6px 10px -4px rgba(0, 0, 0, 0.1); */
+  height: 60px;
   
-  <style scoped>
-  .header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    height: 60px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 17px;
+  color: rgb(71, 71, 71);
+  font-weight: 600;
+  margin-left: 15px; 
+}
+
+.admin-name {
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .page-title {
+    font-size: 14px;
+    margin-left: 10px; 
   }
-  
-  h3 {
-    margin: 0;
-  }
-  
   .admin-name {
-    font-weight: bold;
+    font-size: 14px;
+    margin-right: 10px;
   }
-  </style>
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 12px;
+    margin-left: 8px; 
+  }
+  .admin-name {
+    font-size: 12px;
+    margin-right: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 10px;
+  }
+  .admin-name {
+    font-size: 10px;
+  }
+}
+</style>

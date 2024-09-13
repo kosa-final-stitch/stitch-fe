@@ -4,12 +4,13 @@
  설명 : adminSidebar 구현
  ---------------------
  2024.09.10 김호영 | template 초기 설정 및 디자인, 라우터 연결
+ 2024.09.12 김호영 | 초기 sidebar 완.
 
  -->
 
  <template>
   <div class="sidebar">
-    <div class="logo-container">
+    <div @click="goHome" class="logo-container">
       <img src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
     </div>
 
@@ -22,10 +23,11 @@
       <button class="menu-item" :class="{ active: isActive('admin/report-inquiry') }" @click="navigateTo('admin/report-inquiry')">신고 문의 관리</button>
       <button class="menu-item" :class="{ active: isActive('admin/direct-inquiry') }" @click="navigateTo('admin/direct-inquiry')">1:1 문의</button>
       <button class="menu-item" :class="{ active: isActive('admin/announcement') }" @click="navigateTo('admin/announcement')">공지사항 관리</button>
+      <button class="menu-item" :class="{ active: isActive('admin/pay-management') }" @click="navigateTo('admin/pay-management')">결제정보 관리</button>
       </div>
 
       <div class="logout-container">
-        <button class="logout-btn" @click="logout">로그아웃</button>
+        <button class="logout-btn" @click="confirmLogout">로그아웃</button>
       </div>
     </div>
   </div>
@@ -41,10 +43,19 @@ export default {
   isActive(route) {
     return this.$route.path === `/${route}`;  // 앞에 / 추가
   },
-  logout() {
-    this.$router.push('/login');
+   confirmLogout() {
+      if (confirm('정말 로그아웃 하시겠습니까?')) {
+        this.logout(); // 사용자가 확인을 누르면 로그아웃 진행
+      }
+    },
+    logout() {
+      alert('로그아웃되었습니다.');
+        this.$router.push('/'); // 메인 페이지로 리다이렉트
+    },
+    goHome() {
+      this.$router.push('/admin');
+    },
   }
-}
 };
 </script>
 
@@ -57,6 +68,7 @@ export default {
   align-items: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease; /* 사이드바 크기 변화를 부드럽게 */
+  z-index: 1000;  /* 모든 요소보다 위에 표시되도록 높은 값 설정 */
 }
 
 .logo-container {
@@ -66,6 +78,7 @@ export default {
 .logo {
   width: 130px;
   height: auto;
+  cursor: pointer;
 }
 
 .menu-container {
@@ -93,6 +106,7 @@ export default {
   cursor: pointer;
   transition: background-color 0.3s ease;
   box-shadow: 0px 4px 4px 1px rgba(0, 0, 0, 0.1);
+  color: rgb(71, 71, 71);
 }
 
 .menu-item:hover {
@@ -102,6 +116,22 @@ export default {
 .menu-item.active {
   background-color: #ffa15e;
   color: white;
+  font-weight: bold;
+  font-size: 13px;
+  position: relative;
+  
+}
+
+.menu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 7px;  /* 도형을 왼쪽으로 이동 */
+  top: 50%;     /* 중앙 정렬 */
+  transform: translateY(-50%);
+  width: 7px;  /* 도형의 너비 */
+  height: 22px; /* 도형의 높이 */
+  background-color: rgb(246, 246, 246);
+  border-radius: 80px;  /* 모서리를 둥글게 */
 }
 
 .logout-container {
@@ -133,11 +163,19 @@ export default {
 
   .menu-item {
     padding: 10px;
-    font-size: 14px;
+    font-size: 11px;
+  }
+
+  .menu-item.active {
+    font-size: 12px;
   }
 
   .logo {
     width: 100px;
+  }
+
+  .logout-btn {
+    font-size: 11px;
   }
 }
 
@@ -149,6 +187,10 @@ export default {
 
   .menu-item {
     padding: 8px;
+    font-size: 10px;
+  }
+
+  .menu-item.active {
     font-size: 12px;
   }
 
@@ -158,7 +200,7 @@ export default {
 
   .logout-btn {
     padding: 8px;
-    font-size: 12px;
+    font-size: 10px;
   }
 }
 
@@ -170,7 +212,11 @@ export default {
 
   .menu-item {
     padding: 6px;
-    font-size: 10px;
+    font-size: 9px;
+  }
+
+  .menu-item.active {
+    font-size: 11px;
   }
 
   .logo {
@@ -179,7 +225,7 @@ export default {
 
   .logout-btn {
     padding: 6px;
-    font-size: 10px;
+    font-size: 9px;
   }
 }
 </style>
