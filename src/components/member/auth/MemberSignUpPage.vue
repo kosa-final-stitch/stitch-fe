@@ -290,9 +290,6 @@ export default {
         return;
       }
 
-      // gender 값을 0 또는 1로 변환
-      const genderValue = this.gender === '남' ? 0 : 1;
-
       const reqData = {
         email: this.email,
         nickname: this.nickname,
@@ -301,12 +298,13 @@ export default {
         phone: this.phone,
         birth: this.birth,
         address: this.address,
-        gender: genderValue,
+        gender: this.gender,
       };
 
       try {
         await axios.post('/api/signup', reqData, {
           headers: { 'Content-Type': 'application/json' },
+          withCredentials : true,
         });
         alert('회원가입이 완료되었습니다.');
         this.$router.push('/login');

@@ -116,7 +116,9 @@ export default {
   methods: {
     async fetchPosts() {
       try {
-        const response = await axios.get('/api/member/community/all');
+        const response = await axios.get('/api/member/community/all', {
+          withCredentials: true // 세션 쿠키를 포함시키기 위해 withCredentials 추가
+        });
         this.items = response.data; // API로부터 받은 데이터를 items에 저장
       } catch (error) {
         console.error("Error fetching posts:", error);
