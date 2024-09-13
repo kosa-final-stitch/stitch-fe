@@ -7,8 +7,9 @@
  2024.09.09 김호영 | 헤더 완.
  2024.09.10 김호영 | git 해결
  2024.09.11 김호영 | 마이페이지 버튼 출력 수정.
+ 2024.09.12 박요한 | 학원 정보, 교육 정보 네비 경로 수정
  -->
- <template>
+<template>
   <header class="member-header">
     <nav class="nav-menu">
       <div class="left-side">
@@ -30,13 +31,19 @@
 
       <div class="right-side">
         <ul class="nav-items">
-          <li class="nav-item" @mouseover="showDropdown" @mouseout="hideDropdown">
+          <li
+            class="nav-item"
+            @mouseover="showDropdown"
+            @mouseout="hideDropdown"
+          >
             <div class="nav-menu">
               <a>문의하기</a>
               <a>교육과정 정보</a>
               <a>게시판</a>
             </div>
-            <div :class="{'dropdown-container': true, 'show': isDropdownVisible}">
+            <div
+              :class="{ 'dropdown-container': true, show: isDropdownVisible }"
+            >
               <div class="dropdown-section">
                 <h3>문의하기</h3>
                 <ul>
@@ -46,8 +53,8 @@
               <div class="dropdown-section">
                 <h3>교육과정 정보</h3>
                 <ul>
-                  <li><a href="/course/AcademyInfoList">학원 정보</a></li>
-                  <li><a href="/course/CourseInfoList">교육과정 정보</a></li>
+                  <li><a href="/academies">학원 정보</a></li>
+                  <li><a href="/courses">교육과정 정보</a></li>
                 </ul>
               </div>
               <div class="dropdown-section">
@@ -65,23 +72,34 @@
     </nav>
 
     <div class="logo-container">
-      <img @click="goHome" src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
+      <img
+        @click="goHome"
+        src="@/assets/full-logo.jpg"
+        alt="Stitch 로고"
+        class="logo"
+      />
     </div>
 
     <div class="search-container">
-      <input type="text" v-model="searchText" placeholder="과정명, 강사이름 검색" class="search-input" @keyup.enter="handleSearch" />
+      <input
+        type="text"
+        v-model="searchText"
+        placeholder="과정명, 강사이름 검색"
+        class="search-input"
+        @keyup.enter="handleSearch"
+      />
       <button class="clear-btn" @click="clearSearch">X</button>
     </div>
   </header>
 </template>
 
 <script>
-import { useMemberStore } from '@/store/member-store';
+import { useMemberStore } from "@/store/member-store";
 
 export default {
   data() {
     return {
-      searchText: '', // 검색창에 입력된 텍스트를 관리하는 변수
+      searchText: "", // 검색창에 입력된 텍스트를 관리하는 변수
       isDropdownVisible: false, // 드롭다운 상태
     };
   },
@@ -91,15 +109,15 @@ export default {
       return store.isAuthenticated;
     },
     isMyPage() {
-    return this.$route && this.$route.path.startsWith('/mypage');
+      return this.$route && this.$route.path.startsWith("/mypage");
+    },
   },
-},
   methods: {
     goHome() {
-      this.$router.push('/');
+      this.$router.push("/");
     },
     clearSearch() {
-      this.searchText = '';
+      this.searchText = "";
     },
     handleSearch() {
       if (this.searchText) {
@@ -107,23 +125,23 @@ export default {
       }
     },
     confirmLogout() {
-      if (confirm('정말 로그아웃 하시겠습니까?')) {
+      if (confirm("정말 로그아웃 하시겠습니까?")) {
         this.logout();
       }
     },
     logout() {
-  const store = useMemberStore();
-  store.logout(); // Pinia 스토어의 로그아웃 메서드 호출
-  alert('로그아웃되었습니다.');
-  this.$router.push('/'); // 메인 페이지로 리다이렉트
-},
+      const store = useMemberStore();
+      store.logout(); // Pinia 스토어의 로그아웃 메서드 호출
+      alert("로그아웃되었습니다.");
+      this.$router.push("/"); // 메인 페이지로 리다이렉트
+    },
     showDropdown() {
       this.isDropdownVisible = true;
-      document.body.classList.add('blurred'); // 블러 효과 적용
+      document.body.classList.add("blurred"); // 블러 효과 적용
     },
     hideDropdown() {
       this.isDropdownVisible = false;
-      document.body.classList.remove('blurred'); // 블러 효과 제거
+      document.body.classList.remove("blurred"); // 블러 효과 제거
     },
   },
 };
@@ -206,7 +224,6 @@ export default {
   transition: max-height 0.5s ease; /* 부드러운 애니메이션 */
 }
 
-
 .dropdown-container.show {
   max-height: 400px; /* 드롭다운 최대 높이 */
 }
@@ -279,13 +296,13 @@ export default {
 /* 검색창의 input에 포커스가 들어올 때 search-container의 스타일을 변경 */
 .search-input:focus + .clear-btn, /* 추가적으로 clear-btn의 스타일을 변경하고 싶으면 사용 */
 .search-input:focus {
-outline: none; /* 기본 아웃라인 제거 */
+  outline: none; /* 기본 아웃라인 제거 */
 }
 .search-input:focus {
-border-color: #F8A060; /* 포커스 시 테두리 색상 변경 */
+  border-color: #f8a060; /* 포커스 시 테두리 색상 변경 */
 }
 .search-container:focus-within {
-border-color: #F8A060; /* 검색창에 포커스가 있을 때 테두리 색상 변경 */
+  border-color: #f8a060; /* 검색창에 포커스가 있을 때 테두리 색상 변경 */
 }
 .clear-btn {
   background-color: transparent;
@@ -313,11 +330,11 @@ border-color: #F8A060; /* 검색창에 포커스가 있을 때 테두리 색상 
   }
 }
 .search-input {
-    font-size: 15px; 
-  }
-  .search-input::placeholder {
-    font-size: 12px; /* 화면이 좁아질 때 placeholder 크기 줄이기 */
-  }
+  font-size: 15px;
+}
+.search-input::placeholder {
+  font-size: 12px; /* 화면이 좁아질 때 placeholder 크기 줄이기 */
+}
 @media (max-width: 400px) {
   .search-container {
     width: 80%; /* 화면이 더 좁아지면 검색창을 100%로 설정 */
