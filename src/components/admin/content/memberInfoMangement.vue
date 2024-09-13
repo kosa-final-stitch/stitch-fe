@@ -5,6 +5,7 @@
  ---------------------
  2024.09.10 김호영 | admin 초기 설정
  2024.09.12 김호영 | 사용자 정보 페이지 디자인 구현
+ 2024.09.13 김호영 | 완.
  -->
 
  <template>
@@ -31,7 +32,7 @@
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" 
-            class="dropdown-icon" 
+            class="angle-dropdown-icon" 
           />
         </div>
       
@@ -75,23 +76,21 @@
           <td>{{ user.signupdate }}</td>
           <td>{{ user.editdate }}</td>
           <td>
-            <!-- 드롭다운 아이콘 클릭 시 드롭다운 메뉴 토글 -->
-            <div class="dropdown-container" @click="toggleDropdown(index)">
-                          <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
-              <!-- 드롭다운 메뉴 -->
+            <div class="dropdown-container" @click.stop="toggleDropdown(index)">
+              <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
               <div v-if="openDropdownIndex === index" class="dropdown-menu">
                 <ul>
-                  <li @click="deleteUser(user)">
-                    <font-awesome-icon :icon="['fas', 'trash-can']" /> 삭제 
+                  <li @click="handleItemClick(user, 'delete')">
+                    <font-awesome-icon :icon="['fas', 'trash-can']" class="modal-icon" /> 삭제
                   </li>
-                  <li>
-                    <font-awesome-icon :icon="['fas', 'question']" /> 항목 0
+                  <li @click="handleItemClick(user, 'item1')">
+                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
                   </li>
-                  <li>
-                    <font-awesome-icon :icon="['fas', 'question']" /> 항목 1
+                  <li @click="handleItemClick(user, 'item2')">
+                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
                   </li>
-                  <li>
-                    <font-awesome-icon :icon="['fas', 'question']" /> 항목 2
+                  <li @click="handleItemClick(user, 'item3')">
+                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
                   </li>
                 </ul>
               </div>
@@ -100,6 +99,30 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- 삭제 확인 모달 -->
+    <div v-if="isDeleteModalOpen" class="modal-overlay">
+      <div class="modal-content">
+        <h3>정말 삭제하시겠습니까?</h3>
+        <p>선택하신 이메일 : {{ userToDelete?.email }}</p>
+        <div class="modal-buttons">
+          <button @click="deleteUser">확인</button>
+          <button @click="cancelDelete">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 삭제 완료 모달 -->
+    <div v-if="isDeleteSuccessModalOpen" class="modal-success-overlay">
+      <div class="modal-success-content">
+        <div class="modal-icon-container">
+          <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
+        </div>
+        <p>삭제가 완료되었습니다</p>
+      </div>
+    </div>
+
+
 
     <!-- 페이지네이션 -->
     <div class="pagination">
@@ -116,6 +139,24 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'; // Font Awesome 아이콘 불러오기
 
 export default {
+directives: {
+  clickOutside: {
+    bind(el, binding, vnode) {
+      el.clickOutsideEvent = function(event) {
+        // 클릭된 영역이 엘리먼트가 아닌 경우에만 실행
+        if (!(el === event.target || el.contains(event.target))) {
+          vnode.context[binding.expression](event);
+        }
+      };
+      // 이벤트 등록
+      document.body.addEventListener('click', el.clickOutsideEvent);
+    },
+    unbind(el) {
+      // 이벤트 제거
+      document.body.removeEventListener('click', el.clickOutsideEvent);
+    }
+  }
+},
   components: {
     FontAwesomeIcon, // Font Awesome 컴포넌트 등록
   },
@@ -127,6 +168,9 @@ export default {
       usersPerPage: 12,
       isDropdownOpen: false,
       openDropdownIndex: null,
+      isDeleteModalOpen: false, // 삭제 확인 모달 상태
+      isDeleteSuccessModalOpen: false, // 삭제 성공 모달 상태
+      userToDelete: null, // 삭제할 사용자 정보
       users: [
         {
           email: 'testtest@test.com',
@@ -332,15 +376,53 @@ export default {
     },
   },
   methods: {
-        // 드롭다운 토글
-        toggleDropdown(index) {
+    // 드롭다운 토글
+    toggleDropdown(index) {
       this.openDropdownIndex = this.openDropdownIndex === index ? null : index;
     },
-    // 사용자 삭제 메서드
-    deleteUser(user) {
-      this.users = this.users.filter(u => u.email !== user.email);
-      this.openDropdownIndex = null; // 드롭다운 닫기
+    // 드롭다운 닫기
+    closeDropdown() {
     },
+    handleItemClick(user, action) {
+    this.closeDropdown();
+    
+    if (action === 'delete') {
+      this.confirmDeleteUser(user); // 삭제할 사용자 설정 후 모달 오픈
+    }
+  },
+  
+  confirmDeleteUser(user) {
+    this.userToDelete = user; // 삭제할 사용자 저장
+    console.log('삭제하려는 사용자:', this.userToDelete); // 로그로 삭제할 사용자 확인
+    this.isDeleteModalOpen = true; // 모달 열기
+  },
+
+  deleteUser() {
+    if (!this.userToDelete) {
+      console.error('삭제할 사용자가 설정되지 않았습니다.');
+      return;
+    }
+    console.log('삭제할 사용자:', this.userToDelete); // 삭제하려는 사용자 정보 로그
+    this.users = this.users.filter(u => u.email !== this.userToDelete.email); // 사용자 삭제
+    this.isDeleteModalOpen = false; // 삭제 확인 모달 닫기
+    this.isDeleteSuccessModalOpen = true;
+    this.userToDelete = null; // 초기화
+
+    // 일정시간 이후 자동으로 모달 close
+    setTimeout(() => {
+    this.isDeleteSuccessModalOpen = false;
+  }, 2000); // 2초 후에 모달 닫힘
+  },
+
+  
+
+  cancelDelete() {
+    this.isDeleteModalOpen = false; // 모달 닫기
+    this.userToDelete = null; // 초기화 
+  },
+  closeSuccessModal() {
+    this.isDeleteSuccessModalOpen = false;
+  },
     // 페이지 이동 메서드
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
@@ -387,20 +469,116 @@ export default {
 }
 
 .dropdown-menu li {
-  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 11px;
   cursor: pointer;
   transition: background-color 0.2s;
-  align-items: center;
-}
-
-.dropdown-menu li font-awesome-icon {
-  margin-right: 12px; /* 아이콘과 텍스트 사이 간격 */
-  color: #9e9e9e; /* 연한 회색 설정 */
-  font-size: 14px; /* 적절한 크기로 아이콘 크기 설정 */
 }
 
 .dropdown-menu li:hover {
   background-color: #efefef;
+}
+
+.modal-icon {
+  color: #7b7b7b;
+  margin-right: 10px;
+  flex-shrink: 0; /* 아이콘이 항상 같은 크기로 고정되도록 */
+}
+
+/*state 모달 */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6); /* 배경을 어둡게 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001; /* 위에 배치 */
+}
+
+/* 모달 콘텐츠 스타일 */
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
+}
+.modal-content p {
+  font-size: 14px;
+  color: #7b7b7b;
+  margin-bottom: 40px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  width: 120px;
+}
+
+.modal-buttons button:first-child {
+  background-color: #f56565;
+  color: white;
+}
+
+.modal-buttons button:first-child:hover {
+  background-color: #ec2727;
+  color:white;
+}
+
+.modal-buttons button:last-child:hover {
+  background-color: #b3b3b3; /* 호버 시 더 짙은 회색 */
+}
+
+
+/* 성공 모달 */
+.modal-success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001; /* 위에 배치 */
+}
+
+.modal-success-content {
+  display: flex;
+    align-items: center;
+    background-color: white;
+    padding: 15px 25px;
+    border-radius: 7px;
+    box-shadow: 0px 1px 9px 3px rgba(0, 0, 0, 0.09);
+    gap: 25px;
+}
+
+.modal-success-icon {
+  color: #4F8CFF; /* 체크 아이콘 색상 */
+  font-size: 30px;
+  margin-right: 20px;
+}
+
+.modal-success-content p {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
 }
 
 
@@ -479,7 +657,7 @@ export default {
   text-align: left; /* 텍스트 정렬을 왼쪽으로 */
 }
 
-.dropdown-icon {
+.angle-dropdown-icon {
   position: absolute;
   right: 30px; /* 아이콘을 오른쪽에 배치 */
   font-size: 14px;
@@ -560,7 +738,7 @@ export default {
 /* 테이블 데이터 스타일 */
 .user-list-table td {
   font-size: 12px; /* td에 원하는 크기 설정 */
-  padding: 10px 10px 15px 20px; /* 상, 좌, 우, 하 padding 설정 */
+  padding: 18px 10px 15px 20px; /* 상, 좌, 우, 하 padding 설정 */
   text-align: center;
 }
 

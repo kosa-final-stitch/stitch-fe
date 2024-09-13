@@ -49,6 +49,7 @@
           '/admin/report-inquiry': '신고 문의 관리',
           '/admin/direct-inquiry': '1:1 문의',
           '/admin/announcement': '공지사항 관리',
+          '/admin/pay-management': '결제정보 관리',
         };
         this.currentPage = routeMap[route.path] || '대시보드';
       },

@@ -23,6 +23,7 @@
       <button class="menu-item" :class="{ active: isActive('admin/report-inquiry') }" @click="navigateTo('admin/report-inquiry')">신고 문의 관리</button>
       <button class="menu-item" :class="{ active: isActive('admin/direct-inquiry') }" @click="navigateTo('admin/direct-inquiry')">1:1 문의</button>
       <button class="menu-item" :class="{ active: isActive('admin/announcement') }" @click="navigateTo('admin/announcement')">공지사항 관리</button>
+      <button class="menu-item" :class="{ active: isActive('admin/pay-management') }" @click="navigateTo('admin/pay-management')">결제정보 관리</button>
       </div>
 
       <div class="logout-container">

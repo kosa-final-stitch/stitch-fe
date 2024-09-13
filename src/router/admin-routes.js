@@ -17,8 +17,11 @@
  import ReportInquiryManagement from '../components/admin/content/ReportInquiryManagement.vue';
  import DirectInquiryManagement from '../components/admin/content/DirectInquiryManagement.vue';
  import AnnouncementManagement from '../components/admin/content/AnnouncementManagement.vue';
+ import PayManagement from '../components/admin/content/PayManagement.vue';
 // import ContentArea from '@/components/admin/content/ContentArea.vue';
 //import AdminContentWrapper from '@/components/admin/AdminContentWrapper.vue';
+
+
 
  
  const adminRoutes = [
@@ -64,6 +67,11 @@
             name: 'AnnouncementManagement',
             component: AnnouncementManagement,
           },
+          {
+            path: 'pay-management',
+            name: 'PayManagement',
+            component: PayManagement,
+          }
     ],
   },
 ];
