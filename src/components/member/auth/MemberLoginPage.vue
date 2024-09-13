@@ -15,8 +15,8 @@
       <div class="input-container">
         <input
           type="text"
-          v-model="useremail"
-          id="useremail"
+          v-model="email"
+          id="email"
           placeholder="이메일을 입력해주세요."
           required
         />
@@ -60,7 +60,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      useremail: '',
+      email: '',
       password: '',
     };
   },
@@ -77,33 +77,30 @@ export default {
       this.router.push('/signup'); // 회원가입 페이지로 이동
     },
     async login() {
-      // 아이디(이메일) 입력 확인
-      if (!this.useremail) {
-        alert('아이디를 입력해주세요.');
-        return;
-      }
-      // 비밀번호 입력 확인
-      if (!this.password) {
-        alert('비밀번호를 입력해주세요.');
-        return;
-      }
-      try {
-        // 서버로 로그인 요청
-        const response = await axios.post('/api/login', {
-          email: this.useremail,
-          password: this.password
-        });
+      if (this.email && this.password) {
+        try {
+          const response = await axios.post('/api/login', {
+            email: this.email,
+            password: this.password
+          });
 
-        // 서버의 응답이 성공이면
-        if (response.status === 200) {
-          // 로그인 성공 시 상태 업데이트 및 리디렉션
-          this.memberStore.setMember({ email: this.useremail }); // 로그인 상태로 업데이트
-          this.router.push('/'); // 홈 페이지로 이동
+          const token = response.data.token;
+
+          // Pinia 스토어 불러오기
+          const memberStore = useMemberStore();
+
+          // 스토어에 사용자 정보를 설정
+          memberStore.setMember(token);
+
+          // 로그인 성공 후 페이지 이동
+          this.$router.push('/');
+          alert("로그인 성공")
+        } catch (error) {
+          console.error("로그인 실패:", error);
+          alert('로그인에 실패했습니다. 다시 시도해주세요.');
         }
-      } catch (error) {
-        // 로그인 실패 시 처리
-        console.error(error);
-        alert('아이디와 비밀번호를 확인해주세요.');
+      } else {
+        alert('이메일과 비밀번호를 입력해주세요.');
       }
     }
   }

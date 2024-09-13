@@ -3,94 +3,280 @@
 <template>
   <MemberHeader></MemberHeader>
   <div class="board-container">
+    <h1 class="board-title">정보공유 게시판</h1>
+    <h5 class="board-description">자유롭게 여러분의 의견을 입력하세요.</h5>
     <div class="category-tab">
-      <button>취업정보</button>
-      <button>시험정보</button>
-      <button>기업정보</button>
-      <button>국비정보</button>
-      <button>공부방법</button>
+      <button
+          v-for="(category, index) in categories"
+          :key="index"
+          :class="{ active: activeTab === index }"
+          @click="activeTab = index"
+      >
+        {{ category }}
+      </button>
     </div>
-
-    <table class="board-table">
-      <thead>
-      <tr>
-        <th>번호</th>
-        <th>제목</th>
-        <th>작성자</th>
-        <th>등록일</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr>
-        <td>1</td>
-        <td>공부 할 때 GPT 사용 괜찮을까요?</td>
-        <td>박쓸개</td>
-        <td>2024-09-02</td>
-      </tr>
-      <tr>
-        <td>2</td>
-        <td>오늘 면접 보고 왔습니다.</td>
-        <td>김땅콩</td>
-        <td>2024-08-31</td>
-      </tr>
-      </tbody>
-    </table>
-
+    <div class="board-header">
+      <button class="write" @click="goToPostForm">글쓰기</button>
+      <div class="sort-options">
+         <span
+             :class="{ active: activeSort === 'recent' }"
+             @click="setActiveSort('recent')"
+         >
+          최근순
+        </span>
+        <span
+            :class="{ active: activeSort === 'popular' }"
+            @click="setActiveSort('popular')"
+        >
+          인기순
+        </span>
+      </div>
+    </div>
+    <div class="table-container">
+      <table class="board-table">
+        <thead>
+        <tr>
+          <th>번호</th>
+          <th>제목</th>
+          <th>작성자</th>
+          <th>등록일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(item, index) in paginatedData" :key="index">
+          <td>{{ index + 1 }}</td>
+          <td>{{ item.title }}</td>
+          <td>{{ item.author }}</td>
+          <td>{{ item.date }}</td>
+        </tr>
+        <!-- 빈 항목을 채우기 위한 추가 빈 줄 -->
+        <tr v-for="i in emptyRows" :key="'empty-' + i">
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
     <div class="search-bar">
-      <input type="text" placeholder="검색어를 입력하세요..." />
-      <button>검색</button>
+      <div class="search-wrapper">
+        <input type="text" placeholder="검색어를 입력하세요..." />
+        <button class="search-button">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
     </div>
 
     <div class="pagination">
-      <button>&larr; Previous</button>
-      <span>1</span>
-      <button>Next &rarr;</button>
+      <button @click="previousPage" :disabled="currentPage === 1">
+        &larr; Previous
+      </button>
+      <span :class="{ active: true }">{{ currentPage }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">
+        Next &rarr;
+      </button>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import MemberHeader from '../member-header/MemberHeader.vue';
 
 export default {
   name: "BoardMain",
   components: {
     MemberHeader,
-  }
+  },
+  data() {
+    return {
+      categories: ["취업정보", "시험정보", "공부방법", "기업정보", "국비정보"],
+      activeTab: 0, // 현재 선택된 탭을 관리하는 변수
+      activeSort: 'recent',
+      items: [],
+      currentPage: 1,
+      itemsPerPage: 10, // 한 페이지에 10개 항목
+    };
+  },
+  computed: {
+    paginatedData() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.items.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil(this.items.length / this.itemsPerPage);
+    },
+    emptyRows() {
+      const rows = this.itemsPerPage - this.paginatedData.length;
+      return rows > 0 ? rows : 0; // 남은 빈 줄을 계산
+    },
+  },
+  methods: {
+    async fetchPosts() {
+      try {
+        const response = await axios.get('/api/member/community/all', {
+          withCredentials: true // 세션 쿠키를 포함시키기 위해 withCredentials 추가
+        });
+        this.items = response.data; // API로부터 받은 데이터를 items에 저장
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    },
+    goToPostForm() {
+      this.$router.push('/member/board/PostForm'); // Vue Router를 사용하여 페이지 이동
+    },
+    setActiveSort(sortType) {
+      this.activeSort = sortType;
+      // 정렬 로직을 추가할 수 있음
+    },
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+  },
+  mounted() {
+    this.fetchPosts(); // 컴포넌트가 마운트될 때 게시글 목록을 가져옴
+  },
 };
-
 </script>
 
 <style scoped>
 .board-container {
   width: 100%;
   padding: 20px;
+  text-align: center;
+  box-sizing: border-box;
 }
 
-.category-tabs {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
+.board-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-.category-tabs button {
-  border: none;
-  background-color: white;
-  cursor: pointer;
-  padding: 10px 20px;
+.board-description {
   font-size: 1rem;
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.category-tab{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 50px; /* 둥근 테두리 */
+  padding: 10px;
+  width: 100%;
+  max-width : 600px;
+  height: 20px;
+  margin: 0 auto; /* 가운데 정렬 */
+
+}
+
+/* 카테고리 탭 버튼 스타일 */
+.category-tab button {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 10px 30px;
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+/* 버튼 사이 구분선 추가 */
+.category-tab button:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 20px;
+  background-color: #ddd;
+}
+
+/* 클릭된 탭에 대한 스타일 */
+.category-tab button.active {
+  color: #f28c28; /* 주황색 */
+  font-weight: bold;
+}
+
+.board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 0;
+  border-bottom: 2px solid #000; /* 하단 구분선 */
+  width: 90%; /* 너비를 90%로 설정 */
+  margin: 0 auto; /* 중앙 정렬 */
+}
+
+.write {
+  background-color: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.3s ease;
+  padding: 5px 10px;
+  margin-bottom: 10px;
+}
+
+.write:hover {
+  color: #f28c28;
+}
+
+.write.active {
+  color: #f28c28;
+  font-weight: bold;
+}
+
+.sort-options {
+  display: flex;
+  gap: 20px;
+}
+
+.sort-options span {
+  cursor: pointer;
+  font-size: 1rem;
+  color: #333;
+}
+
+.sort-options span:hover {
+  color: #f28c28; /* 주황색 */
+}
+
+.sort-options span.active {
+  color: #f28c28; /* 주황색 */
+  font-weight: bold;
 }
 
 .board-table {
-  width: 100%;
+  width: 90%;
+  margin: 0 auto;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
 
 .board-table th, .board-table td {
-  border: 1px solid #ddd;
+  border: none;
+  border-bottom: 1px solid #ddd; /* 가로선만 남김 */
   padding: 10px;
   text-align: center;
+  word-wrap: break-word;
 }
 
 .search-bar {
@@ -99,23 +285,72 @@ export default {
   margin-bottom: 20px;
 }
 
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
 .search-bar input {
   padding: 10px;
+  padding-right: 40px;
   width: 300px;
-  margin-right: 10px;
+  max-width: 100%;
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.search-button {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #f28c28;
+  font-size: 1.2rem;
 }
 
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 15px; /* 버튼 사이의 간격을 넓게 설정 */
 }
 
-.pagination button {
-  padding: 10px 20px;
-  margin: 0 5px;
+.pagination button,
+.pagination span {
+  padding: 10px 18px; /* 버튼과 페이지 번호에 충분한 여백을 줌 */
+  border: none;
+  background-color: transparent;
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+  border-radius: 30px; /* 둥근 모서리 */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.pagination button:disabled {
+  color: #ccc; /* 비활성화된 버튼 색상 */
+  cursor: not-allowed;
+}
 
+.pagination span.active {
+  background-color: #f28c28; /* 주황색 배경 */
+  color: white;
+}
+
+.pagination span:hover,
+.pagination button:hover {
+  background-color: #f28c28; /* 마우스 오버 시 배경색 */
+  color: white;
+}
+
+.pagination .dots {
+  cursor: default;
+  pointer-events: none;
+  color: #ccc;
+}
 
 </style>
