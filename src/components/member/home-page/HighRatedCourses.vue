@@ -10,12 +10,16 @@
   <div>
     <h2>평점 높은 교육 과정</h2>
     <!-- 교육 과정 리스트 표시 -->
+
+    <more-button to="/courses" />
   </div>
 </template>
 
 <script>
+import MoreButton from "./MoreButton.vue";
 export default {
   name: "HighRatedCourses",
+  components: { MoreButton },
 };
 </script>
 

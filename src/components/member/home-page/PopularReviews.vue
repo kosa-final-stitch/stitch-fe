@@ -10,12 +10,16 @@
   <div>
     <h2>인기 리뷰</h2>
     <!-- 리뷰 리스트 표시 -->
+
+    <more-button to="/mypage/activities/review" />
   </div>
 </template>
 
 <script>
+import MoreButton from "./MoreButton.vue";
 export default {
   name: "PopularReviews",
+  components: { MoreButton },
 };
 </script>
 

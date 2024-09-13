@@ -10,11 +10,17 @@
   <div>
     <h2>인기 게시글</h2>
     <!-- 게시판별 인기 게시글 리스트 -->
+
+    <more-button to="/board/info-share" />
+    <more-button to="/board/free-community" />
+    <more-button to="/board/qna" />
   </div>
 </template>
 
 <script>
+import MoreButton from "./MoreButton.vue";
 export default {
+  components: { MoreButton },
   name: "PopularPosts",
 };
 </script>
