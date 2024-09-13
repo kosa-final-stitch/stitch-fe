@@ -75,7 +75,27 @@
           <td>{{ user.signupdate }}</td>
           <td>{{ user.editdate }}</td>
           <td>
-            <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" /> <!-- 아이콘 추가 -->
+            <!-- 드롭다운 아이콘 클릭 시 드롭다운 메뉴 토글 -->
+            <div class="dropdown-container" @click="toggleDropdown(index)">
+                          <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
+              <!-- 드롭다운 메뉴 -->
+              <div v-if="openDropdownIndex === index" class="dropdown-menu">
+                <ul>
+                  <li @click="deleteUser(user)">
+                    <font-awesome-icon :icon="['fas', 'trash-can']" /> 삭제 
+                  </li>
+                  <li>
+                    <font-awesome-icon :icon="['fas', 'question']" /> 항목 0
+                  </li>
+                  <li>
+                    <font-awesome-icon :icon="['fas', 'question']" /> 항목 1
+                  </li>
+                  <li>
+                    <font-awesome-icon :icon="['fas', 'question']" /> 항목 2
+                  </li>
+                </ul>
+              </div>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -106,6 +126,7 @@ export default {
       currentPage: 1,
       usersPerPage: 12,
       isDropdownOpen: false,
+      openDropdownIndex: null,
       users: [
         {
           email: 'testtest@test.com',
@@ -119,7 +140,7 @@ export default {
           editdate: '2024-09-11 16:52:24',
         },
         {
-          email: 'test@test.com',
+          email: 'test1@test.com',
           name: '이호영',
           nickname: '별명',
           address: '제주도',
@@ -311,6 +332,15 @@ export default {
     },
   },
   methods: {
+        // 드롭다운 토글
+        toggleDropdown(index) {
+      this.openDropdownIndex = this.openDropdownIndex === index ? null : index;
+    },
+    // 사용자 삭제 메서드
+    deleteUser(user) {
+      this.users = this.users.filter(u => u.email !== user.email);
+      this.openDropdownIndex = null; // 드롭다운 닫기
+    },
     // 페이지 이동 메서드
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
@@ -322,6 +352,58 @@ export default {
 </script>
 
 <style scoped>
+/* 드롭다운 스타일 */
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.icon-bars {
+  cursor: pointer;
+  color: #ababab;
+}
+
+/* 드롭다운 메뉴 */
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1.2px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 100px; /* 드롭다운의 최소 넓이 설정 */
+  max-width: 140px; /* 드롭다운의 최대 넓이 설정 */
+  width: auto; /* 내용에 따라 자동으로 조절 */
+  margin-right: 10px;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-menu li {
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  align-items: center;
+}
+
+.dropdown-menu li font-awesome-icon {
+  margin-right: 12px; /* 아이콘과 텍스트 사이 간격 */
+  color: #9e9e9e; /* 연한 회색 설정 */
+  font-size: 14px; /* 적절한 크기로 아이콘 크기 설정 */
+}
+
+.dropdown-menu li:hover {
+  background-color: #efefef;
+}
+
+
 /* 전체 레이아웃 스타일 */
 .user-info-page {
   padding: 5px;

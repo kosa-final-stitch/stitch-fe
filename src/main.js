@@ -17,7 +17,7 @@ import MemberApp from './components/member/MemberApp.vue'; // 기본 앱은 Memb
 
 // Font Awesome 관련 설정
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faMagnifyingGlass, faBars, faAngleUp, faAngleDown } from '@fortawesome/free-solid-svg-icons'; // 원하는 아이콘 추가
+import { faMagnifyingGlass, faBars, faAngleUp, faAngleDown, faTrashCan, faQuestion } from '@fortawesome/free-solid-svg-icons'; // 원하는 아이콘 추가
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 // Pinia 설정
@@ -25,7 +25,7 @@ const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
 // Font Awesome 라이브러리에 아이콘 추가
-library.add(faBars, faMagnifyingGlass, faAngleUp, faAngleDown);
+library.add(faBars, faMagnifyingGlass, faAngleUp, faAngleDown, faTrashCan, faQuestion);
 
 // member와 admin 라우터 통합
 const routes = [...memberRoutes, ...adminRoutes];
