@@ -56,6 +56,5 @@ export default {
 .content {
   flex: 1;
   padding: 20px;
-  overflow-y: auto; /* 스크롤이 필요할 때만 나타남 */
 }
 </style>
