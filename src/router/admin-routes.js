@@ -11,7 +11,7 @@
 //import AdminApp from '../components/admin/AdminApp.vue';
 import AdminMainLayout from "../components/admin/AdminMainLayout.vue";
 import DashboardLayout from "../components/admin/content/DashboardLayout.vue";
-import MemberInfoMangement from "@/components/admin/content/MemberInfoMangement.vue";
+//import MemberInfoManagement from '../components/admin/content/MemberInfoMangement.vue';
 import PostManagement from "../components/admin/content/PostManagement.vue";
 import ReviewManagement from "../components/admin/content/ReviewManagement.vue";
 import ReportInquiryManagement from "../components/admin/content/ReportInquiryManagement.vue";
@@ -32,12 +32,17 @@ const adminRoutes = [
         component: DashboardLayout,
       },
 
-<<<<<<< HEAD
       {
-        path: "user-info",
-        name: "UserInfoManagement",
-        component: MemberInfoMangement,
+        path: "dashboard",
+        name: "Dashboard",
+        component: DashboardLayout,
       },
+
+      // {
+      //   path: 'user-info',
+      //   name: 'UserInfoManagement',
+      //   component: MemberInfoManagement,
+      // },
       {
         path: "post-management",
         name: "AdminPostManagement",
