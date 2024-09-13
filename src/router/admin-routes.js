@@ -32,6 +32,7 @@ const adminRoutes = [
         component: DashboardLayout,
       },
 
+<<<<<<< HEAD
       {
         path: "user-info",
         name: "UserInfoManagement",

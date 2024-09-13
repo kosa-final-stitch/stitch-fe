@@ -1,32 +1,20 @@
 <!-- 
- 담당자: 김호영 
+ 담당자: 김호영, 박요한
  시작 일자: 2024.09.06
  설명 : 헤더를 위한 HomePage 컴포넌트 설정
  ---------------------
  2024.09.06 김호영 | 헤더 template 추가
+ 2024.09.13 박요한 | 헤더 삭제
  -->
 
-
 <template>
-  <MemberHeader></MemberHeader>
-
+  <div>홈</div>
 </template>
 
 <script>
-import MemberHeader from '../member-header/MemberHeader.vue';
-
 export default {
-    name: "MemberApp",
-    components: {
-        MemberHeader,
-    }
-
+  components: {},
 };
-
 </script>
 
-<style>
-
-
-
-</style>
+<style></style>
