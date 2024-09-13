@@ -5,7 +5,7 @@
  ---------------------
  2024.09.10 김호영 | admin 초기 설정
  2024.09.12 김호영 | 사용자 정보 페이지 디자인 구현
- 2024.09.13 김호영 | 완.
+ 2024.09.13 김호영 | 디자인 완 (코드 정리 미완).
  -->
 
  <template>
@@ -411,7 +411,7 @@ directives: {
     // 일정시간 이후 자동으로 모달 close
     setTimeout(() => {
     this.isDeleteSuccessModalOpen = false;
-  }, 2000); // 2초 후에 모달 닫힘
+  }, 1500); // 2초 후에 모달 닫힘
   },
 
   
@@ -566,7 +566,8 @@ directives: {
     padding: 15px 25px;
     border-radius: 7px;
     box-shadow: 0px 1px 9px 3px rgba(0, 0, 0, 0.09);
-    gap: 25px;
+    gap: 45px;
+    width: 300px;
 }
 
 .modal-success-icon {
