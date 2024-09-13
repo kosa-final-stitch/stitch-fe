@@ -13,6 +13,25 @@ import adminRoutes from './router/admin-routes';    // admin 라우터
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import MemberApp from './components/member/MemberApp.vue'; // 기본 앱은 MemberApp
+import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/js/all.js';
+// main.js 또는 프로젝트 진입 파일에서 설정
+
+import axios from 'axios';
+
+// Axios 인터셉터 설정
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('jwtToken'); // 저장된 JWT 토큰 가져오기
+  if (token) {
+    config.headers['Authorization'] = 'Bearer ' + token; // 토큰을 Authorization 헤더에 추가
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+
+
 
 // Pinia 설정
 const pinia = createPinia();

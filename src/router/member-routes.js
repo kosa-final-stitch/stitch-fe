@@ -15,7 +15,7 @@ import FCommunityBoard from "../components/member/board-page/FCommunityBoard.vue
 // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
 // import QnABoard from '../components/BoardPage/QnABoard.vue';
 // import PostDetail from '../components/BoardPage/PostDetail.vue';
-// import PostForm from '../components/BoardPage/PostForm.vue';
+import PostForm from '../components/member/board-page/PostForm.vue';
 import AcademyInfoList from "@/components/member/rating-info-page/AcademyInfoList.vue";
 import CourseInfoList from "@/components/member/rating-info-page/CourseInfoList.vue";
 // import ReviewForm from '../components/RatingInfoPage/ReviewForm.vue';
@@ -41,13 +41,15 @@ const MemberRoutes = [
       { path: "", component: HomePage, name: "Home" },
       //     //   { path: 'board/info-share', component: InfoShareBoard, name: 'InfoShareBoard' },
       {
-        path: "board/free-community",
+        path: "member/board/free-community",
         component: FCommunityBoard,
         name: "FCommunityBoard",
       },
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
       //     //   { path: 'board/post/:id', component: PostDetail, name: 'PostDetail', props: true },
-      //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
+    { path: 'member/board/PostForm',
+      component: PostForm,
+      name: 'PostForm' },
       //     //   { path: 'review-form', component: ReviewForm, name: 'ReviewForm' },
       {
         path: "academies", // 학원 목록 페이지
