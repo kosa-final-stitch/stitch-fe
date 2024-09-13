@@ -46,26 +46,40 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
       academy: "한국 소프트웨어 산업협회",
       className: "MSA 4차",
       averageRating: 3.5, // 평균 별점
-      reviews: [
-        { title: "강의", rating: 4, comment: "aa" },
-        { title: "강사", rating: 2, comment: "bb" },
-        { title: "시설", rating: 3, comment: "cc" },
-        { title: "반 분위기", rating: 3, comment: "dd" },
-        { title: "행정", rating: 3, comment: "ee" },
-        { title: "취업관련", rating: 3, comment: "ff" },
-      ],
+      reviews: [], // 리뷰 데이터를 서버에서 가져올 예정
     };
   },
   methods: {
-    goToDetail(index) {
-      this.$router.push({ name: "ReviewDetail", params: { id: index } });
+    // 서버에서 리뷰 데이터를 받아오는 함수
+    fetchReviews() {
+      axios
+        .get("http://localhost:8080/api/reviews") // 실제 API 경로를 입력
+        .then((response) => {
+          console.log("리뷰 서버 응답:", response); // 응답 데이터를 확인하기 위해 로그 출력
+          this.reviews = response.data; // 서버에서 받아온 리뷰 데이터를 설정
+        })
+        .catch((error) => {
+          console.error(
+            "리뷰 데이터를 가져오는 중 오류가 발생했습니다.",
+            error
+          );
+        });
     },
+    // 리뷰 상세 페이지로 이동
+    goToDetail(id) {
+      this.$router.push({ name: "ReviewDetail", params: { id: id } });
+    },
+  },
+  mounted() {
+    this.fetchReviews(); // 컴포넌트가 마운트되면 서버에서 데이터를 받아옴
   },
 };
 </script>

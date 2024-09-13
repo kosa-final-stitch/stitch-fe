@@ -68,15 +68,24 @@ export default {
     };
   },
   mounted() {
-    // 백엔드 서버 주소와 API 경로에 대한 요청을 보냄
-    const memberId = 1; // 실제 회원 ID를 이 변수로 설정
     axios
-      .get(`http://localhost:8080/api/member/info/${memberId}`) // 백엔드 API 호출
+      .get("http://localhost:8080/api/member/info")
       .then((response) => {
-        this.member = response.data; // 서버로부터 데이터를 받아서 member 객체에 할당
+        console.log("멤버헤드 서버 응답: ", response);
+        this.member = response.data;
+        console.log("response.data: ", this.member);
       })
       .catch((error) => {
         console.error("회원 정보를 불러오는 중 오류가 발생했습니다.", error);
+        if (error.response) {
+          console.log("응답 데이터:", error.response.data);
+          console.log("응답 상태 코드:", error.response.status);
+          console.log("응답 헤더:", error.response.headers);
+        } else if (error.request) {
+          console.log("요청은 되었으나 응답을 받지 못함:", error.request);
+        } else {
+          console.log("요청을 설정하는 중 오류 발생:", error.message);
+        }
       });
   },
 };
