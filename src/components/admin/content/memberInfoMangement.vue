@@ -139,24 +139,6 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'; // Font Awesome 아이콘 불러오기
 
 export default {
-directives: {
-  clickOutside: {
-    bind(el, binding, vnode) {
-      el.clickOutsideEvent = function(event) {
-        // 클릭된 영역이 엘리먼트가 아닌 경우에만 실행
-        if (!(el === event.target || el.contains(event.target))) {
-          vnode.context[binding.expression](event);
-        }
-      };
-      // 이벤트 등록
-      document.body.addEventListener('click', el.clickOutsideEvent);
-    },
-    unbind(el) {
-      // 이벤트 제거
-      document.body.removeEventListener('click', el.clickOutsideEvent);
-    }
-  }
-},
   components: {
     FontAwesomeIcon, // Font Awesome 컴포넌트 등록
   },

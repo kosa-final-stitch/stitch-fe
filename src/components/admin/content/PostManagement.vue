@@ -8,7 +8,7 @@
  -->
 
  <template>
-  <div class="user-info-page">
+  <div class="post-info-page">
     <!-- 상단 검색창 -->
     <div class="search-bar">
       <div class="search-wrapper search-container">
@@ -21,7 +21,7 @@
             <option value="all">전체</option>
             <option value="infoShareBoard">정보 공유</option>
             <option value="free-community">자유</option>
-            <option value="qnABoard">Q&A</option>
+            <option value="qnABoard">Q&A</option> <!-- 이거 명명 규칙 조금 어색하긴 한데 음 .. 모르겠다-->
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" 
@@ -40,7 +40,7 @@
     </div>
 
     <!-- 게시글 목록 테이블 -->
-    <table class="user-list-table">
+    <table class="post-list-table">
       <thead>
         <tr>
           <th>순번</th>
@@ -55,32 +55,30 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(user, index) in paginatedUsers" :key="user.email">
-          <td>{{  (currentPage -1) * usersPerPage + index + 1 }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.name }}</td>
-          <td>{{ user.nickname }}</td>
-          <td>{{ user.address }}</td>
-          <td>{{ user.gender }}</td>
-          <td>{{ user.birth }}</td>
-          <td>{{ user.phone }}</td>
-          <td>{{ user.signupdate }}</td>
-          <td>{{ user.editdate }}</td>
+        <tr v-for="(post, index) in paginatedPosts" :key="post.id">
+          <td>{{  (currentPage -1) * postsPerPage + index + 1 }}</td>
+          <td>{{ post.id || '-' }}</td>
+          <td>{{ post.type || '-' }}</td>
+          <td>{{ post.author || '-' }}</td>  <!-- 일단 author로 해 놓음 여기에 작성자 넣어놓으면 됨-->
+          <td>{{ post.regdate || '-' }}</td>
+          <td>{{ post.editdate || '-' }}</td>
+          <td>{{ post.title || '-' }}</td>
+          <td>{{ post.status || '-' }}</td>
           <td>
             <div class="dropdown-container" @click.stop="toggleDropdown(index)">
               <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
               <div v-if="openDropdownIndex === index" class="dropdown-menu">
                 <ul>
-                  <li @click="handleItemClick(user, 'delete')">
+                  <li @click="handleItemClick(post, 'delete')">
                     <font-awesome-icon :icon="['fas', 'trash-can']" class="modal-icon" /> 삭제
                   </li>
-                  <li @click="handleItemClick(user, 'item1')">
+                  <li @click="handleItemClick(post, 'item1')">
                     <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
                   </li>
-                  <li @click="handleItemClick(user, 'item2')">
+                  <li @click="handleItemClick(post, 'item2')">
                     <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
                   </li>
-                  <li @click="handleItemClick(user, 'item3')">
+                  <li @click="handleItemClick(post, 'item3')">
                     <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
                   </li>
                 </ul>
@@ -95,9 +93,9 @@
     <div v-if="isDeleteModalOpen" class="modal-overlay">
       <div class="modal-content">
         <h3>정말 삭제하시겠습니까?</h3>
-        <p>선택하신 이메일 : {{ userToDelete?.email }}</p>
+        <p>선택하신 게시글 : {{ postToDelete?.title }}</p>
         <div class="modal-buttons">
-          <button @click="deleteUser">확인</button>
+          <button @click="deletePost">확인</button>
           <button @click="cancelDelete">취소</button>
         </div>
       </div>
@@ -127,27 +125,9 @@
 </template>
 
 <script>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'; // Font Awesome 아이콘 불러오기
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 export default {
-directives: {
-  clickOutside: {
-    bind(el, binding, vnode) {
-      el.clickOutsideEvent = function(event) {
-        // 클릭된 영역이 엘리먼트가 아닌 경우에만 실행
-        if (!(el === event.target || el.contains(event.target))) {
-          vnode.context[binding.expression](event);
-        }
-      };
-      // 이벤트 등록
-      document.body.addEventListener('click', el.clickOutsideEvent);
-    },
-    unbind(el) {
-      // 이벤트 제거
-      document.body.removeEventListener('click', el.clickOutsideEvent);
-    }
-  }
-},
   components: {
     FontAwesomeIcon, // Font Awesome 컴포넌트 등록
   },
@@ -156,271 +136,118 @@ directives: {
       searchQuery: '',
       selectedCategory: 'all',
       currentPage: 1,
-      usersPerPage: 12,
+      postsPerPage: 12,
       isDropdownOpen: false,
       openDropdownIndex: null,
-      isDeleteModalOpen: false, // 삭제 확인 모달 상태
-      isDeleteSuccessModalOpen: false, // 삭제 성공 모달 상태
-      userToDelete: null, // 삭제할 사용자 정보
-      users: [
-        {
-          email: 'testtest@test.com',
-          name: '김호영',
-          nickname: '닉네임은최대몇까지',
-          address: '서울특별시',
-          gender: '남',
-          birth: '2024-10-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10 16:52:24',
-          editdate: '2024-09-11 16:52:24',
-        },
-        {
-          email: 'test1@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0252',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2020-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '20호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        }
-        // 다른 유저들 추가
-      ],
+      isDeleteModalOpen: false,
+      isDeleteSuccessModalOpen: false,
+      postToDelete: null,
+      // 세 개의 게시판 데이터를 위한 배열
+      communityData: [], 
+      infoData: [],
+      inquiryData: [],
     };
   },
   computed: {
-    // 필터된 사용자 목록
-    filteredUsers() {
-      return this.users.filter((user) => {
+    // 모든 게시글을 하나의 배열로 병합
+    allPosts() {
+      return [
+        ...this.communityData.map(post => ({ ...post, type: 'community' })),
+        ...this.infoData.map(post => ({ ...post, type: 'info' })),
+        ...this.inquiryData.map(post => ({ ...post, type: 'inquiry' })),
+      ];
+    },
+    // 선택된 카테고리에 따라 게시글 필터링
+    filteredPosts() {
+      return this.allPosts.filter(post => {
         if (this.selectedCategory === 'all') {
-          // 모든 필드를 검색할 경우
           return (
-            user.email.includes(this.searchQuery) ||
-            user.name.includes(this.searchQuery) ||
-            user.nickname.includes(this.searchQuery) ||
-            user.address.includes(this.searchQuery) ||
-            user.gender.includes(this.searchQuery) ||
-            user.birth.includes(this.searchQuery) ||
-            user.phone.includes(this.searchQuery) ||
-            user.signupdate.includes(this.searchQuery) ||
-            user.editdate.includes(this.searchQuery)
+            (post.title || '-').includes(this.searchQuery) ||
+            (post.content || '-').includes(this.searchQuery) ||
+            (post.author || '-').includes(this.searchQuery) ||
+            (post.status || '-').includes(this.searchQuery)
           );
-        } else {
-          // 특정 카테고리 검색
-          return user[this.selectedCategory] && user[this.selectedCategory].includes(this.searchQuery);
+        } else if (this.selectedCategory === 'infoShareBoard' && post.type === 'info') {
+          return true;
+        } else if (this.selectedCategory === 'free-community' && post.type === 'community') {
+          return true;
+        } else if (this.selectedCategory === 'qnABoard' && post.type === 'inquiry') {
+          return true;
         }
+        return false;
       });
     },
-    // 현재 페이지에 표시할 사용자들
-    paginatedUsers() {
-      const start = (this.currentPage - 1) * this.usersPerPage;
-      const end = start + this.usersPerPage;
-      return this.filteredUsers.slice(start, end);
+    // 현재 페이지에 표시할 게시글
+    paginatedPosts() {
+      const start = (this.currentPage - 1) * this.postsPerPage;
+      const end = start + this.postsPerPage;
+      return this.filteredPosts.slice(start, end);
     },
     // 전체 페이지 수
     totalPages() {
-      return Math.ceil(this.filteredUsers.length / this.usersPerPage);
+      return Math.ceil(this.filteredPosts.length / this.postsPerPage);
     },
   },
   methods: {
-    // 드롭다운 토글
-    toggleDropdown(index) {
-      this.openDropdownIndex = this.openDropdownIndex === index ? null : index;
-    },
-    // 드롭다운 닫기
-    closeDropdown() {
-    },
-    handleItemClick(user, action) {
-    this.closeDropdown();
-    
-    if (action === 'delete') {
-      this.confirmDeleteUser(user); // 삭제할 사용자 설정 후 모달 오픈
-    }
-  },
-  
-  confirmDeleteUser(user) {
-    this.userToDelete = user; // 삭제할 사용자 저장
-    console.log('삭제하려는 사용자:', this.userToDelete); // 로그로 삭제할 사용자 확인
-    this.isDeleteModalOpen = true; // 모달 열기
-  },
-
-  deleteUser() {
-    if (!this.userToDelete) {
-      console.error('삭제할 사용자가 설정되지 않았습니다.');
-      return;
-    }
-    console.log('삭제할 사용자:', this.userToDelete); // 삭제하려는 사용자 정보 로그
-    this.users = this.users.filter(u => u.email !== this.userToDelete.email); // 사용자 삭제
-    this.isDeleteModalOpen = false; // 삭제 확인 모달 닫기
-    this.isDeleteSuccessModalOpen = true;
-    this.userToDelete = null; // 초기화
-
-    // 일정시간 이후 자동으로 모달 close
-    setTimeout(() => {
-    this.isDeleteSuccessModalOpen = false;
-  }, 1500); // 2초 후에 모달 닫힘
-  },
-
-  
-
-  cancelDelete() {
-    this.isDeleteModalOpen = false; // 모달 닫기
-    this.userToDelete = null; // 초기화 
-  },
-  closeSuccessModal() {
-    this.isDeleteSuccessModalOpen = false;
-  },
     // 페이지 이동 메서드
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
       }
     },
+    // 드롭다운 토글
+    toggleDropdown(index) {
+      this.openDropdownIndex = this.openDropdownIndex === index ? null : index;
+    },
+    // 게시글 삭제 확인 모달 열기
+    handleItemClick(post, action) {
+      if (action === 'delete') {
+        this.confirmDeletePost(post);
+      }
+    },
+    confirmDeletePost(post) {
+      this.postToDelete = post;
+      this.isDeleteModalOpen = true;
+    },
+    // 게시글 삭제
+    deletePost() {
+      if (!this.postToDelete) {
+        return;
+      }
+      // 게시글 삭제 로직 (API 연동 부분)
+      this.communityData = this.communityData.filter(post => post.id !== this.postToDelete.id);
+      this.infoData = this.infoData.filter(post => post.id !== this.postToDelete.id);
+      this.inquiryData = this.inquiryData.filter(post => post.id !== this.postToDelete.id);
+
+      this.isDeleteModalOpen = false;
+      this.isDeleteSuccessModalOpen = true;
+      setTimeout(() => {
+        this.isDeleteSuccessModalOpen = false;
+      }, 1500);
+    },
+    // 삭제 취소
+    cancelDelete() {
+      this.isDeleteModalOpen = false;
+      this.postToDelete = null;
+    },
   },
+  mounted() {
+  // 게시판 데이터를 불러오는 로직 (임시 데이터로 테스트)
+  this.communityData = [
+    { id: 1, author: 'User A', title: '자유 게시판 글 1', regdate: '2024-09-01', editdate: '2024-09-02', status: '처리 완료' },
+    { id: 2, author: 'User B', title: '자유 게시판 글 2', regdate: '2024-09-05', editdate: '2024-09-06', status: '처리 중' }
+  ];
+
+  this.infoData = [
+    { id: 3, author: 'User C', title: '정보 공유 게시판 글 1', regdate: '2024-09-01', editdate: '2024-09-02', status: '처리 완료' },
+    { id: 4, author: 'User D', title: '정보 공유 게시판 글 2', regdate: '2024-09-03', editdate: '2024-09-04', status: '처리 중' }
+  ];
+
+  this.inquiryData = [
+    { id: 5, author: 'User E', title: 'Q&A 게시판 글 1', regdate: '2024-09-01', editdate: '2024-09-02', status: '미처리' },
+    { id: 6, author: 'User F', title: 'Q&A 게시판 글 2', regdate: '2024-09-05', editdate: '2024-09-06', status: '처리 중' }
+  ];
+},
 };
 </script>
 
@@ -575,7 +402,7 @@ directives: {
 
 
 /* 전체 레이아웃 스타일 */
-.user-info-page {
+.post-info-page {
   padding: 5px;
   position: relative; /* 페이지네이션을 하단에 고정시키기 위한 설정 */
   min-height: 100%; /* 컨테이너가 content-area와 동일한 높이를 가지도록 설정 */
@@ -626,7 +453,7 @@ directives: {
   background-color: #ffe5d1;
 }
 
-/* 검색창 스타일------------------------------------------------------------------ */
+/* 창 스타일------------------------------------------------------------------ */
 .category-container {
   position: relative;
   display: inline-flex;
@@ -711,15 +538,22 @@ directives: {
 
 
 
-/* 사용자 목록 테이블 스타일 ---------------------------------------------------------*/
-.user-list-table {
+/* 게시글 목록 테이블 스타일 ---------------------------------------------------------*/
+.post-list-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 50px;
 }
 
+/* 첫 번째와 두 번째 열(순번과 게시글 번호) 패딩 조정 */
+.post-list-table th:nth-child(1), .post-list-table th:nth-child(2), 
+.post-list-table td:nth-child(1), .post-list-table td:nth-child(2) {
+  padding-left: 5px; /* 좌측 패딩 값 줄이기 */
+  padding-right: 5px; /* 우측 패딩 값 줄이기 */
+}
+
 /* 테이블 헤더 스타일 */
-.user-list-table th {
+.post-list-table th {
   font-weight: bold;
   font-size: 12px; 
   padding: 0px 10px 15px 20px; /* 상, 좌, 우, 하 padding 설정 */
@@ -728,7 +562,7 @@ directives: {
 }
 
 /* 테이블 데이터 스타일 */
-.user-list-table td {
+.post-list-table td {
   font-size: 12px; /* td에 원하는 크기 설정 */
   padding: 18px 10px 15px 20px; /* 상, 좌, 우, 하 padding 설정 */
   text-align: center;
@@ -745,12 +579,12 @@ directives: {
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
   /* 테이블 헤더 스타일 */
-  .user-list-table th {
+  .post-list-table th {
     font-size: 10px; 
     padding: 0px 10px 12px 15px; /* 상, 좌, 우, 하 padding 설정 */
   }
   /* 테이블 데이터 스타일 */
-  .user-list-table td {
+  .post-list-table td {
     font-size: 10px; /* td에 원하는 크기 설정 */
   }
 }
@@ -758,24 +592,24 @@ directives: {
 
 @media (max-width: 768px) {
   /* 테이블 헤더 스타일 */
-  .user-list-table th {
+  .post-list-table th {
     font-size: 8px; 
     padding: 0px 8px 12px 15px; /* 상, 좌, 우, 하 padding 설정 */
   }
   /* 테이블 데이터 스타일 */
-  .user-list-table td {
+  .post-list-table td {
     font-size: 8px; /* td에 원하는 크기 설정 */
   }
 }
 
 @media (max-width: 480px) {
   /* 테이블 헤더 스타일 */
-  .user-list-table th {
+  .post-list-table th {
     font-size: 6px; 
     padding: 0px 6px 10px 12px; /* 상, 좌, 우, 하 padding 설정 */
   }
   /* 테이블 데이터 스타일 */
-  .user-list-table td {
+  .post-list-table td {
     font-size: 6px; /* td에 원하는 크기 설정 */
   }
   
