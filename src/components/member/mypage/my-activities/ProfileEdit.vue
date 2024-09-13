@@ -98,7 +98,7 @@ import axios from "axios";
 export default {
   data() {
     return {
-      userId: 1, // 실제 사용자 ID를 설정합니다.
+      userId: null, // 실제 사용자 ID를 설정합니다.
       userInfo: {
         name: "",
         email: "",
@@ -128,10 +128,10 @@ export default {
     // 사용자 정보를 서버에서 가져오는 함수
     fetchUserInfo() {
       axios
-        .get(`http://localhost:8080/api/member/info/${this.userId}`)
+        .get("http://localhost:8080/api/member/info")
         .then((response) => {
           this.userInfo = response.data;
-          this.editableUserInfo = { ...this.userInfo }; // 받아온 데이터를 편집 가능한 객체에 복사
+          this.editableUserInfo = { ...this.userInfo };
         })
         .catch((error) => {
           console.error("회원 정보를 불러오는 중 오류가 발생했습니다.", error);
@@ -140,10 +140,7 @@ export default {
     // 사용자 정보를 서버에 저장하는 함수
     saveProfile() {
       axios
-        .put(
-          `http://localhost:8080/api/member/info/${this.userId}`,
-          this.editableUserInfo
-        )
+        .put("http://localhost:8080/api/member/info", this.editableUserInfo)
         .then((response) => {
           console.log("Response:", response);
           alert("회원 정보가 저장되었습니다.");
