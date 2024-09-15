@@ -46,8 +46,8 @@
         <tr v-for="(item, index) in paginatedData" :key="index">
           <td>{{ index + 1 }}</td>
           <td>{{ item.title }}</td>
-          <td>{{ item.author }}</td>
-          <td>{{ item.date }}</td>
+          <td>{{ item.nickname }}</td>
+          <td>{{formatDate(item.regdate) }}</td>
         </tr>
         <!-- 빈 항목을 채우기 위한 추가 빈 줄 -->
         <tr v-for="i in emptyRows" :key="'empty-' + i">
@@ -91,7 +91,7 @@ export default {
   },
   data() {
     return {
-      categories: ["취업정보", "시험정보", "공부방법", "기업정보", "국비정보"],
+      categories: ["전체","취업정보", "시험정보", "공부방법", "기업정보", "국비정보"],
       activeTab: 0, // 현재 선택된 탭을 관리하는 변수
       activeSort: 'recent',
       items: [],
@@ -100,32 +100,58 @@ export default {
     };
   },
   computed: {
+    filteredItems() {
+      const selectedCategory = this.categories[this.activeTab];
+      if (selectedCategory === "전체") {
+        return this.items;
+      } else {
+        return this.items.filter(item => item.category === selectedCategory);
+      }
+    },
     paginatedData() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.items.slice(start, end);
+      return this.filteredItems.slice(start, end); // 필터링된 데이터의 일부만 반환
     },
     totalPages() {
-      return Math.ceil(this.items.length / this.itemsPerPage);
+      return Math.ceil(this.filteredItems.length / this.itemsPerPage); // 필터링된 데이터 기준으로 총 페이지 계산
     },
     emptyRows() {
       const rows = this.itemsPerPage - this.paginatedData.length;
-      return rows > 0 ? rows : 0; // 남은 빈 줄을 계산
+      return rows > 0 ? rows : 0; // 남은 빈 줄 계산
     },
   },
   methods: {
-    async fetchPosts() {
+    formatDate(date) {
+      if (!date) return '날짜 없음'; // date가 없을 경우 처리
+
+      // date가 문자열일 때 처리
       try {
-        const response = await axios.get('/api/member/community/all', {
-          withCredentials: true // 세션 쿠키를 포함시키기 위해 withCredentials 추가
-        });
-        this.items = response.data; // API로부터 받은 데이터를 items에 저장
+        const parsedDate = new Date(date);
+        if (isNaN(parsedDate.getTime())) {
+          return '유효하지 않은 날짜'; // 유효하지 않은 날짜일 경우 처리
+        }
+        return parsedDate.toLocaleDateString(); // 날짜만 표시
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        return '날짜 없음'; // 변환 중 오류가 발생하면 기본값 반환
       }
     },
+    // 다른 메서드들...
+
+  // 게시글 목록을 불러오는 메서드 정의
+    fetchPosts() {
+      axios.get('/api/board/community/all')
+          .then(response => {
+            this.items = response.data; // 받아온 데이터를 items 배열에 저장
+            console.log('Fetched items:', this.items); // 데이터 확인
+            console.log('Total items:', this.items.length); // 전체 데이터 개수 확인
+          })
+          .catch(error => {
+            console.error("Error fetching posts:", error);
+          });
+    },
     goToPostForm() {
-      this.$router.push('/member/board/PostForm'); // Vue Router를 사용하여 페이지 이동
+      this.$router.push('/board/PostForm'); // Vue Router를 사용하여 페이지 이동
     },
     setActiveSort(sortType) {
       this.activeSort = sortType;
@@ -176,7 +202,7 @@ export default {
   border-radius: 50px; /* 둥근 테두리 */
   padding: 10px;
   width: 100%;
-  max-width : 600px;
+  max-width : 700px;
   height: 20px;
   margin: 0 auto; /* 가운데 정렬 */
 

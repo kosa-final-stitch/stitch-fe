@@ -44,7 +44,7 @@ const MemberRoutes = [
       { path: "", component: HomePage, name: "Home" },
       //     //   { path: 'board/info-share', component: InfoShareBoard, name: 'InfoShareBoard' },
       {
-        path: "member/board/free-community",
+        path: "board/free-community",
         component: FCommunityBoard,
         name: "FCommunityBoard",
       },
@@ -52,7 +52,7 @@ const MemberRoutes = [
       //     //   { path: 'board/post/:id', component: PostDetail, name: 'PostDetail', props: true },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
       { path: "review-form", component: ReviewForm, name: "ReviewForm" },
-      { path: "member/board/PostForm", component: PostForm, name: "PostForm" },
+      { path: "/board/PostForm", component: PostForm, name: "PostForm" },
       {
         path: "academies", // 학원 목록 페이지
         component: AcademyInfoList,

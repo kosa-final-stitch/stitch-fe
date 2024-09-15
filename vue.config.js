@@ -9,7 +9,6 @@ module.exports = defineConfig({
       '/api': {
         target: 'http://localhost:8080', // Spring Boot가 동작하는 서버
         changeOrigin: true,
-        ws:false,
       }
     }
   },
