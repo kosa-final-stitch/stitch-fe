@@ -2,9 +2,7 @@
   <div class="academy-info">
     <!-- 학원 정보 상단 -->
     <div class="info-box">
-      <div class="rating-box">
-        <p class="stars">⭐⭐⭐⭐⭐</p>
-      </div>
+      <p class="stars">⭐⭐⭐⭐⭐</p>
       <div class="details">
         <h2>{{ academy.academy_name }}</h2>
         <p>주소: {{ academy.address }}</p>
@@ -270,6 +268,13 @@ export default {
   margin-bottom: 10px; /* 별점 아래쪽 간격 */
   text-align: left; /* 왼쪽 정렬 */
   width: 100%; /* 전체 너비 사용 */
+}
+
+/* stars: 별점 */
+.stars {
+  font-size: 24px; /* 별 크기 조정 */
+  margin-bottom: 10px; /* 별점과 제목 사이 간격 조정 */
+  display: block; /* 별을 한 줄에 배치 */
 }
 
 .course-details {

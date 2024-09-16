@@ -14,7 +14,7 @@ import HomePage from "../components/member/home-page/HomePage.vue";
 import FCommunityBoard from "../components/member/board-page/FCommunityBoard.vue";
 // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
 // import QnABoard from '../components/BoardPage/QnABoard.vue';
-// import PostDetail from '../components/BoardPage/PostDetail.vue';
+import PostDetail from '../components/member/board-page/PostDetail.vue';
 import PostForm from "../components/member/board-page/PostForm.vue";
 import AcademyInfoList from "@/components/member/rating-info-page/AcademyInfoList.vue";
 import CourseInfoList from "@/components/member/rating-info-page/CourseInfoList.vue";
@@ -44,22 +44,25 @@ const MemberRoutes = [
       { path: "", component: HomePage, name: "Home" },
       //     //   { path: 'board/info-share', component: InfoShareBoard, name: 'InfoShareBoard' },
       {
-        path: "member/board/free-community",
+        path: "board/free-community",
         component: FCommunityBoard,
         name: "FCommunityBoard",
       },
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
-      //     //   { path: 'board/post/:id', component: PostDetail, name: 'PostDetail', props: true },
+      { path: 'board/post/:id',
+        component: PostDetail,
+        name: 'PostDetail',
+        props: true },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
       { path: "review-form", component: ReviewForm, name: "ReviewForm" },
-      { path: "member/board/PostForm", component: PostForm, name: "PostForm" },
+      { path: "/board/PostForm", component: PostForm, name: "PostForm" },
       {
-        path: "academies", // 학원 목록 페이지
+        path: "/academies/academy", // 학원 목록 페이지
         component: AcademyInfoList,
         name: "AcademyInfoList",
       },
       {
-        path: "courses", //강의 목록 페이지
+        path: "/academies/courses", //강의 목록 페이지
         component: CourseInfoList,
         name: "CourseInfoList",
       },
