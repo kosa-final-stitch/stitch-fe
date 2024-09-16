@@ -50,7 +50,7 @@
     <table class="member-list-table">
       <thead>
         <tr>
-          <th>순번</th>
+          <th>No.</th>
           <th>사용자 이메일</th>
           <th>이름</th>
           <th>닉네임</th>
