@@ -32,31 +32,51 @@
 
       <div class="right-side">
         <ul class="nav-items">
-          <li class="nav-item" @mouseover="showDropdown" @mouseout="hideDropdown">
+          <li
+            class="nav-item"
+            @mouseover="showDropdown"
+            @mouseout="hideDropdown"
+          >
             <div class="nav-menu">
               <div>문의하기</div>
               <div>교육과정 정보</div>
               <div>게시판</div>
             </div>
-            <div :class="{ 'dropdown-container': true, show: isDropdownVisible }">
+            <div
+              :class="{ 'dropdown-container': true, show: isDropdownVisible }"
+            >
               <div class="dropdown-section">
                 <h3>문의하기</h3>
                 <ul>
-                  <li><router-link to="/inquiry">1:1 문의 하러가기</router-link></li>
+                  <li>
+                    <router-link to="/inquiry">1:1 문의 하러가기</router-link>
+                  </li>
                 </ul>
               </div>
               <div class="dropdown-section">
                 <h3>교육과정 정보</h3>
                 <ul>
-                  <li><router-link to="/academies">학원 정보</router-link></li>
-                  <li><router-link to="/courses">교육과정 정보</router-link></li>
+                  <li>
+                    <router-link to="/academies/academy">학원 정보</router-link>
+                  </li>
+                  <li>
+                    <router-link to="/academies/courses"
+                      >교육과정 정보</router-link
+                    >
+                  </li>
                 </ul>
               </div>
               <div class="dropdown-section">
                 <h3>게시판</h3>
                 <ul>
-                  <li><router-link to="/board/info-share">정보 공유</router-link></li>
-                  <li><router-link to="/board/free-community">자유 게시판</router-link></li>
+                  <li>
+                    <router-link to="/board/info-share">정보 공유</router-link>
+                  </li>
+                  <li>
+                    <router-link to="/board/free-community"
+                      >자유 게시판</router-link
+                    >
+                  </li>
                   <li><router-link to="/board/qna">Q&A</router-link></li>
                 </ul>
               </div>
@@ -67,7 +87,12 @@
     </nav>
 
     <div class="logo-container">
-      <img @click="goHome" src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
+      <img
+        @click="goHome"
+        src="@/assets/full-logo.jpg"
+        alt="Stitch 로고"
+        class="logo"
+      />
     </div>
 
     <div class="search-container">
