@@ -43,7 +43,7 @@
     <table class="post-list-table">
       <thead>
         <tr>
-          <th>순번</th>
+          <th>No.</th>
           <th>게시글 번호</th>
           <th>게시글 유형</th>
           <th>작성자</th>
