@@ -27,7 +27,7 @@
     </div>
 
     <!-- 더보기 버튼 -->
-    <MoreButton to="/academies" />
+    <MoreButton to="/academies/academy" />
   </div>
 </template>
 
@@ -50,9 +50,9 @@ export default {
     // 상위 학원 리스트 가져오는 메서드
     async fetchTopRatedAcademies() {
       try {
-        const response = await axios.get("/api/academies/top", {
-          withCredentials: true, // 인증이 필요한 경우 세션 쿠키 포함
-        });
+        const response = await axios.get("/api/academies/top");
+        console.log("Status Code:", response.status); // 상태 코드 확인
+        console.log("Response Data:", response.data); // 응답 데이터 확인
         this.academies = response.data;
       } catch (error) {
         console.error("Error fetching academies:", error);

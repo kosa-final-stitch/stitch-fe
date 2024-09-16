@@ -9,6 +9,7 @@
  2024.09.11 김호영 | 마이페이지 버튼 출력 수정.
  2024.09.12 박요한 | 학원 정보, 교육 정보 네비 경로 수정.
  2024.09.13 박요한 | a 태그 router-link로 수정, router에 맞춰서 경로 수정.
+ 2024.09.16 박요한 | 로그아웃 시 localStorage JWT 토큰 제거
  -->
 <template>
   <header class="member-header">
@@ -32,51 +33,31 @@
 
       <div class="right-side">
         <ul class="nav-items">
-          <li
-            class="nav-item"
-            @mouseover="showDropdown"
-            @mouseout="hideDropdown"
-          >
+          <li class="nav-item" @mouseover="showDropdown" @mouseout="hideDropdown">
             <div class="nav-menu">
               <div>문의하기</div>
               <div>교육과정 정보</div>
               <div>게시판</div>
             </div>
-            <div
-              :class="{ 'dropdown-container': true, show: isDropdownVisible }"
-            >
+            <div :class="{ 'dropdown-container': true, show: isDropdownVisible }">
               <div class="dropdown-section">
                 <h3>문의하기</h3>
                 <ul>
-                  <li>
-                    <router-link to="/inquiry">1:1 문의 하러가기</router-link>
-                  </li>
+                  <li><router-link to="/inquiry">1:1 문의 하러가기</router-link></li>
                 </ul>
               </div>
               <div class="dropdown-section">
                 <h3>교육과정 정보</h3>
                 <ul>
-                  <li>
-                    <router-link to="/academies/academy">학원 정보</router-link>
-                  </li>
-                  <li>
-                    <router-link to="/academies/courses"
-                      >교육과정 정보</router-link
-                    >
-                  </li>
+                  <li><router-link to="/academies/academy">학원 정보</router-link></li>
+                  <li><router-link to="/academies/courses">교육과정 정보</router-link></li>
                 </ul>
               </div>
               <div class="dropdown-section">
                 <h3>게시판</h3>
                 <ul>
-                  <li>
-                    <router-link to="/board/info-share">정보 공유</router-link>
-                  </li>
-                  <li>
-                    <router-link to="/board/free-community"
-                      >자유 게시판</router-link
-                    >
-                  </li>
+                  <li><router-link to="/board/info-share">정보 공유</router-link></li>
+                  <li><router-link to="/board/free-community">자유 게시판</router-link></li>
                   <li><router-link to="/board/qna">Q&A</router-link></li>
                 </ul>
               </div>
@@ -87,12 +68,7 @@
     </nav>
 
     <div class="logo-container">
-      <img
-        @click="goHome"
-        src="@/assets/full-logo.jpg"
-        alt="Stitch 로고"
-        class="logo"
-      />
+      <img @click="goHome" src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
     </div>
 
     <div class="search-container">
@@ -147,6 +123,7 @@ export default {
     logout() {
       const store = useMemberStore();
       store.logout(); // Pinia 스토어의 로그아웃 메서드 호출
+      localStorage.removeItem("jwt"); // localStorage에서 JWT 토큰 제거
       alert("로그아웃되었습니다.");
       this.$router.push("/"); // 메인 페이지로 리다이렉트
     },
