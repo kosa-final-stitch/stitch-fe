@@ -70,17 +70,17 @@ export default {
   },
   methods: {
     async submitPost() {
-      const memberStore = useMemberStore();
-      const memberId = memberStore.memberId; // Pinia에서 memberId 가져오기
+      const memberStore = useMemberStore(); // Pinia의 memberStore에서 memberId 가져오기
 
-      if (this.title && this.content && this.category && memberId) {
+      if (this.title && this.content && this.category) {
         try {
           await axios.post("/api/member/board/community/create", {
+            headers: { 'Content-Type': 'application/json' },
+            memberId: memberStore.memberId,
             category: this.category,
             title: this.title,
             content: this.content,
             tag: this.tag || null,
-            memberId: memberId, // 로그인한 사용자 ID 전송
           });
           alert('게시글이 등록되었습니다.');
           this.$router.push('/board/free-community'); // 작성 후 게시판 목록으로 이동

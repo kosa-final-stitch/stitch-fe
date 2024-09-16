@@ -84,8 +84,11 @@ export default {
             password: this.password
           });
 
-          const token = response.data.token;
+          const token = response.data.token; // 서버에서 받은 JWT 토큰
+          localStorage.setItem('jwt', token); // 로컬 스토리지에 JWT 저장
 
+          // 이후 모든 요청에서 Authorization 헤더에 토큰을 포함시킴
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           // Pinia 스토어 불러오기
           const memberStore = useMemberStore();
 
