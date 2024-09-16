@@ -57,12 +57,12 @@ const MemberRoutes = [
       { path: "review-form", component: ReviewForm, name: "ReviewForm" },
       { path: "/board/PostForm", component: PostForm, name: "PostForm" },
       {
-        path: "academies", // 학원 목록 페이지
+        path: "/academies/academy", // 학원 목록 페이지
         component: AcademyInfoList,
         name: "AcademyInfoList",
       },
       {
-        path: "courses", //강의 목록 페이지
+        path: "/academies/courses", //강의 목록 페이지
         component: CourseInfoList,
         name: "CourseInfoList",
       },

@@ -28,7 +28,7 @@
         v-for="course in paginatedCourses(currentCourses)"
         :key="course.course_id"
         class="course-card"
-        @click="goToCourseDetail(course.course_id)"
+        @click="goToCourseDetail(course.course_id, course.academy_id)"
       >
         <div class="course-details">
           <h4>{{ course.course_name }}</h4>
@@ -48,7 +48,7 @@
         v-for="course in paginatedCourses(completedCourses)"
         :key="course.course_id"
         class="course-card"
-        @click="goToCourseDetail(course.course_id)"
+        @click="goToCourseDetail(course.course_id, course.academy_id)"
       >
         <div class="course-details">
           <h4>{{ course.course_name }}</h4>
@@ -68,7 +68,7 @@
         v-for="course in paginatedCourses(upcomingCourses)"
         :key="course.course_id"
         class="course-card"
-        @click="goToCourseDetail(course.course_id)"
+        @click="goToCourseDetail(course.course_id, course.academy_id)"
       >
         <div class="course-details">
           <h4>{{ course.course_name }}</h4>
@@ -128,7 +128,7 @@ export default {
     // 강좌 정보 가져오는 메서드
     fetchCourses() {
       axios
-        .get(`http://localhost:8080/api/academies/courses`)
+        .get("http://localhost:8080/api/academies/courses")
         .then((response) => {
           const today = new Date();
           const upcomingCourses = [];
@@ -184,18 +184,11 @@ export default {
       }
     },
     // 강의 상세 페이지로 이동
-    goToCourseDetail(courseId, academyId = null) {
-      if (academyId) {
-        this.$router.push({
-          name: "AcademyInfoDetail",
-          params: { courseId, academyId },
-        });
-      } else {
-        this.$router.push({
-          name: "CourseInfoDetail",
-          params: { courseId },
-        });
-      }
+    goToCourseDetail(courseId, academyId) {
+      // academyId와 courseId를 사용해 바로 해당 경로로 라우팅
+      this.$router.push({
+        path: `/academies/academy/${academyId}/courses/${courseId}`,
+      });
     },
 
     // 날짜 형식 변환

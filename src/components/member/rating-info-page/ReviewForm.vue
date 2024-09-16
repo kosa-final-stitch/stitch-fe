@@ -149,7 +149,7 @@ export default {
     saveReviewData() {
       // 서버에 데이터를 전송하는 POST 요청
       axios
-        .post("http://localhost:8080/api/reviews", this.reviews)
+        .post("http://localhost:8080/api/member/reviews", this.reviews)
         .then((response) => {
           // 요청이 성공했을 때 실행될 코드
           alert("리뷰가 성공적으로 저장되었습니다.");
