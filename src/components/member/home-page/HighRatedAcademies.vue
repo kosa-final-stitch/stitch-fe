@@ -12,14 +12,14 @@
     <h2>평점 높은 학원</h2>
     <div class="academy-container">
       <div
-        v-for="academy in academies"
-        :key="academy.academy_id"
+        v-for="(academy, index) in academies"
+        :key="academy.academyid"
         class="academy-card"
-        @click="goToAcademyDetail(academy.academy_id)"
+        @click="goToAcademyDetail(academy.academyId)"
       >
         <div class="academy-details">
-          <div class="stars">★★★★★</div>
-          <h3>{{ academy.academy_name }}</h3>
+          <div class="stars">{{ "★".repeat(roundedStars[index]) }}{{ "☆".repeat(5 - roundedStars[index]) }}</div>
+          <h3>{{ academy.academyName }}</h3>
           <p>주소: {{ academy.address }}</p>
           <p>전화번호: {{ academy.phone }}</p>
         </div>
@@ -63,24 +63,31 @@ export default {
       this.$router.push({ name: "AcademyInfoDetail", params: { academyId } });
     },
   },
+  computed: {
+    roundedStars() {
+      return this.academies.map((academy) => {
+        if (academy.averageRating) {
+          return Math.round(academy.averageRating); // 평균 별점을 반올림
+        }
+        return 0; // 값이 없으면 0으로 설정
+      });
+    },
+  },
 };
 </script>
 
 <style scoped>
 .high-rated-academies {
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .academy-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5개의 열 */
+  gap: 10px; /* 카드 간의 간격 */
 }
 
 .academy-card {
-  width: 20%;
   border: 1px solid #ddd;
   padding: 25px;
   margin-bottom: 20px;
