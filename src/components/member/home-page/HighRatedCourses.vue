@@ -15,12 +15,12 @@
         v-for="(course, index) in courses"
         :key="course.courseId"
         class="course-card"
-        @click="goToCourseDetail(course.academyId, course.course_id)"
+        @click="goToCourseDetail(course.academyId, course.courseId)"
       >
         <div class="course-details">
           <div class="stars">{{ "★".repeat(roundedStars[index]) }}{{ "☆".repeat(5 - roundedStars[index]) }}</div>
           <h3>{{ course.courseName }}</h3>
-          <p>회차: {{ course.round }}</p>
+          <p>회차: {{ course.sessionNumber }}</p>
           <p>학원명: {{ course.academyName }}</p>
           <p>시작일: {{ course.startDate }}</p>
           <p>종료일: {{ course.endDate }}</p>
@@ -95,7 +95,6 @@ export default {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
   cursor: pointer;
   transition: transform 0.3s ease;
 }
@@ -108,13 +107,16 @@ export default {
   color: #ffcc00;
   font-size: 20px;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .course-details h3 {
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .course-details p {
   margin: 5px 0;
+  text-align: left;
 }
 </style>
