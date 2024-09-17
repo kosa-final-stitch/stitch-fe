@@ -15,7 +15,7 @@
         v-for="(course, index) in courses"
         :key="course.courseId"
         class="course-card"
-        @click="goToCourseDetail(course.course_id, course.courseId)"
+        @click="goToCourseDetail(course.academyId, course.course_id)"
       >
         <div class="course-details">
           <div class="stars">{{ "★".repeat(roundedStars[index]) }}{{ "☆".repeat(5 - roundedStars[index]) }}</div>
@@ -44,7 +44,7 @@ export default {
       courses: [], // 고 평점 교육 과정 데이터
     };
   },
-  created() {
+  mounted() {
     this.fetchTopRatedCourses(); // 데이터 가져오기
   },
   methods: {
@@ -60,7 +60,7 @@ export default {
       }
     },
     // 교육 과정 상세 페이지로 이동
-    goToCourseDetail(courseId, academyId) {
+    goToCourseDetail(academyId, courseId) {
       this.$router.push({ path: `/academies/academy/${academyId}/courses/${courseId}` });
     },
   },
