@@ -11,7 +11,7 @@
     <h2>평점 높은 교육 과정</h2>
     <!-- 교육 과정 리스트 표시 -->
 
-    <more-button to="/courses" />
+    <more-button to="/academies/courses" />
   </div>
 </template>
 
