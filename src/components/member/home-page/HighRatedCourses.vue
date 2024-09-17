@@ -17,9 +17,9 @@
         class="course-card"
         @click="goToCourseDetail(course.academyId, course.courseId)"
       >
+        <div class="stars">{{ "★".repeat(roundedStars[index]) }}{{ "☆".repeat(5 - roundedStars[index]) }}</div>
+        <h3>{{ course.courseName }}</h3>
         <div class="course-details">
-          <div class="stars">{{ "★".repeat(roundedStars[index]) }}{{ "☆".repeat(5 - roundedStars[index]) }}</div>
-          <h3>{{ course.courseName }}</h3>
           <p>회차: {{ course.sessionNumber }}</p>
           <p>학원명: {{ course.academyName }}</p>
           <p>시작일: {{ course.startDate }}</p>
@@ -89,6 +89,9 @@ export default {
 }
 
 .course-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 위와 아래의 콘텐츠가 일정 간격을 유지 */
   border: 1px solid #ddd;
   padding: 25px;
   margin-bottom: 20px;
@@ -106,13 +109,18 @@ export default {
 .stars {
   color: #ffcc00;
   font-size: 20px;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
   text-align: center;
 }
 
-.course-details h3 {
-  margin-bottom: 10px;
+.course-card h3 {
+  margin-bottom: 30px;
   text-align: center;
+}
+
+.course-details {
+  margin-top: auto; /* 아래로 정렬 */
+  text-align: left;
 }
 
 .course-details p {

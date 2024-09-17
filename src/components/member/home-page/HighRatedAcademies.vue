@@ -17,9 +17,9 @@
         class="academy-card"
         @click="goToAcademyDetail(academy.academyId)"
       >
+        <div class="stars">{{ "★".repeat(roundedStars[index]) }}{{ "☆".repeat(5 - roundedStars[index]) }}</div>
+        <h3>{{ academy.academyName }}</h3>
         <div class="academy-details">
-          <div class="stars">{{ "★".repeat(roundedStars[index]) }}{{ "☆".repeat(5 - roundedStars[index]) }}</div>
-          <h3>{{ academy.academyName }}</h3>
           <p>주소: {{ academy.address }}</p>
           <p>전화번호: {{ academy.phone }}</p>
         </div>
@@ -88,13 +88,15 @@ export default {
 }
 
 .academy-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 위와 아래의 콘텐츠가 일정 간격을 유지 */
   border: 1px solid #ddd;
   padding: 25px;
   margin-bottom: 20px;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
   cursor: pointer;
   transition: transform 0.3s ease;
 }
@@ -106,6 +108,22 @@ export default {
 .stars {
   color: #ffcc00;
   font-size: 20px;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
+  text-align: center;
+}
+
+.academy-card h3 {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.academy-details {
+  margin-top: auto; /* 아래로 정렬 */
+  text-align: left;
+}
+
+.academy-details p {
+  margin: 5px 0;
+  text-align: left;
 }
 </style>
