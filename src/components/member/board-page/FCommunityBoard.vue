@@ -45,7 +45,7 @@
         <tbody>
         <tr v-for="(item, index) in paginatedData" :key="index">
           <td>{{ index + 1 }}</td>
-          <td>{{ item.title }}</td>
+          <td @click="goToPostDetail(item.boardId)" class="clickable">{{ item.title }}</td> <!-- 클릭 이벤트 추가 -->
           <td>{{ item.nickname }}</td>
           <td>{{formatDate(item.regdate) }}</td>
         </tr>
@@ -152,6 +152,14 @@ export default {
     },
     goToPostForm() {
       this.$router.push('/board/PostForm'); // Vue Router를 사용하여 페이지 이동
+    },
+    goToPostDetail(boardId) {
+      console.log('Board ID:', boardId);  // boardId 값이 제대로 들어오는지 확인
+      if (!boardId) {
+        console.error('Board ID is null or undefined');
+        return;
+      }
+      this.$router.push(`/board/post/${boardId}`);
     },
     setActiveSort(sortType) {
       this.activeSort = sortType;
@@ -378,5 +386,12 @@ export default {
   pointer-events: none;
   color: #ccc;
 }
+
+.clickable {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: underline;
+}
+
 
 </style>

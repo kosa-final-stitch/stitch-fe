@@ -4,7 +4,7 @@
   <MemberHeader></MemberHeader>
   <div class="board-container">
     <!-- 뒤로가기 버튼 -->
-    <router-link to="/board/FCommunityBoard" class="back-button">
+    <router-link to="/board/free-community" class="back-button">
       <span>&lt; 뒤로가기</span>
     </router-link>
 
@@ -12,48 +12,50 @@
     <h1 class="board-title">정보공유 게시판</h1>
 
     <!-- 게시글 -->
-    <div class="post-section">
+    <div class="post-section" v-if="post">
       <div class="post-header">
-        <div class="category">공부방법</div>
-        <div class="title">공부할 때 GPT 사용 괜찮을까요? [2]</div>
+        <div class="category">{{ post.category }}</div>
+        <div class="title">{{ post.title }}</div>
+<!--        <div class="title">{{ post.title }} [{{ post.commentCount }}]</div>-->
         <div class="meta-info">
-          <span class="author">박주희</span>
-          <span class="date">2024-09-02</span>
-          <span class="views">조회 4</span>
+          <span class="nickname">{{ post.nickname }}</span>
+          <span class="date">{{ post.regdate }}</span>
+<!--          <span class="views">조회 {{ post.views }}</span>-->
         </div>
       </div>
 
       <div class="post-content">
-        <p>안녕하세요. 취준 준비중인 학생입니다.</p>
-        <p>개발공부를 하며 GPT사용을 권장하셔서 유료버전을 열심히 사용하고 있는데..</p>
-        <p>Gpt를 사용하지만요 구글링으로 문제를 해결하는것과 Gpt를 잘 이용하는것이 좋다는 조언을 들었습니다.</p>
-        <p>여러분은 어떻게 공부하고 계시나요</p>
-        <p>혹시 현업에서 계셨던 분들중 업무에서 사용해보신 적이 있으신가요?</p>
+        <p v-for="paragraph in post.content.split('\n')" :key="paragraph">{{ paragraph }}</p>
       </div>
     </div>
 
     <!-- 댓글 섹션 -->
-    <div class="comment-section">
-      <div class="comment">
-        <div class="comment-header">
-          <span class="comment-author">김명중</span>
-          <span class="comment-date">2024.09.02 17:42</span>
-        </div>
-        <div class="comment-content">협업에서 주수준은 느낌으로 사용한다면 문제없을 것 같아요!</div>
-      </div>
-      <div class="comment">
-        <div class="comment-header">
-          <span class="comment-author">박주희</span>
-          <span class="comment-date">2024.09.02 17:45</span>
-        </div>
-        <div class="comment-content">감사합니다!</div>
-      </div>
+<!--    <div class="comment-section" v-if="comments.length">-->
+<!--      <div class="comment" v-for="comment in comments" :key="comment.commentId">-->
+<!--        <div class="comment-header">-->
+<!--          <span class="comment-author">{{ comment.author }}</span>-->
+<!--          <span class="comment-date">{{ comment.regdate }}</span>-->
+<!--        </div>-->
+<!--        <div class="comment-content">{{ comment.content }}</div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+    <!-- 로딩 중일 때 -->
+    <div v-else-if="loading">
+      <p>게시글을 불러오는 중입니다...</p>
+    </div>
+
+    <!-- 게시글이나 댓글이 없는 경우 -->
+    <div v-else>
+      <p>게시글을 찾을 수 없습니다.</p>
     </div>
   </div>
+
+
 </template>
 
 <script>
-// import axios from 'axios';
+import axios from 'axios';
 import MemberHeader from '../member-header/MemberHeader.vue';
 // import { useMemberStore } from '/src/store/member-store'; // Pinia 상태관리에서 memberStore 가져오기
 
@@ -62,6 +64,34 @@ export default {
   components: {
     MemberHeader,
   },
+  data(){
+    return {
+      post: null, // 게시글 데이터
+      comments: [], // 댓글 데이터
+      loading: true // 로딩 상태
+    };
+  },
+  created() {
+    const boardId = this.$route.params.boardId;
+    console.log('Board ID:', boardId); // 디버깅 로그
+
+    if (!boardId) {
+      console.error('Board ID is null or undefined');
+      return;
+    }
+
+    axios.get(`/api/board/post/${boardId}`)
+        .then(response => {
+          this.post = response.data.post;
+          this.comments = response.data.comments;
+        })
+        .catch(error => {
+          console.error('Error fetching post:', error);
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+  }
 };
 </script>
 
