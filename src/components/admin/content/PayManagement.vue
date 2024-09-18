@@ -5,6 +5,7 @@
  ---------------------
  2024.09.13 김호영 | 초기 설정
  2024.09.12 김호영 | 결제 정보 페이지 디자인 구현
+ 2024.09.17 김호영 | 결제 정보 페이지 완
  -->
  <template>
   <div class="pay-info-page">
@@ -18,11 +19,10 @@
             @blur="isDropdownOpen = false"
             @change="isDropdownOpen = false">
             <option value="all">전체</option>
-            <option value="infoShareBoard">결제완료</option>
-            <option value="infoShareBoard">결제실패</option>
-            <option value="free-community">카드</option>
-            <option value="free-community">계좌이체</option>
-            <option value="free-community">도네이션</option>
+            <option value="complete">처리 완료</option>
+            <option value="pending">미처리</option>
+            <option value="card">카드</option>
+            <option value="cash">계좌이체</option>
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" 
@@ -56,22 +56,22 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(pay, index) in paginatedPays" :key="pay.id">
+        <tr v-for="(pay, index) in paginatedPays" :key="pay.payment_id">
           <td>{{  (currentPage -1) * paysPerPage + index + 1 }}</td>
-          <td>{{ pay.id || '-' }}</td>
-          <td>{{ pay.type || '-' }}</td>
-          <td>{{ pay.author || '-' }}</td>  <!-- 일단 author로 해 놓음 여기에 작성자 넣어놓으면 됨-->
-          <td>{{ pay.regdate || '-' }}</td>
-          <td>{{ pay.editdate || '-' }}</td>
-          <td>{{ pay.title || '-' }}</td>
-          <td>{{ pay.status || '-' }}</td>
+          <td>{{ formatDate(pay.paydate) }}</td>
+          <td>{{ pay.email || '-' }}</td>
+          <td>{{ pay.name || '-' }}</td> 
+          <td>donation</td>
+          <td>{{ pay.amount }}</td>
+          <td>{{ pay.method === 'card' ? '카드' : '계좌이체' }}</td>
+          <td>{{ pay.status === 'pending' ? '미처리' : '처리 완료' }}</td>
           <td>
             <div class="dropdown-container" @click.stop="toggleDropdown(index)">
               <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
               <div v-if="openDropdownIndex === index" class="dropdown-menu">
                 <ul>
-                  <li @click="handleItemClick(pay, 'delete')">
-                    <font-awesome-icon :icon="['fas', 'trash-can']" class="modal-icon" /> 삭제
+                  <li @click="handleItemClick(pay, 'change')">
+                    <font-awesome-icon :icon="['fas', 'check']" class="modal-icon" /> 처리 완료
                   </li>
                   <li @click="handleItemClick(pay, 'item1')">
                     <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
@@ -90,25 +90,25 @@
       </tbody>
     </table>
 
-    <!-- 삭제 확인 모달 -->
-    <div v-if="isDeleteModalOpen" class="modal-overlay">
+    <!-- 변경 확인 모달 -->
+    <div v-if="isChangeModalOpen" class="modal-overlay">
       <div class="modal-content">
-        <h3>정말 삭제하시겠습니까?</h3>
-        <p>선택하신 게시글 : {{ payToDelete?.title }}</p>
+        <h3>상태를 "처리 완료"로 변경하시겠습니까?</h3>
+        <p>선택하신 사용자 정보 : {{ payToChange?.email }}</p>
         <div class="modal-buttons">
-          <button @click="deletePay">확인</button>
-          <button @click="cancelDelete">취소</button>
+          <button @click="changePay">확인</button>
+          <button @click="cancelChange">취소</button>
         </div>
       </div>
     </div>
 
-    <!-- 삭제 완료 모달 -->
-    <div v-if="isDeleteSuccessModalOpen" class="modal-success-overlay">
+    <!-- 변경 완료 모달 -->
+    <div v-if="isChangeSuccessModalOpen" class="modal-success-overlay">
       <div class="modal-success-content">
         <div class="modal-icon-container">
           <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
         </div>
-        <p>삭제가 완료되었습니다</p>
+        <p>변경이 완료되었습니다</p>
       </div>
     </div>
 
@@ -127,6 +127,7 @@
 
 <script>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import axios from 'axios';
 
 export default {
   components: {
@@ -140,49 +141,31 @@ export default {
       paysPerPage: 12,
       isDropdownOpen: false,
       openDropdownIndex: null,
-      isDeleteModalOpen: false,
-      isDeleteSuccessModalOpen: false,
-      payToDelete: null,
-      // 세 개의 게시판 데이터를 위한 배열
-      communityData: [], 
-      infoData: [],
-      inquiryData: [],
+      isChangeModalOpen: false,
+      isChangeSuccessModalOpen: false,
+      payToChange: null,
+      paymentsData: [], //결제 정보를 저장할 배열
     };
   },
   computed: {
-    // 모든 게시글을 하나의 배열로 병합
-    allPays() {
-      return [
-        ...this.communityData.map(pay => ({ ...pay, type: 'community' })),
-        ...this.infoData.map(pay => ({ ...pay, type: 'info' })),
-        ...this.inquiryData.map(pay => ({ ...pay, type: 'inquiry' })),
-      ];
-    },
     // 선택된 카테고리에 따라 게시글 필터링
     filteredPays() {
-      return this.allPays.filter(pay => {
-        if (this.selectedCategory === 'all') {
-          return (
-            (pay.title || '-').includes(this.searchQuery) ||
-            (pay.content || '-').includes(this.searchQuery) ||
-            (pay.author || '-').includes(this.searchQuery) ||
-            (pay.status || '-').includes(this.searchQuery)
-          );
-        } else if (this.selectedCategory === 'infoShareBoard' && pay.type === 'info') {
-          return true;
-        } else if (this.selectedCategory === 'free-community' && pay.type === 'community') {
-          return true;
-        } else if (this.selectedCategory === 'qnABoard' && pay.type === 'inquiry') {
-          return true;
-        }
-        return false;
+      return this.paymentsData.filter(pay => {
+        const matchesCategory =
+          this.selectedCategory === 'all' ||
+          (this.selectedCategory === 'completed' && pay.status === 'completed') ||
+          (this.selectedCategory === 'pending' && pay.status === 'pending') ||
+          (this.selectedCategory === pay.method);
+          const matchesQuery =
+          (pay.email || '-').includes(this.searchQuery) ||
+          (pay.name || '-').includes(this.searchQuery);
+          return matchesCategory && matchesQuery;
       });
     },
     // 현재 페이지에 표시할 게시글
     paginatedPays() {
       const start = (this.currentPage - 1) * this.paysPerPage;
-      const end = start + this.paysPerPage;
-      return this.filteredPays.slice(start, end);
+      return this.filteredPays.slice(start, start + this.paysPerPage);
     },
     // 전체 페이지 수
     totalPages() {
@@ -190,6 +173,11 @@ export default {
     },
   },
   methods: {
+    // 날짜 형식 메서드
+    formatDate(date) {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      return new Date(date).toLocaleDateString(undefined, options);
+    },
     // 페이지 이동 메서드
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
@@ -200,54 +188,97 @@ export default {
     toggleDropdown(index) {
       this.openDropdownIndex = this.openDropdownIndex === index ? null : index;
     },
-    // 게시글 삭제 확인 모달 열기
+    // 결제 상태 변경 확인 모달 열기
     handleItemClick(pay, action) {
-      if (action === 'delete') {
-        this.confirmDeletePay(pay);
+      if (action === 'change') {
+        this.confirmChangePay(pay);
       }
     },
-    confirmDeletePay(pay) {
-      this.payToDelete = pay;
-      this.isDeleteModalOpen = true;
+    confirmChangePay(pay) {
+      this.payToChange = pay;
+      this.isChangeModalOpen = true;
     },
-    // 게시글 삭제
-    deletePay() {
-      if (!this.payToDelete) {
+
+
+/*    changePay() {
+      if (!this.payToChange) {
+        console.error("payToChange가 정의되지 않았습니다");
         return;
       }
-      // 게시글 삭제 로직 (API 연동 부분)
-      this.communityData = this.communityData.filter(pay => pay.id !== this.payToDelete.id);
-      this.infoData = this.infoData.filter(pay => pay.id !== this.payToDelete.id);
-      this.inquiryData = this.inquiryData.filter(pay => pay.id !== this.payToDelete.id);
 
-      this.isDeleteModalOpen = false;
-      this.isDeleteSuccessModalOpen = true;
+      // 상태를 'completed'로 변경하면서 Vue가 반응하도록 처리
+      this.payToChange.status = 'completed'; // 직접 변경
+
+      // paymentsData 배열에서 상태가 변경된 항목을 반영
+      const index = this.paymentsData.findIndex(payment => payment.payment_id === this.payToChange.payment_id);
+      if (index !== -1) {
+      // Vue 3에서는 배열의 항목을 직접 업데이트해도 반응성을 유지함
+      this.paymentsData[index] = { ...this.payToChange };
+      }
+
+      // 모달 닫기 및 성공 모달 표시
+      this.isChangeModalOpen = false;
+      this.isChangeSuccessModalOpen = true;
+
       setTimeout(() => {
-        this.isDeleteSuccessModalOpen = false;
+        this.isChangeSuccessModalOpen = false;
       }, 1500);
     },
-    // 삭제 취소
-    cancelDelete() {
-      this.isDeleteModalOpen = false;
-      this.payToDelete = null;
+
+    */
+ //axios 
+
+   changePay() {
+    if (!this.payToChange) return;
+
+    // 상태를 'completed'로 변경하면서 Vue가 반응하도록 처리
+    Object.assign(this.payToChange, { status: 'completed' });
+
+    // 서버로 상태 업데이트 API 요청
+    axios.post('/api/update-payment-status', { paymentId: this.payToChange.payment_id, status: 'completed' })
+    .catch(error => {
+      console.error('Error updating payment status', error);
+    });
+
+  // 모달 닫기 및 성공 모달 표시
+  this.isChangeModalOpen = false;
+  this.isChangeSuccessModalOpen = true;
+
+  setTimeout(() => {
+    this.isChangeSuccessModalOpen = false;
+  }, 1500);
+},
+
+    // 변경 취소
+    cancelChange() {
+      this.isChangeModalOpen = false;
+      this.payToChange = null;
     },
   },
   mounted() {
   // 게시판 데이터를 불러오는 로직 (임시 데이터로 테스트)
-  this.communityData = [
-    { id: 1, author: 'User A', title: '자유 게시판 글 1', regdate: '2024-09-01', editdate: '2024-09-02', status: '처리 완료' },
-    { id: 2, author: 'User B', title: '자유 게시판 글 2', regdate: '2024-09-05', editdate: '2024-09-06', status: '처리 중' }
-  ];
-
-  this.infoData = [
-    { id: 3, author: 'User C', title: '정보 공유 게시판 글 1', regdate: '2024-09-01', editdate: '2024-09-02', status: '처리 완료' },
-    { id: 4, author: 'User D', title: '정보 공유 게시판 글 2', regdate: '2024-09-03', editdate: '2024-09-04', status: '처리 중' }
-  ];
-
-  this.inquiryData = [
-    { id: 5, author: 'User E', title: 'Q&A 게시판 글 1', regdate: '2024-09-01', editdate: '2024-09-02', status: '미처리' },
-    { id: 6, author: 'User F', title: 'Q&A 게시판 글 2', regdate: '2024-09-05', editdate: '2024-09-06', status: '처리 중' }
-  ];
+  this.paymentsData = [
+    {
+      payment_id: 1,
+      member_id: 101,
+      email: 'user1@example.com',
+      name: 'User One',
+      amount: 10000,
+      method: 'card',
+      status: 'pending',
+      paydate: '2024-09-01',
+      },
+      {
+      payment_id: 2,
+      member_id: 102,
+      email: 'user2@example.com',
+      name: 'User two',
+      amount: 20000,
+      method: 'cash',
+      status: 'completed',
+      paydate: '2024-09-02',
+      },
+  ]
 },
 };
 </script>
@@ -290,7 +321,6 @@ export default {
 .dropdown-menu li {
   display: flex;
   align-items: center;
-  justify-content: space-around;
   padding: 11px;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -326,7 +356,7 @@ export default {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  width: 300px;
+  width: 380px;
   text-align: center;
 }
 .modal-content p {
@@ -347,7 +377,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
-  width: 120px;
+  width: 160px;
 }
 
 .modal-buttons button:first-child {
