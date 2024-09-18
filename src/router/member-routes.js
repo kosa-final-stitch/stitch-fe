@@ -5,6 +5,7 @@
  ---------------------
  2024.08.30 박요한 | 라우터 설계
  2024.09.05 김호영 | 라우터 통합,수정,개선
+ 2024.09.18 박요한 | mypage에 meta 필드 추가
  */
 
 import MemberMainLayout from "@/components/member/MemberMainLayout.vue";
@@ -14,7 +15,7 @@ import HomePage from "../components/member/home-page/HomePage.vue";
 import FCommunityBoard from "../components/member/board-page/FCommunityBoard.vue";
 // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
 // import QnABoard from '../components/BoardPage/QnABoard.vue';
-import PostDetail from '../components/member/board-page/PostDetail.vue';
+import PostDetail from "../components/member/board-page/PostDetail.vue";
 import PostForm from "../components/member/board-page/PostForm.vue";
 import AcademyInfoList from "@/components/member/rating-info-page/AcademyInfoList.vue";
 import CourseInfoList from "@/components/member/rating-info-page/CourseInfoList.vue";
@@ -49,10 +50,7 @@ const MemberRoutes = [
         name: "FCommunityBoard",
       },
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
-      { path: 'board/post/:id',
-        component: PostDetail,
-        name: 'PostDetail',
-        props: true },
+      { path: "board/post/:id", component: PostDetail, name: "PostDetail", props: true },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
       { path: "review-form", component: ReviewForm, name: "ReviewForm" },
       { path: "/board/PostForm", component: PostForm, name: "PostForm" },
@@ -89,6 +87,7 @@ const MemberRoutes = [
         path: "mypage",
         component: MyPage,
         name: "MyPage",
+        meta: { requiresAuth: true }, // 인증 필요
         children: [
           {
             path: "activities/profileEdit",
