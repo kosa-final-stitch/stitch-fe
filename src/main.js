@@ -7,7 +7,7 @@
 //  2024.09.10 김호영 | admin 라우터 설정
 //  2024.09.12 김호영 | Font Awesome 설정.
 //  2024.09.16 박요한 | localStorage.getItem("jwt") 로 변경.
-//  2024.09.18 박요한 | 전역 가드 설정 추가(로그인 리다이렉트).
+//  2024.09.18 박요한 | 전역 가드 설정 추가(로그인 리다이렉트). faHeart 아이콘 추가.
 
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
@@ -46,6 +46,7 @@ import {
   faTrashCan,
   faQuestion,
   faCircleCheck,
+  faHeart,
 } from "@fortawesome/free-solid-svg-icons"; // 원하는 아이콘 추가
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
@@ -54,7 +55,7 @@ const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
 // Font Awesome 라이브러리에 아이콘 추가
-library.add(faBars, faMagnifyingGlass, faAngleUp, faAngleDown, faTrashCan, faQuestion, faCircleCheck);
+library.add(faBars, faMagnifyingGlass, faAngleUp, faAngleDown, faTrashCan, faQuestion, faCircleCheck, faHeart);
 
 // member와 admin 라우터 통합
 const routes = [...memberRoutes, ...adminRoutes];
