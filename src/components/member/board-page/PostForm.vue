@@ -70,14 +70,10 @@ export default {
   },
   methods: {
     async submitPost() {
-      const memberStore = useMemberStore(); // Pinia의 memberStore에서 memberId 가져오기
-
       if (this.title && this.content && this.category) {
         try {
           await axios.post("/api/member/board/community/create", {
-            headers: { 'Content-Type': 'application/json' },
-            memberId: memberStore.memberId,
-            category: this.category,
+            headers: { 'Content-Type': 'application/json' }, category: this.category,
             title: this.title,
             content: this.content,
             tag: this.tag || null,

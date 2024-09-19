@@ -45,7 +45,7 @@
         <tbody>
         <tr v-for="(item, index) in paginatedData" :key="index">
           <td>{{ index + 1 }}</td>
-          <td>{{ item.title }}</td>
+          <td @click="goToPostDetail(item.boardId)" class="clickable">{{ item.title }}</td>
           <td>{{ item.nickname }}</td>
           <td>{{formatDate(item.regdate) }}</td>
         </tr>
@@ -83,6 +83,7 @@
 <script>
 import axios from 'axios';
 import MemberHeader from '../member-header/MemberHeader.vue';
+// import PostDetail from './PostDetail.vue';  // 자식 컴포넌트를 import
 
 export default {
   name: "BoardMain",
@@ -97,6 +98,7 @@ export default {
       items: [],
       currentPage: 1,
       itemsPerPage: 10, // 한 페이지에 10개 항목
+      selectedBoardId: null,  // 선택된 게시글의 boardId를 저장
     };
   },
   computed: {
@@ -136,7 +138,6 @@ export default {
         return '날짜 없음'; // 변환 중 오류가 발생하면 기본값 반환
       }
     },
-    // 다른 메서드들...
 
   // 게시글 목록을 불러오는 메서드 정의
     fetchPosts() {
@@ -152,6 +153,14 @@ export default {
     },
     goToPostForm() {
       this.$router.push('/board/PostForm'); // Vue Router를 사용하여 페이지 이동
+    },
+    goToPostDetail(boardId) {
+      console.log('Board ID:', boardId);  // boardId 값이 제대로 들어오는지 확인
+      if (!boardId) {
+        console.error('Board ID is null or undefined');
+        return;
+      }
+      this.$router.push({ name: 'PostDetail', params: { boardId } }); // 라우터를 통해 페이지 이동
     },
     setActiveSort(sortType) {
       this.activeSort = sortType;
@@ -378,5 +387,12 @@ export default {
   pointer-events: none;
   color: #ccc;
 }
+
+.clickable {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: underline;
+}
+
 
 </style>
