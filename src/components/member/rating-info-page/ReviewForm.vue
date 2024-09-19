@@ -13,7 +13,6 @@
             >{{ index + 1 }}. {{ review.title }}</label
           >
           <div class="rating">
-            <!-- 별을 클릭할 때마다 별점을 변경하는 이벤트 바인딩 -->
             <span
               v-for="n in 5"
               :key="n"
@@ -78,36 +77,35 @@ export default {
   data() {
     return {
       reviews: [
-        { title: "강의", rating: 1, comment: "" },
-        { title: "강사", rating: 1, comment: "" },
-        { title: "시설", rating: 1, comment: "" },
-        { title: "반 분위기", rating: 1, comment: "" },
-        { title: "행정", rating: 1, comment: "" },
-        { title: "취업관련", rating: 1, comment: "" },
+        { title: "강의", comment: "", rating: 1 },
+        { title: "강사", comment: "", rating: 1 },
+        { title: "시설", comment: "", rating: 1 },
+        { title: "반 분위기", comment: "", rating: 1 },
+        { title: "행정", comment: "", rating: 1 },
+        { title: "취업관련", comment: "", rating: 1 },
       ],
-      chart: null, // 차트 객체를 저장할 변수
-      isChartGenerated: false, // 버튼 클릭 상태를 저장할 변수
-      buttonText: "등록", // 버튼에 표시할 텍스트
+      chart: null,
+      isChartGenerated: false,
+      buttonText: "등록",
+      memberId: null, // 회원 정보를 저장할 변수
     };
   },
+  mounted() {
+    this.courseId = this.$route.params.courseId;
+    // 컴포넌트가 마운트되면 사용자 정보를 가져옴
+    this.fetchMemberInfo();
+  },
   methods: {
-    // 별점 설정 함수
     setRating(index, rating) {
       this.reviews[index].rating = rating;
     },
-    // 차트 생성 함수
     generateChart() {
       if (this.chart) {
-        this.chart.destroy(); // 기존 차트를 제거하여 중복되지 않도록 함
+        this.chart.destroy();
       }
-
-      const labels = this.reviews.map(
-        (review) => review.title || `항목 ${this.reviews.indexOf(review) + 1}`
-      );
+      const labels = this.reviews.map((review) => review.title);
       const data = this.reviews.map((review) => review.rating);
-
       const ctx = document.getElementById("radarChart").getContext("2d");
-
       this.chart = new Chart(ctx, {
         type: "radar",
         data: {
@@ -126,39 +124,78 @@ export default {
           scales: {
             r: {
               beginAtZero: true,
-              max: 5, // 최대값을 5로 설정하여 0.5 단위가 아닌 1 단위로 스케일링
+              max: 5,
               ticks: {
-                stepSize: 1, // 스케일 단계 설정을 통해 1 단위로 표시
+                stepSize: 1,
               },
             },
           },
         },
       });
     },
-    // 버튼 클릭 시 차트 생성 또는 DB 저장 실행
     handleButtonClick() {
       if (!this.isChartGenerated) {
-        this.generateChart(); // 차트 생성
-        this.buttonText = "저장"; // 버튼 텍스트를 '저장'으로 변경
-        this.isChartGenerated = true; // 차트가 생성되었음을 기록
+        this.generateChart();
+        this.buttonText = "저장";
+        this.isChartGenerated = true;
       } else {
-        this.saveReviewData(); // DB에 데이터 저장
+        this.saveReviewData();
       }
     },
-    // 리뷰 데이터를 서버로 전송하는 함수
-    saveReviewData() {
-      // 서버에 데이터를 전송하는 POST 요청
+    fetchMemberInfo() {
       axios
-        .post("http://localhost:8080/api/member/reviews", this.reviews)
+        .get("http://localhost:8080/api/member/info")
         .then((response) => {
-          // 요청이 성공했을 때 실행될 코드
-          alert("리뷰가 성공적으로 저장되었습니다.");
-          console.log("리뷰디테일 서버 응답:", response);
-          // 필요한 후처리 (예: 페이지 이동 또는 상태 초기화 등)
+          this.userInfo = response.data;
+          this.memberId = this.userInfo.memberId; // memberId를 저장합니다.
+          console.log(
+            JSON.stringify(
+              "리뷰에서 사용자정보" + JSON.stringify(this.userInfo)
+            )
+          );
+          this.editableUserInfo = { ...this.userInfo };
         })
         .catch((error) => {
-          // 요청이 실패했을 때 실행될 코드
-          console.error("리뷰 저장 중 오류가 발생했습니다.", error);
+          console.error("회원 정보를 불러오는 중 오류가 발생했습니다.", error);
+        });
+    },
+    saveReviewData() {
+      if (!this.memberId || !this.courseId) {
+        console.log(
+          "회원아이디 : " + this.memberId + " 코스아이디 : " + this.courseId
+        );
+        console.error("회원 ID를 가져오지 못했습니다.");
+        alert("회원 ID를 가져오지 못했습니다. 다시 시도해 주세요.");
+        return;
+      }
+      const reviewData = [
+        {
+          memberId: this.memberId,
+          courseId: this.courseId,
+          education: this.reviews[0].comment,
+          educationRating: this.reviews[0].rating,
+          instructor: this.reviews[1].comment,
+          instructorRating: this.reviews[1].rating,
+          facility: this.reviews[2].comment,
+          facilityRating: this.reviews[2].rating,
+          atmosphere: this.reviews[3].comment,
+          atmosphereRating: this.reviews[3].rating,
+          management: this.reviews[4].comment,
+          managementRating: this.reviews[4].rating,
+          later: this.reviews[5].comment,
+          laterRating: this.reviews[5].rating,
+          regDate: new Date(),
+        },
+      ];
+      console.log("전송할 리뷰 데이터:", reviewData);
+      axios
+        .post("http://localhost:8080/api/member/reviews", reviewData)
+        .then((response) => {
+          alert("리뷰가 성공적으로 저장되었습니다.");
+          console.log("리뷰서버 응답:", response.data); // 서버 응답 데이터를 처리
+        })
+        .catch((error) => {
+          console.error("리뷰 저장 중 오류 발생:", error);
           alert("리뷰 저장 중 오류가 발생했습니다. 다시 시도해 주세요.");
         });
     },
@@ -173,7 +210,6 @@ export default {
   margin: 20px auto;
   text-align: center;
 }
-
 .review-container {
   display: flex;
   justify-content: space-between;
@@ -181,20 +217,17 @@ export default {
   gap: 20px;
   margin-top: 20px;
 }
-
 .review-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   flex: 1;
 }
-
 .review-item {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
-
 .chart-container {
   padding: 20px;
   flex: 1;
@@ -202,26 +235,21 @@ export default {
   justify-content: center;
   align-items: center;
 }
-
 label {
   font-weight: bold;
   margin-bottom: 8px;
 }
-
 .rating {
   margin-bottom: 10px;
-  cursor: pointer; /* 마우스를 올렸을 때 포인터 모양으로 변경 */
+  cursor: pointer;
 }
-
 .star {
   font-size: 20px;
   color: #ccc;
 }
-
 .filled {
   color: orange;
 }
-
 textarea {
   width: 90%;
   min-height: 60px;
@@ -230,14 +258,12 @@ textarea {
   border: 1px solid #ddd;
   resize: none;
 }
-
 .buttons {
   display: flex;
   justify-content: center;
   gap: 20px;
   margin-top: 30px;
 }
-
 .cancel-btn,
 .submit-btn {
   padding: 10px 20px;
@@ -247,7 +273,6 @@ textarea {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-
 .cancel-btn:hover,
 .submit-btn:hover {
   background-color: #ffa500;

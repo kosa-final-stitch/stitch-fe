@@ -12,7 +12,7 @@
         </div>
         <div class="info-item">
           <strong>지역</strong>
-          <p>{{ member.region }}</p>
+          <p>{{ member.address }}</p>
         </div>
         <div class="info-item">
           <strong>평균 별점</strong>
@@ -61,7 +61,7 @@ export default {
         email: "",
         star: "☆☆☆☆☆", // 초기값
         ratingScore: "0.0", // 초기값
-        region: "",
+        address: "",
         postCount: 0,
         reviewCount: 0,
       },
@@ -73,7 +73,7 @@ export default {
       .then((response) => {
         console.log("멤버헤드 서버 응답: ", response);
         this.member = response.data;
-        console.log("response.data: ", this.member);
+        console.log("멤버헤드 response.data: ", this.member);
       })
       .catch((error) => {
         console.error("회원 정보를 불러오는 중 오류가 발생했습니다.", error);
