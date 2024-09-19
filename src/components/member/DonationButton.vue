@@ -32,7 +32,7 @@
           꿈을 향해 나아갈 수 있는 힘이 됩니다.
         </p>
 
-        <button class="donation-button" @click="submitDonation">후원</button>
+        <button class="submit-button" @click="submitDonation">후원</button>
         <button class="close-button" @click="closeModal">닫기</button>
       </div>
     </div>
@@ -117,9 +117,10 @@ h1 {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  box-sizing: border-box; /* 추가 */
 }
 
-.donation-button {
+.submit-button {
   background-color: #ff6600;
   color: white;
   padding: 10px 20px;
