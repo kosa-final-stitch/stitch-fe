@@ -52,7 +52,8 @@ const MemberRoutes = [
       { path: 'board/post/:boardId',
         component: PostDetail,
         name: 'PostDetail',
-        props: true },
+        props: true
+      },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
       { path: "review-form", component: ReviewForm, name: "ReviewForm" },
       { path: "/board/PostForm", component: PostForm, name: "PostForm" },

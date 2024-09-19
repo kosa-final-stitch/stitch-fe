@@ -64,6 +64,12 @@ export default {
   components: {
     MemberHeader,
   },
+  props: {
+    boardId: {
+      type: Number,
+      required: true, // boardId가 반드시 필요함
+    }
+  },
   data(){
     return {
       post: null, // 게시글 데이터
@@ -71,26 +77,29 @@ export default {
       loading: true // 로딩 상태
     };
   },
-  created() {
-    const boardId = this.$route.params.boardId;
-    console.log('Board ID:', boardId); // 디버깅 로그
-
-    if (!boardId) {
-      console.error('Board ID is null or undefined');
-      return;
+  watch: {
+    // boardId가 변경될 때마다 게시글을 가져옴
+    boardId: {
+      immediate: true,
+      handler(newBoardId) {
+        this.fetchPost(newBoardId);
+      }
     }
-
-    axios.get(`/api/board/post/${boardId}`)
-        .then(response => {
-          this.post = response.data.post;
-          this.comments = response.data.comments;
-        })
-        .catch(error => {
-          console.error('Error fetching post:', error);
-        })
-        .finally(() => {
-          this.loading = false;
-        });
+  },
+  methods: {
+    fetchPost(boardId) {
+      // 게시글 데이터를 가져오는 API 호출
+      axios.get(`/api/board/post/${boardId}`)
+          .then(response => {
+            this.post = response.data.post;
+          })
+          .catch(error => {
+            console.error('Error fetching post:', error);
+          })
+          .finally(() => {
+            this.loading = false;
+          });
+    }
   }
 };
 </script>
