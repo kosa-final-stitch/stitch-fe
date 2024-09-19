@@ -57,7 +57,7 @@ export default {
   methods: {
     async fetchPopularReviews() {
       try {
-        const response = await axios.get("/api/reviews/top");
+        const response = await axios.get("/api/member/reviews/top");
         this.reviews = response.data;
       } catch (error) {
         console.error("Error fetching popular reviews:", error);
