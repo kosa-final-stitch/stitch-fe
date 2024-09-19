@@ -49,11 +49,10 @@ const MemberRoutes = [
         name: "FCommunityBoard",
       },
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
-      {
-        path: "board/post/:id",
+      { path: 'board/post/:boardId',
         component: PostDetail,
-        name: "PostDetail",
-        props: true,
+        name: 'PostDetail',
+        props: true
       },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
       {
