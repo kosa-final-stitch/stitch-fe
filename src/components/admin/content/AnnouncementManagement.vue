@@ -101,6 +101,16 @@
       </div>
     </div>
 
+    <!-- 작성 완료 모달 -->
+    <div v-if="isCreateSuccessModalOpen" class="modal-success-overlay">
+      <div class="modal-success-content">
+        <div class="modal-icon-container">
+          <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
+        </div>
+        <p>작성이 완료되었습니다.</p>
+      </div>
+    </div>
+
     <!-- 페이지네이션 -->
     <div class="pagination">
       <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">이전</button>
@@ -129,8 +139,9 @@
         </form>
       </div>
     </div>
-
   </div>
+
+  
 </template>
 
 <script>
@@ -148,8 +159,9 @@ export default {
       noticesPerPage: 10,
       isDropdownOpen: false,
       openDropdownIndex: null,
-      isChangeModalOpen: false,
+      isChangeModalOpen: false, // 공개 상태 변경 상태
       isChangeSuccessModalOpen: false,
+      isCreateSuccessModalOpen: false, // 작성 완료 모달 상태
       isCreateModalOpen: false, // 작성 모달 상태
       noticeToChange: null,
       noticementsData: [], // 공지사항 데이터를 저장할 배열
@@ -178,8 +190,8 @@ export default {
   },
   methods: {
     formatDate(date) {
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-      return new Date(date).toLocaleDateString(undefined, options);
+      const d = new Date(date);
+      return d.toISOString().replace('T', ' ').substring(0, 10);
     },
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
@@ -238,6 +250,14 @@ export default {
       };
 
       this.noticementsData.push(newNotice); // 배열에 새 공지사항 추가
+
+      // 작성 완료 모달 표시
+      this.isCreateSuccessModalOpen = true;
+
+      // 일정 시간 후 작성 완료 모달 닫기
+      setTimeout(() => {
+        this.isCreateSuccessModalOpen = false;
+      }, 1500);
 
       // 모달 닫기 및 초기화
       this.closeCreateModal();

@@ -175,8 +175,8 @@ export default {
   methods: {
     // 날짜 형식 메서드
     formatDate(date) {
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-      return new Date(date).toLocaleDateString(undefined, options);
+      const d = new Date(date);
+      return d.toISOString().replace('T', ' ').substring(0, 10);
     },
     // 페이지 이동 메서드
     goToPage(page) {

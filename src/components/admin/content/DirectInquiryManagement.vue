@@ -105,6 +105,18 @@
       </div>
     </div>
   </div>
+
+  <!-- 답변 작성 완료 모달 -->
+  <div v-if="isChangeSuccessModalOpen" class="modal-success-overlay">
+    <div class="modal-success-content">
+      <div class="modal-icon-container">
+        <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
+      </div>
+      <p>답변 작성이 완료 되었습니다.</p>
+    </div>
+  </div>
+
+  
 </template>
 
 <script>
@@ -119,7 +131,9 @@ export default {
       isDirectAnswerModalOpen: false, // 답변 모달 열림 여부
       selectedDirect: null, // 선택된 문의
       answerContent: '', // 답변 내용
+      isChangeSuccessModalOpen: false,
     };
+
   },
   mounted() {
     this.directmentsData = [
@@ -164,8 +178,8 @@ export default {
   },
   methods: {
     formatDate(date) {
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-      return new Date(date).toLocaleDateString(undefined, options);
+      const d = new Date(date);
+      return d.toISOString().replace('T', ' ').substring(0, 10);
     },
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
@@ -180,17 +194,35 @@ export default {
       this.isDirectAnswerModalOpen = false;
       this.answerContent = '';
     },
+
     submitDirectAnswer() {
       if (!this.selectedDirect) return;
 
-      // 답변 저장 로직 (백엔드 연동 부분 필요)
+      // 답변 저장 로직 (백엔드 연동 부분이 없으므로 프론트엔드에서 임시 저장)
       this.selectedDirect.ansdate = new Date().toISOString().split('T')[0];
       this.selectedDirect.status = 'answered';
       this.selectedDirect.answer = this.answerContent;
 
+      // directmentsData에서 해당 문의를 찾아서 업데이트
+      const directIndex = this.directmentsData.findIndex(direct => direct.direct_id === this.selectedDirect.direct_id);
+      if (directIndex !== -1) {
+        // 데이터 갱신
+        this.directmentsData.splice(directIndex, 1, { ...this.selectedDirect });
+      }
+
       // 모달 닫기 및 초기화
       this.closeDirectAnswerModal();
+
+      // 조치 완료 후 변경 완료 모달을 표시
+      this.isChangeSuccessModalOpen = true;
+
+      // 일정 시간 후 변경 완료 모달을 자동으로 닫기
+      setTimeout(() => {
+        this.isChangeSuccessModalOpen = false;
+        console.log("성공 모달 닫힘");
+      }, 1000); 
     },
+
   },
 };
 </script>
@@ -443,8 +475,8 @@ export default {
     padding: 15px 25px;
     border-radius: 7px;
     box-shadow: 0px 1px 9px 3px rgba(0, 0, 0, 0.09);
-    gap: 45px;
-    width: 300px;
+    gap: 30px;
+    width: 320px;
 }
 
 .modal-success-icon {
