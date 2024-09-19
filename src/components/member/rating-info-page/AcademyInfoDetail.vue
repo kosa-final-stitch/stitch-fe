@@ -49,6 +49,7 @@
         v-for="course in currentCourses"
         :key="course.course_id"
         class="course-card"
+        @click="goToCourseDetail(course.course_id)"
       >
         <div class="course-details">
           <h4>{{ course.course_name }}</h4>
@@ -69,6 +70,7 @@
         v-for="course in completedCourses"
         :key="course.course_id"
         class="course-card"
+        @click="goToCourseDetail(course.course_id)"
       >
         <div class="rating-box">
           <p class="stars">⭐⭐⭐⭐☆</p>
@@ -92,6 +94,7 @@
         v-for="course in upcomingCourses"
         :key="course.course_id"
         class="course-card"
+        @click="goToCourseDetail(course.course_id)"
       >
         <div class="course-details">
           <h4>{{ course.course_name }}</h4>
@@ -198,6 +201,13 @@ export default {
     formatDate(date) {
       const options = { year: "numeric", month: "2-digit", day: "2-digit" };
       return new Date(date).toLocaleDateString("ko-KR", options);
+    },
+    goToCourseDetail(courseId) {
+      const academyId = this.academyId; // props로 받은 academyId 사용
+      this.$router.push({
+        name: "CourseInfoDetail", // 라우터 설정에 정의된 이름
+        params: { academyId, courseId },
+      });
     },
   },
 };

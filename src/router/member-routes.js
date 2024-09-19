@@ -14,7 +14,7 @@ import HomePage from "../components/member/home-page/HomePage.vue";
 import FCommunityBoard from "../components/member/board-page/FCommunityBoard.vue";
 // import InfoShareBoard from '../components/BoardPage/InfoShareBoard.vue';
 // import QnABoard from '../components/BoardPage/QnABoard.vue';
-import PostDetail from '../components/member/board-page/PostDetail.vue';
+import PostDetail from "../components/member/board-page/PostDetail.vue";
 import PostForm from "../components/member/board-page/PostForm.vue";
 import AcademyInfoList from "@/components/member/rating-info-page/AcademyInfoList.vue";
 import CourseInfoList from "@/components/member/rating-info-page/CourseInfoList.vue";
@@ -55,7 +55,11 @@ const MemberRoutes = [
         props: true
       },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
-      { path: "review-form", component: ReviewForm, name: "ReviewForm" },
+      {
+        path: "member/review-form/:academyId/:courseId",
+        component: ReviewForm,
+        name: "ReviewForm",
+      },
       { path: "/board/PostForm", component: PostForm, name: "PostForm" },
       {
         path: "/academies/academy", // 학원 목록 페이지
