@@ -36,7 +36,8 @@ axios.interceptors.request.use((config) => {
 
 // Font Awesome 관련 설정
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faMagnifyingGlass, faBars, faAngleUp, faAngleDown, faTrashCan, faQuestion, faCircleCheck } from '@fortawesome/free-solid-svg-icons'; // 원하는 아이콘 추가
+import { faMagnifyingGlass, faBars, faAngleUp, faAngleDown,
+         faTrashCan, faQuestion, faCircleCheck, faCheck, faLock, faUnlock } from '@fortawesome/free-solid-svg-icons'; // 원하는 아이콘 추가
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 // Pinia 설정
@@ -44,7 +45,8 @@ const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
 // Font Awesome 라이브러리에 아이콘 추가
-library.add(faBars, faMagnifyingGlass, faAngleUp, faAngleDown, faTrashCan, faQuestion, faCircleCheck);
+library.add(faBars, faMagnifyingGlass, faAngleUp, faAngleDown,
+            faTrashCan, faQuestion, faCircleCheck, faCheck, faLock, faUnlock);
 
 // member와 admin 라우터 통합
 const routes = [...memberRoutes, ...adminRoutes];
