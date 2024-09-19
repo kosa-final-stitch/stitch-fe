@@ -23,8 +23,8 @@
       <div class="info-row">
         <label for="gender">성별</label>
         <select id="gender" v-model="editableUserInfo.gender">
-          <option value="남자">남자</option>
-          <option value="여자">여자</option>
+          <option value="남">남자</option>
+          <option value="여">여자</option>
         </select>
       </div>
       <div class="info-row">
@@ -32,66 +32,45 @@
         <input type="text" id="phone" v-model="editableUserInfo.phone" />
       </div>
       <div class="info-row">
-        <label for="region">지역</label>
-        <select id="region" v-model="editableUserInfo.region">
+        <label for="address">지역</label>
+        <select id="address" v-model="editableUserInfo.address">
           <option value="서울특별시">서울특별시</option>
           <option value="부산광역시">부산광역시</option>
           <option value="대구광역시">대구광역시</option>
+          <option value="경기도">경기도</option>
+          <option value="전라도">전라도</option>
         </select>
       </div>
-    </div>
-
-    <!-- 비밀번호 변경 파트 -->
-    <div class="edit-section">
-      <h4>비밀번호 변경</h4>
-      <button @click="togglePasswordFields" class="btn-toggle">
-        비밀번호 변경 {{ showPasswordFields ? "숨기기" : "보이기" }}
-      </button>
-
       <!-- 비밀번호 변경 필드 -->
-      <div v-if="showPasswordFields" class="password-section">
-        <div class="inform__block">
-          <label class="form-label">현재 비밀번호* </label>
-          <input
-            type="password"
-            v-model="currentPassword"
-            placeholder="현재 비밀번호를 입력하세요"
-            class="form-input"
-          />
-        </div>
-
-        <div class="inform__block">
-          <label class="form-label">새 비밀번호* </label>
-          <input
-            type="password"
-            v-model="newPassword"
-            placeholder="새 비밀번호를 입력하세요"
-            class="form-input"
-          />
-        </div>
-
-        <div class="inform__block">
-          <label class="form-label">새 비밀번호 확인* </label>
-          <input
-            type="password"
-            v-model="confirmPassword"
-            placeholder="새 비밀번호를 다시 입력하세요"
-            class="form-input"
-          />
-        </div>
-
-        <div class="btn-save">
-          <button type="button" class="btn" @click="changepw">
-            비밀번호 저장
-          </button>
-        </div>
+      <div class="info-row">
+        <label for="currentPassword">현재 비밀번호</label>
+        <input
+          type="password"
+          id="currentPassword"
+          v-model="editableUserInfo.currentPassword"
+        />
+      </div>
+      <div class="info-row">
+        <label for="newPassword">새 비밀번호</label>
+        <input
+          type="password"
+          id="newPassword"
+          v-model="editableUserInfo.newPassword"
+        />
+      </div>
+      <div class="info-row">
+        <label for="confirmPassword">새 비밀번호 확인</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          v-model="editableUserInfo.confirmPassword"
+        />
       </div>
     </div>
 
     <button class="submit-btn" @click="saveProfile">확인하기</button>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 
@@ -105,7 +84,7 @@ export default {
         nickname: "",
         gender: "",
         phone: "",
-        region: "",
+        address: "",
       },
       editableUserInfo: {
         name: "",
@@ -113,12 +92,11 @@ export default {
         nickname: "",
         gender: "",
         phone: "",
-        region: "",
+        address: "",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       },
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-      showPasswordFields: false, // 비밀번호 변경 필드 가시성 상태
     };
   },
   mounted() {
@@ -131,6 +109,11 @@ export default {
         .get("http://localhost:8080/api/member/info")
         .then((response) => {
           this.userInfo = response.data;
+          console.log(
+            JSON.stringify(
+              "사용자정보를 서버에서 가져오기" + JSON.stringify(this.userInfo)
+            )
+          );
           this.editableUserInfo = { ...this.userInfo };
         })
         .catch((error) => {
@@ -139,44 +122,23 @@ export default {
     },
     // 사용자 정보를 서버에 저장하는 함수
     saveProfile() {
+      if (
+        this.editableUserInfo.newPassword !==
+        this.editableUserInfo.confirmPassword
+      ) {
+        alert("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        return;
+      }
       axios
         .put("http://localhost:8080/api/member/info", this.editableUserInfo)
-        .then((response) => {
-          console.log("Response:", response);
+        .then(() => {
           alert("회원 정보가 저장되었습니다.");
           this.userInfo = { ...this.editableUserInfo }; // 저장 후 현재 사용자 정보 업데이트
+          console.log("업데이트저장" + JSON.stringify(this.userInfo));
         })
         .catch((error) => {
           console.error("회원 정보를 저장하는 중 오류가 발생했습니다.", error);
-          console.log("Request:", error.config); // 요청 내용을 확인합니다.
-          console.log("Response:", error.response); // 응답 내용을 확인합니다.
         });
-    },
-    // 비밀번호 변경 함수
-    changepw() {
-      if (this.newPassword === this.confirmPassword) {
-        axios
-          .post(`http://localhost:8080/api/member/change-password`, {
-            userId: this.userId,
-            currentPassword: this.currentPassword,
-            newPassword: this.newPassword,
-          })
-          .then(() => {
-            alert("비밀번호가 변경되었습니다.");
-            this.currentPassword = "";
-            this.newPassword = "";
-            this.confirmPassword = "";
-          })
-          .catch((error) => {
-            console.error("비밀번호 변경 중 오류가 발생했습니다.", error);
-            alert("비밀번호 변경에 실패했습니다.");
-          });
-      } else {
-        alert("새 비밀번호가 일치하지 않습니다.");
-      }
-    },
-    togglePasswordFields() {
-      this.showPasswordFields = !this.showPasswordFields;
     },
   },
 };

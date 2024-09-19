@@ -50,9 +50,13 @@ const MemberRoutes = [
         name: "FCommunityBoard",
       },
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
-      { path: "board/post/:id", component: PostDetail, name: "PostDetail", props: true },
+      { path: "board/post/:boardId", component: PostDetail, name: "PostDetail", props: true },
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
-      { path: "review-form", component: ReviewForm, name: "ReviewForm" },
+      {
+        path: "member/review-form/:academyId/:courseId",
+        component: ReviewForm,
+        name: "ReviewForm",
+      },
       { path: "/board/PostForm", component: PostForm, name: "PostForm" },
       {
         path: "/academies/academy", // 학원 목록 페이지

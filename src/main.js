@@ -26,6 +26,7 @@ import axios from "axios";
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("jwt"); // 저장된 JWT 토큰 가져오기
+    console.log("메인js에서 토큰가져오기" + token);
     if (token) {
       config.headers["Authorization"] = "Bearer " + token; // 토큰을 Authorization 헤더에 추가
     }
@@ -46,6 +47,9 @@ import {
   faTrashCan,
   faQuestion,
   faCircleCheck,
+  faCheck,
+  faLock,
+  faUnlock,
   faHeart,
 } from "@fortawesome/free-solid-svg-icons"; // 원하는 아이콘 추가
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -55,7 +59,19 @@ const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
 // Font Awesome 라이브러리에 아이콘 추가
-library.add(faBars, faMagnifyingGlass, faAngleUp, faAngleDown, faTrashCan, faQuestion, faCircleCheck, faHeart);
+library.add(
+  faBars,
+  faMagnifyingGlass,
+  faAngleUp,
+  faAngleDown,
+  faTrashCan,
+  faQuestion,
+  faCircleCheck,
+  faCheck,
+  faLock,
+  faUnlock,
+  faHeart
+);
 
 // member와 admin 라우터 통합
 const routes = [...memberRoutes, ...adminRoutes];

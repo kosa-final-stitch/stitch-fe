@@ -95,6 +95,8 @@ export default {
     goToReviewForm() {
       const academyId = this.$route.params.academyId;
       const courseId = this.$route.params.courseId;
+      console.log("넘어가는 academyId:", academyId);
+      console.log("넘어가는 courseId:", courseId);
       this.$router.push({
         name: "ReviewForm",
         params: { academyId, courseId },

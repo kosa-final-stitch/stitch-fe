@@ -4,19 +4,19 @@
     <div class="tab-header">
       <div
         :class="{ active: selectedTab === 'upcoming' }"
-        @click="selectedTab = 'upcoming'"
+        @click="selectTab('upcoming')"
       >
         진행 예정 과정
       </div>
       <div
         :class="{ active: selectedTab === 'current' }"
-        @click="selectedTab = 'current'"
+        @click="selectTab('current')"
       >
         현재 진행중인 과정
       </div>
       <div
         :class="{ active: selectedTab === 'completed' }"
-        @click="selectedTab = 'completed'"
+        @click="selectTab('completed')"
       >
         진행 완료 과정
       </div>
@@ -135,7 +135,6 @@ export default {
           const currentCourses = [];
           const completedCourses = [];
 
-          // 각 과정에 대해 분류
           response.data.forEach((course) => {
             const startDate = new Date(course.start_date);
             const endDate = new Date(course.end_date);
@@ -185,12 +184,16 @@ export default {
     },
     // 강의 상세 페이지로 이동
     goToCourseDetail(courseId, academyId) {
-      // academyId와 courseId를 사용해 바로 해당 경로로 라우팅
+      console.log("강의상세페이지로이동", courseId, academyId); // 클릭 로그 확인
       this.$router.push({
         path: `/academies/academy/${academyId}/courses/${courseId}`,
       });
     },
-
+    // 탭 선택 시 현재 페이지를 1로 초기화
+    selectTab(tab) {
+      this.selectedTab = tab;
+      this.currentPage = 1;
+    },
     // 날짜 형식 변환
     formatDate(date) {
       const options = { year: "numeric", month: "2-digit", day: "2-digit" };
