@@ -47,6 +47,8 @@ export default {
 <style scoped>
 .home-page {
   padding: 20px;
+  max-width: 1280px;
+  margin: 0 auto; /* 가운데 정렬 */
 }
 
 section {

@@ -12,14 +12,14 @@
     <h2>평점 높은 학원</h2>
     <div class="academy-container">
       <div
-        v-for="academy in academies"
-        :key="academy.academy_id"
+        v-for="(academy, index) in academies"
+        :key="academy.academyid"
         class="academy-card"
-        @click="goToAcademyDetail(academy.academy_id)"
+        @click="goToAcademyDetail(academy.academyId)"
       >
+        <div class="stars">{{ "★".repeat(roundedStars[index]) }}{{ "☆".repeat(5 - roundedStars[index]) }}</div>
+        <h3>{{ academy.academyName }}</h3>
         <div class="academy-details">
-          <div class="stars">★★★★★</div>
-          <h3>{{ academy.academy_name }}</h3>
           <p>주소: {{ academy.address }}</p>
           <p>전화번호: {{ academy.phone }}</p>
         </div>
@@ -27,7 +27,7 @@
     </div>
 
     <!-- 더보기 버튼 -->
-    <MoreButton to="/academies" />
+    <MoreButton to="/academies/academy" />
   </div>
 </template>
 
@@ -50,9 +50,9 @@ export default {
     // 상위 학원 리스트 가져오는 메서드
     async fetchTopRatedAcademies() {
       try {
-        const response = await axios.get("/api/academies/top", {
-          withCredentials: true, // 인증이 필요한 경우 세션 쿠키 포함
-        });
+        const response = await axios.get("/api/academies/top");
+        console.log("Status Code:", response.status); // 상태 코드 확인
+        console.log("Response Data:", response.data); // 응답 데이터 확인
         this.academies = response.data;
       } catch (error) {
         console.error("Error fetching academies:", error);
@@ -63,31 +63,40 @@ export default {
       this.$router.push({ name: "AcademyInfoDetail", params: { academyId } });
     },
   },
+  computed: {
+    roundedStars() {
+      return this.academies.map((academy) => {
+        if (academy.averageRating) {
+          return Math.round(academy.averageRating); // 평균 별점을 반올림
+        }
+        return 0; // 값이 없으면 0으로 설정
+      });
+    },
+  },
 };
 </script>
 
 <style scoped>
 .high-rated-academies {
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .academy-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5개의 열 */
+  gap: 10px; /* 카드 간의 간격 */
 }
 
 .academy-card {
-  width: 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 위와 아래의 콘텐츠가 일정 간격을 유지 */
   border: 1px solid #ddd;
   padding: 25px;
   margin-bottom: 20px;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
   cursor: pointer;
   transition: transform 0.3s ease;
 }
@@ -99,6 +108,22 @@ export default {
 .stars {
   color: #ffcc00;
   font-size: 20px;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
+  text-align: center;
+}
+
+.academy-card h3 {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.academy-details {
+  margin-top: auto; /* 아래로 정렬 */
+  text-align: left;
+}
+
+.academy-details p {
+  margin: 5px 0;
+  text-align: left;
 }
 </style>
