@@ -4,6 +4,7 @@
  설명 : vue3 기본 여백 margin 8px 제거
  ---------------------
  2024.09.10 김호영 | margin 8px 제거
+ 2024.09.20 박요한 | PortOne CDN으로 불러오기
  -->
 
 <!DOCTYPE html>
@@ -14,6 +15,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <!-- PortOne 결제 모듈을 CDN으로 불러오기 -->
+    <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
   </head>
   <body>
     <noscript>
