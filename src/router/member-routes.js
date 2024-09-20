@@ -50,7 +50,13 @@ const MemberRoutes = [
         name: "FCommunityBoard",
       },
       //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
-      { path: "board/post/:boardId", component: PostDetail, name: "PostDetail", props: true },
+      {
+        path: "board/post/:boardId",
+        component: PostDetail,
+        name: "PostDetail",
+        props: true,
+      },
+
       //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
       {
         path: "member/review-form/:academyId/:courseId",
@@ -68,12 +74,6 @@ const MemberRoutes = [
         component: CourseInfoList,
         name: "CourseInfoList",
       },
-      // {
-      //   path: "courses/:courseId", // 특정 강의의 상세 정보 (학원 ID 없이)
-      //   component: CourseInfoDetail,
-      //   name: "CourseInfoDetail",
-      //   props: true, // URL 매개변수를 props로 전달
-      // },
       {
         path: "academies/academy/:academyId", // 특정 학원의 상세 정보
         component: AcademyInfoDetail,

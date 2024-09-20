@@ -4,14 +4,8 @@
     <div class="review-container">
       <!-- 평가 항목 리스트 -->
       <div class="review-grid">
-        <div
-          class="review-item"
-          v-for="(review, index) in reviews"
-          :key="index"
-        >
-          <label :for="'review-' + index"
-            >{{ index + 1 }}. {{ review.title }}</label
-          >
+        <div class="review-item" v-for="(review, index) in reviews" :key="index">
+          <label :for="'review-' + index">{{ index + 1 }}. {{ review.title }}</label>
           <div class="rating">
             <span
               v-for="n in 5"
@@ -63,15 +57,7 @@ import {
   Legend,
 } from "chart.js";
 
-Chart.register(
-  RadarController,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-);
+Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
 export default {
   data() {
@@ -148,11 +134,7 @@ export default {
         .then((response) => {
           this.userInfo = response.data;
           this.memberId = this.userInfo.memberId; // memberId를 저장합니다.
-          console.log(
-            JSON.stringify(
-              "리뷰에서 사용자정보" + JSON.stringify(this.userInfo)
-            )
-          );
+          console.log(JSON.stringify("리뷰에서 사용자정보" + JSON.stringify(this.userInfo)));
           this.editableUserInfo = { ...this.userInfo };
         })
         .catch((error) => {
@@ -161,9 +143,7 @@ export default {
     },
     saveReviewData() {
       if (!this.memberId || !this.courseId) {
-        console.log(
-          "회원아이디 : " + this.memberId + " 코스아이디 : " + this.courseId
-        );
+        console.log("회원아이디 : " + this.memberId + " 코스아이디 : " + this.courseId);
         console.error("회원 ID를 가져오지 못했습니다.");
         alert("회원 ID를 가져오지 못했습니다. 다시 시도해 주세요.");
         return;
@@ -193,6 +173,8 @@ export default {
         .then((response) => {
           alert("리뷰가 성공적으로 저장되었습니다.");
           console.log("리뷰서버 응답:", response.data); // 서버 응답 데이터를 처리
+          // 저장 후 courseDetail 페이지로 이동
+          this.$router.push({ name: "CourseInfoDetail", params: { courseId: this.courseId } });
         })
         .catch((error) => {
           console.error("리뷰 저장 중 오류 발생:", error);
