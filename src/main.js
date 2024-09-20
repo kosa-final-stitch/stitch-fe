@@ -6,6 +6,8 @@
 //  2024.09.06 김호영 | member-store 테스트를 위한 pinia 설정
 //  2024.09.10 김호영 | admin 라우터 설정
 //  2024.09.12 김호영 | Font Awesome 설정.
+//  2024.09.16 박요한 | localStorage.getItem("jwt") 로 변경.
+//  2024.09.18 박요한 | 전역 가드 설정 추가(로그인 리다이렉트). faHeart 아이콘 추가.
 
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
@@ -36,7 +38,6 @@ axios.interceptors.request.use(
 );
 
 // Font Awesome 관련 설정
-
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faMagnifyingGlass,
@@ -46,6 +47,10 @@ import {
   faTrashCan,
   faQuestion,
   faCircleCheck,
+  faCheck,
+  faLock,
+  faUnlock,
+  faHeart,
 } from "@fortawesome/free-solid-svg-icons"; // 원하는 아이콘 추가
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
@@ -54,7 +59,6 @@ const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
 // Font Awesome 라이브러리에 아이콘 추가
-
 library.add(
   faBars,
   faMagnifyingGlass,
@@ -62,7 +66,11 @@ library.add(
   faAngleDown,
   faTrashCan,
   faQuestion,
-  faCircleCheck
+  faCircleCheck,
+  faCheck,
+  faLock,
+  faUnlock,
+  faHeart
 );
 
 // member와 admin 라우터 통합
@@ -71,6 +79,22 @@ const routes = [...memberRoutes, ...adminRoutes];
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+// 전역 가드 설정
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem("jwt"); // 토큰 여부로 인증 확인
+
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    // 인증이 필요한 라우트에 접근 시
+    if (!isAuthenticated) {
+      next({ name: "Login" }); // 인증되지 않았으면 로그인 페이지로 리디렉션
+    } else {
+      next(); // 인증된 경우 그대로 진행
+    }
+  } else {
+    next(); // 인증이 필요 없는 페이지는 그대로 진행
+  }
 });
 
 // Vue 앱 생성 및 설정
