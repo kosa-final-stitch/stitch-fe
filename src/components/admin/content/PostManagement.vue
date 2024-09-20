@@ -5,6 +5,7 @@
  ---------------------
  2024.09.10 김호영 | admin 초기 설정
  2024.09.13 김호영 | 초기 게시글 관리 디자인 및 기능 구현
+ 2024.09.19 김호영 | 날짜 출력형식 수정
  -->
 
  <template>
@@ -50,7 +51,7 @@
           <th>등록일자</th>
           <th>최종 수정일자</th>
           <th>게시글 제목</th>
-          <th>처리 상태</th>
+          <!--<th>처리 상태</th>-->
           <th></th>
         </tr>
       </thead>
@@ -60,10 +61,10 @@
           <td>{{ post.id || '-' }}</td>
           <td>{{ post.type || '-' }}</td>
           <td>{{ post.author || '-' }}</td>  <!-- 일단 author로 해 놓음 여기에 작성자 넣어놓으면 됨-->
-          <td>{{ post.regdate || '-' }}</td>
-          <td>{{ post.editdate || '-' }}</td>
+          <td>{{ formatDate(post.regdate) || '-' }}</td>
+          <td>{{ formatDate(post.editdate) || '-' }}</td>
           <td>{{ post.title || '-' }}</td>
-          <td>{{ post.status || '-' }}</td>
+          <!--<td>{{ post.status || '-' }}</td>-->
           <td>
             <div class="dropdown-container" @click.stop="toggleDropdown(index)">
               <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
@@ -164,8 +165,8 @@ export default {
           return (
             (post.title || '-').includes(this.searchQuery) ||
             (post.content || '-').includes(this.searchQuery) ||
-            (post.author || '-').includes(this.searchQuery) ||
-            (post.status || '-').includes(this.searchQuery)
+            (post.author || '-').includes(this.searchQuery) //||
+           // (post.status || '-').includes(this.searchQuery)
           );
         } else if (this.selectedCategory === 'infoShareBoard' && post.type === 'info') {
           return true;
@@ -189,6 +190,10 @@ export default {
     },
   },
   methods: {
+    formatDate(date) {
+      const d = new Date(date);
+      return d.toISOString().replace('T', ' ').substring(0, 10);
+    },
     // 페이지 이동 메서드
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {

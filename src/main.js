@@ -36,6 +36,7 @@ axios.interceptors.request.use(
 );
 
 // Font Awesome 관련 설정
+
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faMagnifyingGlass,
@@ -53,6 +54,7 @@ const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
 // Font Awesome 라이브러리에 아이콘 추가
+
 library.add(
   faBars,
   faMagnifyingGlass,

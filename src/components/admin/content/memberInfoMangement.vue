@@ -6,6 +6,7 @@
  2024.09.10 김호영 | admin 초기 설정
  2024.09.12 김호영 | 사용자 정보 페이지 디자인 구현
  2024.09.13 김호영 | 디자인 완 (코드 정리 미완).
+ 2024.09.19 김호영 | 날짜 형식 수정.
  -->
 
  <template>
@@ -73,8 +74,8 @@
           <td>{{ member.gender }}</td>
           <td>{{ member.birth }}</td>
           <td>{{ member.phone }}</td>
-          <td>{{ member.signupdate }}</td>
-          <td>{{ member.editdate }}</td>
+          <td>{{ formatDate(member.signupdate) }}</td>
+          <td>{{ formatDate(member.editdate) }}</td>
           <td>
             <div class="dropdown-container" @click.stop="toggleDropdown(index)">
               <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
@@ -358,6 +359,11 @@ export default {
     },
   },
   methods: {
+
+    formatDate(date) {
+      const d = new Date(date);
+      return d.toISOString().replace('T', ' ').substring(0, 10);
+    },
     // 드롭다운 토글
     toggleDropdown(index) {
       this.openDropdownIndex = this.openDropdownIndex === index ? null : index;
