@@ -32,7 +32,7 @@
           꿈을 향해 나아갈 수 있는 힘이 됩니다.
         </p>
 
-        <button class="donation-button" @click="submitDonation">후원</button>
+        <button class="submit-button" @click="submitDonation">후원</button>
         <button class="close-button" @click="closeModal">닫기</button>
       </div>
     </div>
@@ -40,6 +40,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
@@ -56,9 +58,52 @@ export default {
       this.showModal = false;
     },
     submitDonation() {
-      // 기부 처리 로직 추가
-      alert(`카테고리: ${this.category}, 기부금액: ${this.donationAmount}원이 입력되었습니다.`);
-      this.closeModal();
+      if (!this.donationAmount || isNaN(this.donationAmount) || Number(this.donationAmount) <= 0) {
+        alert("올바른 금액을 입력해주세요.");
+        return;
+      }
+
+      // PortOne(아임포트) 결제 처리
+      const IMP = window.IMP;
+      const userCode = "imp37551151"; // 아임포트에서 발급받은 가맹점 식별 코드
+      IMP.init(userCode); // 아임포트 초기화
+
+      IMP.request_pay(
+        {
+          pg: "html5_inicis", // PG사 선택 (여기서는 이니시스 예시)
+          pay_method: "card", // 결제 방식 (카드)
+          merchant_uid: `mid_${new Date().getTime()}`, // 가맹점 고유 주문번호
+          name: "기부금", // 결제 이름
+          amount: this.donationAmount, // 사용자 입력 금액
+          buyer_email: "test@test.com",
+          buyer_name: "홍길동",
+          buyer_tel: "01012345678",
+          buyer_addr: "서울특별시 강남구",
+          buyer_postcode: "12345",
+        },
+        (rsp) => {
+          if (rsp.success) {
+            // 결제 성공 처리
+            this.handlePaymentSuccess(rsp);
+          } else {
+            // 결제 실패 처리
+            alert(`결제 실패: ${rsp.error_msg}`);
+          }
+        }
+      );
+    },
+    async handlePaymentSuccess(paymentData) {
+      try {
+        // 서버로 결제 결과 전송 로직
+        const response = await axios.post("/api/payment/complete", paymentData); // await로 axios 처리
+        if (response) {
+          alert("결제가 성공적으로 완료되었습니다.");
+        }
+        this.closeModal(); // 모달 닫기
+      } catch (error) {
+        console.error(error); // 에러 로그
+        alert("결제 처리 중 오류가 발생했습니다.");
+      }
     },
   },
 };
@@ -117,9 +162,10 @@ h1 {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  box-sizing: border-box;
 }
 
-.donation-button {
+.submit-button {
   background-color: #ff6600;
   color: white;
   padding: 10px 20px;
