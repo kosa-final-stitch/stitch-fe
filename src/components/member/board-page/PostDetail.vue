@@ -13,15 +13,23 @@
     <!-- 게시글 -->
     <div class="post-section" v-if="post">
       <div class="post-header">
-        <div class="category">{{ post.category }}</div>
-        <div class="title">{{ post.title }}</div>
-<!--        <div class="title">{{ post.title }} [{{ post.commentCount }}]</div>-->
+        <div class="header-top">
+          <div class="category">{{ post.category }}</div>
+          <div class="post-actions">
+            <button class="edit-button">수정</button>
+            <button class="delete-button" @click="confirmDelete">삭제</button>
+            <button class="report-button">신고</button>
+          </div>
+        </div>
+        <div class="title">{{ post.title }} [{{comments.length }}]</div>
         <div class="meta-info">
           <span class="nickname">{{ post.nickname }}</span>
-          <span class="date">{{ post.regdate }}</span>
-<!--          <span class="views">조회 {{ post.views }}</span>-->
+          <span class="date">{{ formatDate(post.regdate) }}</span>
+          <span class="views">조회 {{ post.views }}</span>
         </div>
       </div>
+
+      <hr class="divider" />
 
       <div class="post-content">
         <p v-for="paragraph in post.content.split('\n')" :key="paragraph">{{ paragraph }}</p>
@@ -29,15 +37,21 @@
     </div>
 
     <!-- 댓글 섹션 -->
-<!--    <div class="comment-section" v-if="comments.length">-->
-<!--      <div class="comment" v-for="comment in comments" :key="comment.commentId">-->
-<!--        <div class="comment-header">-->
-<!--          <span class="comment-author">{{ comment.author }}</span>-->
-<!--          <span class="comment-date">{{ comment.regdate }}</span>-->
-<!--        </div>-->
-<!--        <div class="comment-content">{{ comment.content }}</div>-->
-<!--      </div>-->
-<!--    </div>-->
+    <div class="comment-section" v-if="comments.length">
+      <h3 class="comment-count">댓글 {{ comments.length }}</h3>
+      <div class="comment" v-for="comment in comments" :key="comment.commentId">
+        <div class="comment-header">
+          <span class="comment-author">{{ comment.nickname }}</span>
+          <span class="comment-date">{{ formatDateTime(comment.regdate) }}</span>
+          <span class="comment-actions">
+        <button class="edit-button">수정</button>
+        <button class="delete-button">삭제</button>
+        <button class="report-button">신고</button>
+      </span>
+        </div>
+        <div class="comment-content">{{ comment.content }}</div>
+      </div>
+    </div>
 
     <!-- 로딩 중일 때 -->
     <div v-else-if="loading">
@@ -46,17 +60,31 @@
 
     <!-- 게시글이나 댓글이 없는 경우 -->
     <div v-else>
-      <p>게시글을 찾을 수 없습니다.</p>
+      <p>게시글 or 댓글을 찾을 수 없습니다.</p>
+    </div>
+    <!-- 삭제 확인 모달 -->
+    <div v-if="showDeleteModal" class="modal">
+      <div class="modal-content">
+        <h3>삭제하시겠습니까?</h3>
+        <p>이 게시글을 삭제하시겠습니까?</p>
+        <div class="modal-actions">
+          <button @click="deletePost">네</button>
+          <button @click="showDeleteModal = false">아니요</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 삭제 성공 메시지 -->
+    <div v-if="deleteSuccess" class="success-message">
+      <p>삭제되었습니다.</p>
     </div>
   </div>
-
 
 </template>
 
 <script>
 import axios from 'axios';
 import MemberHeader from '../member-header/MemberHeader.vue';
-// import { useMemberStore } from '/src/store/member-store'; // Pinia 상태관리에서 memberStore 가져오기
 
 export default {
   name: "PostDetail",
@@ -73,7 +101,9 @@ export default {
     return {
       post: null, // 게시글 데이터
       comments: [], // 댓글 데이터
-      loading: true // 로딩 상태
+      loading: true, // 로딩 상태
+      showDeleteModal: false, // 삭제 확인 모달 상태
+      deleteSuccess: false, // 삭제 성공 메시지 상태
     };
   },
   watch: {
@@ -99,6 +129,51 @@ export default {
           .finally(() => {
             this.loading = false;
           });
+      // 댓글 데이터도 함께 가져옴
+      this.fetchComments(boardId);
+    },
+    fetchComments(boardId) {
+      // 댓글 데이터를 가져오는 API 호출
+      axios.get(`/api/comments/board/${boardId}`)
+          .then(response => {
+            console.log("Comments data: ", response.data); // 댓글 데이터를 확인
+            this.comments = response.data; // 댓글 데이터를 저장
+          })
+          .catch(error => {
+            console.error('Error fetching comments:', error);
+          });
+    },
+    // 날짜 포맷팅 메서드 (날짜와 시간 모두 표시)
+    formatDateTime(dateString) {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    },
+    // 날짜 포맷팅 메서드
+    formatDate(dateString) {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    },
+    // 삭제 확인 모달을 표시
+    confirmDelete() {
+      console.log('Delete button clicked'); // 로그가 찍히는지 확인
+      this.showDeleteModal = true;
+    },
+    // 게시글 삭제 메서드
+    deletePost() {
+      axios.delete(`/api/board/post/delete/${this.boardId}`)
+          .then(response => {
+            console.log('Post deleted:', response.data);
+            this.showDeleteModal = false;
+            this.deleteSuccess = true;
+            // 삭제 후 리스트 페이지로 이동
+            setTimeout(() => {
+              this.$router.push('/board/free-community');
+            }, 2000); // 2초 후 이동
+          })
+          .catch(error => {
+            console.error('Error deleting post:', error);
+            this.showDeleteModal = false;
+          });
     }
   }
 };
@@ -107,15 +182,17 @@ export default {
 <style scoped>
 .board-container {
   padding: 20px;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   font-family: 'Arial', sans-serif;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .back-button {
   display: block;
   margin-bottom: 20px;
-  color: #f28c28;
+  color: #666;
   text-decoration: none;
 }
 
@@ -126,16 +203,68 @@ export default {
   text-align: center;
 }
 
-.post-section {
-  border: 1px solid #ddd;
-  padding: 20px;
-  margin-bottom: 30px;
+.back-button:hover {
+  text-decoration: underline;
 }
 
-.post-header .category {
-  color: #f28c28;
+.board-title {
+  font-size: 28px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.post-section {
+  padding: 20px;
+  margin-bottom: 30px;
+
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+/* 게시글 헤더 스타일 */
+.post-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* 요소 간 간격 */
+}
+
+/* 카테고리와 버튼을 한 줄에 배치하는 컨테이너 */
+.header-top {
+  display: flex;
+  justify-content: space-between; /* 양쪽 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+  margin-bottom: 10px; /* 아래쪽 간격 */
+}
+
+/* 카테고리 스타일 */
+.category {
+  color: #f28c28; /* 글자 색상 */
+  font-weight: bold; /* 굵게 */
+  font-size: 16px; /* 글자 크기 */
+}
+
+/* 수정, 삭제, 신고 버튼 */
+.post-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.post-actions button {
+  background: none;
+  border: 1px solid #f28c28;
+  border-radius: 4px;
+  color: #f28c28;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 14px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.post-actions button:hover {
+  background-color: #f28c28;
+  color: #fff;
 }
 
 .post-header .title {
@@ -144,8 +273,36 @@ export default {
 }
 
 .meta-info {
-  font-size: 12px;
-  color: #666;
+  display: flex;
+  justify-content: space-between; /* 좌우 배치 */
+  align-items: center; /* 수직 중앙 정렬 */
+  font-size: 14px; /* 글자 크기 */
+  color: #666; /* 글자색 */
+  padding-bottom: 5px; /* 구분선과의 간격 */
+}
+
+.meta-info .nickname {
+  margin-right: 10px; /* 닉네임과 날짜 간격 */
+  color: #999; /* 날짜 색상 */
+
+}
+
+.meta-info .date {
+  margin-right: auto; /* 닉네임과 조회수 사이 간격 확보 */
+  font-size: 12px; /* 날짜 글자 크기 */
+  color: #999; /* 날짜 색상 */
+}
+
+.meta-info .views {
+  font-size: 12px; /* 조회수 글자 크기 */
+  color: #999; /* 조회수 글자색 */
+}
+
+/* 구분선 스타일 */
+.divider {
+  border: none;
+  border-top: 1px solid #ddd; /* 얇은 구분선 */
+  margin: 10px 0; /* 위아래 여백 */
 }
 
 .post-content {
@@ -154,22 +311,115 @@ export default {
 }
 
 .comment-section {
-  border-top: 1px solid #ddd;
-  padding-top: 20px;
+  border-top: 1px solid #ddd; /* 구분선 */
+  padding-top: 20px; /* 위쪽 여백 */
+  margin-top: 20px; /* 상단과의 간격 */
+}
+
+.comment-count {
+  font-size: 16px; /* 댓글 수 글자 크기 */
+  font-weight: bold; /* 굵게 */
+  color: #666; /* 글자 색상 */
+  margin-bottom: 20px; /* 댓글 섹션과 댓글 리스트 간 간격 */
 }
 
 .comment {
-  margin-bottom: 20px;
+  padding: 10px 0; /* 댓글 내부 여백 */
+  border-bottom: 1px solid #eee; /* 댓글 간 구분선 */
 }
 
 .comment-header {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between; /* 작성자와 날짜, 액션 버튼을 양쪽 정렬 */
+  align-items: center;
+  font-size: 14px; /* 글자 크기 */
+  color: #666; /* 글자 색상 */
+  margin-bottom: 5px; /* 작성자와 내용 간 간격 */
+}
+
+.comment-author {
+  font-weight: bold; /* 작성자명 강조 */
+  margin-right: 20px; /* 작성자와 날짜 사이 간격 추가 */
+}
+
+.comment-date {
+  font-size: 12px; /* 날짜 글자 크기 */
+  color: #999; /* 날짜 색상 */
+  margin-right: 10px;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 10px; /* 수정, 삭제, 신고 버튼 간 간격 */
+  margin-right: auto; /* 작성자와 날짜 사이 간격 고정 */
+}
+
+.comment-actions button {
+  background: none;
+  border: none;
+  color: #f28c28;
+  cursor: pointer;
+  font-size: 12px;
 }
 
 .comment-content {
-  font-size: 16px;
-  color: #333;
+  font-size: 16px; /* 댓글 내용 글자 크기 */
+  color: #333; /* 글자 색상 */
 }
+
+/* 모달 스타일 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #f28c28;
+  color: #fff;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.modal-actions button:hover {
+  background-color: #d47723;
+}
+
+.success-message {
+  background-color: #4caf50;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 4px;
+  z-index: 1000;
+}
+
 </style>

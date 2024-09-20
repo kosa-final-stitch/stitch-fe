@@ -124,10 +124,12 @@ export default {
   top: 10px; /* 헤더와의 간격을 조정 */
   left: 20px; /* 왼쪽으로 약간의 여백을 둠 */
   font-size: 1rem;
-  color: #000;
+  color: #666;
   text-decoration: none;
 }
-
+.back-button:hover {
+  text-decoration: underline;
+}
 
 h1 {
   text-align: center;
