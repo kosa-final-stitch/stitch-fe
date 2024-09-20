@@ -18,7 +18,7 @@
           <div class="post-actions">
             <button class="edit-button" @click="toggleEditMode">수정</button>
             <button class="delete-button" @click="confirmDelete">삭제</button>
-            <button class="report-button">신고</button>
+            <button class="report-button" @click="openReportModal">신고</button>
           </div>
         </div>
         <!-- 수정 모드일 때 제목과 내용 폼을 보여줌 -->
@@ -51,9 +51,15 @@
       </div>
     </div>
   </div>
+
     <!-- 댓글 섹션 -->
     <div class="comment-section" v-if="comments.length">
       <h3 class="comment-count">댓글 {{ comments.length }}</h3>
+      <!-- 댓글 입력 폼 -->
+      <div class="comment-form">
+        <input v-model="newComment.content" placeholder="댓글을 입력하세요" class="comment-input" />
+        <button class="comment-submit" @click="addComment">작성</button>
+      </div>
       <div class="comment" v-for="comment in comments" :key="comment.commentId">
         <div class="comment-header">
           <span class="comment-author">{{ comment.nickname }}</span>
@@ -94,6 +100,28 @@
       <p>삭제되었습니다.</p>
     </div>
   </div>
+  <!-- 신고 모달 -->
+  <div v-if="showReportModal" class="modal">
+    <div class="modal-content">
+      <h3>신고 하기</h3>
+      <div class="report-form">
+        <label for="reportType">신고 유형</label>
+        <select v-model="report.type" id="reportType" >
+          <option>스팸</option>
+          <option>욕설</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div class="report-form">
+      <label for="reportContent">내용</label>
+        <textarea v-model="report.content" id="reportContent" placeholder="신고 내용을 입력하세요"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-submit" @click="submitReport">등록</button>
+        <button class="modal-cancel" @click="closeReportModal">취소</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -116,9 +144,12 @@ export default {
       post: null, // 게시글 데이터
       editedPost: {}, // 수정할 게시글 데이터
       comments: [], // 댓글 데이터
+      newComment: { content: '' }, // 새 댓글 데이터
       loading: true, // 로딩 상태
       showDeleteModal: false, // 삭제 확인 모달 상태
       deleteSuccess: false, // 삭제 성공 메시지
+      showReportModal: false, // 신고 모달 상태
+      report: { type: '', content: '' }, // 신고 데이터
       editMode: false, // 수정 모드 상태
     };
   },
@@ -187,6 +218,52 @@ export default {
           })
           .catch(error => {
             console.error('Error updating post:', error);
+          });
+    },
+    // 신고 모달 열기
+    openReportModal() {
+      this.showReportModal = true;
+    },
+    // 신고 모달 닫기
+    closeReportModal() {
+      this.showReportModal = false;
+      this.report = { type: '', content: '' }; // 초기화
+    },
+    // 신고 등록 메서드
+    submitReport() {
+      if (this.report.type.trim() === '' || this.report.content.trim() === '') {
+        alert('신고 유형과 내용을 입력하세요.');
+        return;
+      }
+      axios.post(`/api/report`, {
+        postId: this.post.boardId,
+        reportType: this.report.type,
+        reportContent: this.report.content
+      })
+          .then(()=> {
+            alert('신고가 접수되었습니다.');
+            this.closeReportModal(); // 모달 닫기
+          })
+          .catch(error => {
+            console.error('Error submitting report:', error);
+          });
+    },
+    // 댓글 작성 메서드
+    addComment() {
+      if (this.newComment.content.trim() === '') {
+        alert('댓글 내용을 입력하세요.');
+        return;
+      }
+      axios.post(`/api/comments/add`, {
+        boardId: this.boardId,
+        content: this.newComment.content,
+      })
+          .then(response => {
+            this.comments.push(response.data); // 작성한 댓글을 댓글 리스트에 추가
+            this.newComment.content = ''; // 입력 필드 초기화
+          })
+          .catch(error => {
+            console.error('Error adding comment:', error);
           });
     },
     // 삭제 확인 모달을 표시
@@ -346,6 +423,38 @@ export default {
   line-height: 1.5;
 }
 
+.comment-form {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 입력 필드와 버튼 사이 간격 */
+  margin-top: 20px; /* 댓글 섹션과의 간격 */
+  padding: 10px 0; /* 여백 */
+
+}
+
+.comment-input {
+  flex: 1; /* 남은 공간을 입력 필드가 차지하게 함 */
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.comment-submit {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: #f28c28;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.comment-submit:hover {
+  background-color: #d47723;
+}
+
+
 .comment-section {
   border-top: 1px solid #ddd; /* 구분선 */
   padding-top: 20px; /* 위쪽 여백 */
@@ -419,14 +528,48 @@ export default {
 
 .modal-content {
   background-color: #fff;
-  padding: 20px;
+  padding: 30px 20px;
   border-radius: 8px;
   text-align: center;
+  width: 400px; /* 너비 조정 */
+}
+
+h3 {
+  margin-bottom: 20px; /* 제목과 폼 간의 간격 */
+}
+.report-form {
+  margin-bottom: 15px; /* 신고 폼 간의 간격 */
+  text-align: left; /* 왼쪽 정렬 */
+}
+
+.report-form label {
+  display: block; /* 블록 요소로 변환 */
+  margin-bottom: 5px; /* 라벨과 입력 필드 사이 간격 */
+  font-weight: bold; /* 라벨 글자 굵게 */
+}
+
+#reportType, #reportContent {
+  width: 100%; /* 입력 요소 너비 */
+  padding: 8px; /* 입력 요소 내부 패딩 */
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+#reportType {
+  height: 35px; /* 선택 박스의 높이 조정 */
+  width: 100px;
+}
+
+#reportContent {
+  height: 80px; /* 텍스트 영역 높이 줄임 */
+  width : 380px;
 }
 
 .modal-actions {
   display: flex;
-  justify-content: space-around;
+  justify-content: center; /* 버튼들을 가운데 정렬 */
+  gap : 20px;
   margin-top: 20px;
 }
 
@@ -443,6 +586,29 @@ export default {
 
 .modal-actions button:hover {
   background-color: #d47723;
+}
+
+
+.modal-submit, .modal-cancel {
+  padding: 8px 20px; /* 버튼 크기 조정 */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-submit {
+  background-color: #f28c28;
+  color: white;
+}
+
+.modal-cancel {
+  background-color: #f28c28;
+  color: white;
+}
+
+.modal-submit:hover, .modal-cancel:hover {
+  background-color: #d47723; /* 호버 시 색상 변경 */
 }
 
 .success-message {
@@ -492,4 +658,5 @@ export default {
   background-color: #f28c28;
   color: white;
 }
+
 </style>
