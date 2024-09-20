@@ -1,5 +1,4 @@
 <!--작성자 : 박주희 -->
-
 <template>
   <MemberHeader></MemberHeader>
   <div class="board-container">
@@ -91,7 +90,8 @@ export default {
       // 게시글 데이터를 가져오는 API 호출
       axios.get(`/api/board/post/${boardId}`)
           .then(response => {
-            this.post = response.data.post;
+            console.log("Response data: ", response.data); // 전체 응답 데이터를 확인
+            this.post = response.data;
           })
           .catch(error => {
             console.error('Error fetching post:', error);

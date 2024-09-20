@@ -3,7 +3,7 @@
 <template>
   <MemberHeader></MemberHeader>
   <div class="board-container">
-    <router-link to="/board/FCommunityBoard" class="back-button">
+    <router-link to="/board/free-community" class="back-button">
       <span>&lt; 뒤로가기</span>
     </router-link>
 

@@ -145,7 +145,9 @@ export default {
           .then(response => {
             this.items = response.data; // 받아온 데이터를 items 배열에 저장
             console.log('Fetched items:', this.items); // 데이터 확인
-            console.log('Total items:', this.items.length); // 전체 데이터 개수 확인
+            if (this.items.length > 0) {
+              console.log('First item boardId:', this.items[0].boardId); // 첫 번째 항목의 boardId 확인
+            }
           })
           .catch(error => {
             console.error("Error fetching posts:", error);
