@@ -16,12 +16,18 @@
         <div class="header-top">
           <div class="category">{{ post.category }}</div>
           <div class="post-actions">
-            <button class="edit-button">수정</button>
+            <button class="edit-button" @click="toggleEditMode">수정</button>
             <button class="delete-button" @click="confirmDelete">삭제</button>
             <button class="report-button">신고</button>
           </div>
         </div>
-        <div class="title">{{ post.title }} [{{comments.length }}]</div>
+        <!-- 수정 모드일 때 제목과 내용 폼을 보여줌 -->
+        <div v-if="editMode">
+          <input v-model="editedPost.title" placeholder="제목을 입력하세요" class="edit-title" />
+        </div>
+        <div v-else>
+          <div class="title">{{ post.title }} [{{ comments.length }}]</div>
+        </div>
         <div class="meta-info">
           <span class="nickname">{{ post.nickname }}</span>
           <span class="date">{{ formatDate(post.regdate) }}</span>
@@ -31,11 +37,20 @@
 
       <hr class="divider" />
 
-      <div class="post-content">
+    <!-- 내용 부분: 수정 모드일 때 텍스트 에어리어를 표시, 아닐 때는 내용 텍스트를 표시 -->
+    <div class="post-content">
+      <div v-if="editMode">
+        <textarea v-model="editedPost.content" placeholder="내용을 입력하세요" class="edit-content"></textarea>
+        <div class="edit-actions">
+          <button class="save-button" @click="savePost">저장</button>
+          <button class="cancel-button" @click="toggleEditMode">취소</button>
+        </div>
+      </div>
+      <div v-else>
         <p v-for="paragraph in post.content.split('\n')" :key="paragraph">{{ paragraph }}</p>
       </div>
     </div>
-
+  </div>
     <!-- 댓글 섹션 -->
     <div class="comment-section" v-if="comments.length">
       <h3 class="comment-count">댓글 {{ comments.length }}</h3>
@@ -79,7 +94,6 @@
       <p>삭제되었습니다.</p>
     </div>
   </div>
-
 </template>
 
 <script>
@@ -100,10 +114,12 @@ export default {
   data(){
     return {
       post: null, // 게시글 데이터
+      editedPost: {}, // 수정할 게시글 데이터
       comments: [], // 댓글 데이터
       loading: true, // 로딩 상태
       showDeleteModal: false, // 삭제 확인 모달 상태
-      deleteSuccess: false, // 삭제 성공 메시지 상태
+      deleteSuccess: false, // 삭제 성공 메시지
+      editMode: false, // 수정 모드 상태
     };
   },
   watch: {
@@ -122,6 +138,7 @@ export default {
           .then(response => {
             console.log("Response data: ", response.data); // 전체 응답 데이터를 확인
             this.post = response.data;
+            this.editedPost = { ...response.data }; // 수정할 게시글 데이터도 초기화
           })
           .catch(error => {
             console.error('Error fetching post:', error);
@@ -152,6 +169,25 @@ export default {
     formatDate(dateString) {
       const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
       return new Date(dateString).toLocaleDateString(undefined, options);
+    },
+    // 수정 모드 토글
+    toggleEditMode() {
+      if (this.editMode) {
+        this.editedPost = { ...this.post }; // 취소 시 수정 내용을 원래대로 복구
+      }
+      this.editMode = !this.editMode;
+    },
+    // 게시글 저장 메서드
+    savePost() {
+      axios.put(`/api/board/post/update/${this.boardId}`, this.editedPost)
+          .then(response => {
+            console.log('Post updated:', response.data);
+            this.post = { ...this.editedPost }; // 저장 후 수정 내용을 게시글 데이터에 반영
+            this.editMode = false; // 수정 모드 종료
+          })
+          .catch(error => {
+            console.error('Error updating post:', error);
+          });
     },
     // 삭제 확인 모달을 표시
     confirmDelete() {
@@ -410,7 +446,7 @@ export default {
 }
 
 .success-message {
-  background-color: #4caf50;
+  background-color: #f28c28;
   color: #fff;
   padding: 10px;
   text-align: center;
@@ -422,4 +458,38 @@ export default {
   z-index: 1000;
 }
 
+/* 수정 폼 스타일 */
+.edit-title, .edit-content {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+.edit-content {
+  min-height: 100px; /* 텍스트 영역의 최소 높이 */
+}
+.edit-actions {
+  display: flex;
+  justify-content: center; /* 가운데 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.save-button, .cancel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.save-button {
+  background-color: #f28c28;
+  color: white;
+}
+.cancel-button {
+  background-color: #f28c28;
+  color: white;
+}
 </style>
