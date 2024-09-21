@@ -52,25 +52,42 @@
     </div>
   </div>
 
-    <!-- 댓글 섹션 -->
-    <div class="comment-section" v-if="comments.length">
-      <h3 class="comment-count">댓글 {{ comments.length }}</h3>
-      <!-- 댓글 입력 폼 -->
-      <div class="comment-form">
+    <!-- 댓글 입력 폼 -->
+    <div class="comment-form">
+      <h3 class="comment-count">댓글 ({{ comments.length }})</h3>
+      <div class="comment-input-container">
         <input v-model="newComment.content" placeholder="댓글을 입력하세요" class="comment-input" />
         <button class="comment-submit" @click="addComment">작성</button>
       </div>
+    </div>
+
+
+    <!-- 댓글 섹션 -->
+    <div class="comment-section" v-if="comments.length">
       <div class="comment" v-for="comment in comments" :key="comment.commentId">
         <div class="comment-header">
           <span class="comment-author">{{ comment.nickname }}</span>
           <span class="comment-date">{{ formatDateTime(comment.regdate) }}</span>
           <span class="comment-actions">
-        <button class="edit-button">수정</button>
-        <button class="delete-button">삭제</button>
+        <button class="edit-button" @click="toggleEditComment(comment)">수정</button>
+          <button class="delete-button" @click="confirmDeleteComment(comment.commentId)">삭제</button> <!-- 삭제 버튼 클릭 시 메서드 호출 -->
         <button class="report-button">신고</button>
       </span>
         </div>
-        <div class="comment-content">{{ comment.content }}</div>
+        <div class="comment-content">
+          <!-- 수정 모드일 때는 텍스트에어리어를 표시 -->
+          <div v-if="editingCommentId === comment.commentId">
+            <textarea v-model="editedCommentContent" class="edit-comment-content"></textarea>
+            <div class="edit-actions">
+              <button class="save-button" @click="saveComment(comment.commentId)">저장</button>
+              <button class="cancel-button" @click="cancelEditComment">취소</button>
+            </div>
+          </div>
+          <!-- 수정 모드가 아닐 때는 일반 텍스트를 표시 -->
+          <div v-else>
+            {{ comment.content }}
+          </div>
+        </div>
       </div>
     </div>
 
@@ -81,7 +98,7 @@
 
     <!-- 게시글이나 댓글이 없는 경우 -->
     <div v-else>
-      <p>게시글 or 댓글을 찾을 수 없습니다.</p>
+      <p>댓글이 없습니다.</p>
     </div>
     <!-- 삭제 확인 모달 -->
     <div v-if="showDeleteModal" class="modal">
@@ -91,6 +108,18 @@
         <div class="modal-actions">
           <button @click="deletePost">네</button>
           <button @click="showDeleteModal = false">아니요</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 댓글 삭제 확인 모달 -->
+    <div v-if="showCommentDeleteModal" class="modal">
+      <div class="modal-content">
+        <h3>댓글 삭제 확인</h3>
+        <p>정말로 이 댓글을 삭제하시겠습니까?</p>
+        <div class="modal-actions">
+          <button @click="deleteComment">네</button>
+          <button @click="showCommentDeleteModal = false">아니요</button>
         </div>
       </div>
     </div>
@@ -127,6 +156,8 @@
 <script>
 import axios from 'axios';
 import MemberHeader from '../member-header/MemberHeader.vue';
+import { useMemberStore } from '/src/store/member-store'; // Pinia 상태관리에서 memberStore 가져오기
+
 
 export default {
   name: "PostDetail",
@@ -141,16 +172,21 @@ export default {
   },
   data(){
     return {
+      requiresAuth: false,
       post: null, // 게시글 데이터
       editedPost: {}, // 수정할 게시글 데이터
       comments: [], // 댓글 데이터
       newComment: { content: '' }, // 새 댓글 데이터
+      editedCommentContent: '', // 수정할 댓글 내용
+      editingCommentId: null, // 수정 중인 댓글 ID
       loading: true, // 로딩 상태
       showDeleteModal: false, // 삭제 확인 모달 상태
       deleteSuccess: false, // 삭제 성공 메시지
       showReportModal: false, // 신고 모달 상태
       report: { type: '', content: '' }, // 신고 데이터
       editMode: false, // 수정 모드 상태
+      showCommentDeleteModal: false, // 댓글 삭제 모달 상태
+      commentToDelete: null, // 삭제할 댓글 ID
     };
   },
   watch: {
@@ -162,8 +198,15 @@ export default {
       }
     }
   },
+  mounted() {
+    const boardId = this.$route.params.boardId; // 게시글 ID 가져오기
+    this.fetchComments(boardId); // 페이지 로드 시 댓글 데이터를 가져옴
+  },
   methods: {
     fetchPost(boardId) {
+      // 조회수 증가 API 호출
+      this.incrementViewCount(boardId);
+
       // 게시글 데이터를 가져오는 API 호출
       axios.get(`/api/board/post/${boardId}`)
           .then(response => {
@@ -179,6 +222,16 @@ export default {
           });
       // 댓글 데이터도 함께 가져옴
       this.fetchComments(boardId);
+    },
+    // 조회수 증가 메서드
+    incrementViewCount(boardId) {
+      axios.post(`/api/board/post/increment-views/${boardId}`)
+          .then(response => {
+            console.log('View count incremented:', response.data);
+          })
+          .catch(error => {
+            console.error('Error incrementing view count:', error);
+          });
     },
     fetchComments(boardId) {
       // 댓글 데이터를 가져오는 API 호출
@@ -220,6 +273,40 @@ export default {
             console.error('Error updating post:', error);
           });
     },
+    // 댓글 수정 모드 토글
+    toggleEditComment(comment) {
+      if (this.editingCommentId === comment.commentId) {
+        // 현재 수정 중인 댓글을 다시 클릭하면 수정 모드 해제
+        this.cancelEditComment();
+      } else {
+        // 수정 모드 시작
+        this.editingCommentId = comment.commentId;
+        this.editedCommentContent = comment.content; // 수정할 댓글 내용 초기화
+      }
+    },
+    // 댓글 수정 취소
+    cancelEditComment() {
+      this.editingCommentId = null;
+      this.editedCommentContent = '';
+    },
+    // 댓글 수정 저장
+    saveComment(commentId) {
+      axios.put(`/api/comments/update/${commentId}`, {
+        content: this.editedCommentContent,
+      })
+          .then(response => {
+            console.log('Comment updated:', response.data);
+            // 댓글 리스트에서 수정된 댓글을 반영
+            const index = this.comments.findIndex(comment => comment.commentId === commentId);
+            if (index !== -1) {
+              this.comments[index].content = this.editedCommentContent;
+            }
+            this.cancelEditComment(); // 수정 모드 종료
+          })
+          .catch(error => {
+            console.error('Error updating comment:', error);
+          });
+    },
     // 신고 모달 열기
     openReportModal() {
       this.showReportModal = true;
@@ -250,20 +337,68 @@ export default {
     },
     // 댓글 작성 메서드
     addComment() {
+      const memberStore = useMemberStore(); // Pinia 스토어 가져오기
+      console.log('isAuthenticated:', this.isAuthenticated);
+      console.log('boardId:', this.boardId);
+      console.log('newComment content:', this.newComment.content);
+
+      if (!memberStore.isAuthenticated) {
+        alert('로그인이 필요합니다.');
+        this.$router.push('/login'); // 로그인 페이지로 리다이렉트
+        return;
+      }
+
       if (this.newComment.content.trim() === '') {
         alert('댓글 내용을 입력하세요.');
         return;
       }
-      axios.post(`/api/comments/add`, {
-        boardId: this.boardId,
-        content: this.newComment.content,
-      })
+
+      axios.post(`/api/member/comments/create`,
+          {
+            boardId: this.boardId,
+            content: this.newComment.content,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            withCredentials: true // 세션 쿠키가 포함되도록 설정
+          })
           .then(response => {
-            this.comments.push(response.data); // 작성한 댓글을 댓글 리스트에 추가
-            this.newComment.content = ''; // 입력 필드 초기화
+            // 작성한 댓글을 댓글 리스트에 추가
+            const boardId = this.boardId;
+
+            this.comments.push(response.data);
+            // 입력 필드 초기화
+            this.newComment.content = '';
+            this.fetchComments(boardId);
           })
           .catch(error => {
             console.error('Error adding comment:', error);
+          });
+
+    },
+    // 댓글 삭제 확인 모달 표시 및 삭제할 댓글 ID 설정
+    confirmDeleteComment(commentId) {
+      this.commentToDelete = commentId; // 삭제할 댓글 ID 저장
+      this.showCommentDeleteModal = true; // 삭제 확인 모달 표시
+    },
+    // 댓글 삭제 메서드
+    deleteComment() {
+      if (!this.commentToDelete) return;
+
+      axios.delete(`/api/comments/delete/${this.commentToDelete}`)
+          .then(response => {
+            console.log('Comment deleted:', response.data);
+            // 댓글 리스트에서 삭제된 댓글을 제거
+            this.comments = this.comments.filter(comment => comment.commentId !== this.commentToDelete);
+            this.showCommentDeleteModal = false; // 모달 닫기
+            this.commentToDelete = null; // 삭제할 댓글 초기화
+          })
+          .catch(error => {
+            console.error('Error deleting comment:', error);
+            this.showCommentDeleteModal = false;
+            this.commentToDelete = null;
           });
     },
     // 삭제 확인 모달을 표시
@@ -281,7 +416,7 @@ export default {
             // 삭제 후 리스트 페이지로 이동
             setTimeout(() => {
               this.$router.push('/board/free-community');
-            }, 2000); // 2초 후 이동
+            }, 800); // 0.8초 후 이동
           })
           .catch(error => {
             console.error('Error deleting post:', error);
@@ -425,12 +560,20 @@ export default {
 
 .comment-form {
   display: flex;
-  align-items: center;
+  flex-direction: column; /* 세로로 나열 */
+  align-items: flex-start; /* 왼쪽 정렬 */
   gap: 10px; /* 입력 필드와 버튼 사이 간격 */
   margin-top: 20px; /* 댓글 섹션과의 간격 */
   padding: 10px 0; /* 여백 */
 
 }
+
+.comment-input-container {
+  display: flex; /* 입력창과 버튼을 같은 줄에 배치 */
+  gap: 10px; /* 입력창과 버튼 사이의 간격 */
+  width: 100%;
+}
+
 
 .comment-input {
   flex: 1; /* 남은 공간을 입력 필드가 차지하게 함 */
@@ -448,6 +591,7 @@ export default {
   color: white;
   cursor: pointer;
   font-size: 14px;
+  flex-shrink: 0;
 }
 
 .comment-submit:hover {
@@ -456,7 +600,6 @@ export default {
 
 
 .comment-section {
-  border-top: 1px solid #ddd; /* 구분선 */
   padding-top: 20px; /* 위쪽 여백 */
   margin-top: 20px; /* 상단과의 간격 */
 }

@@ -73,7 +73,8 @@ export default {
       if (this.title && this.content && this.category) {
         try {
           await axios.post("/api/member/board/community/create", {
-            headers: { 'Content-Type': 'application/json' }, category: this.category,
+            headers: { 'Content-Type': 'application/json' },
+            category: this.category,
             title: this.title,
             content: this.content,
             tag: this.tag || null,
