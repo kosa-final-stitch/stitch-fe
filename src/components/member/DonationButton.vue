@@ -114,7 +114,7 @@ export default {
   display: inline-block;
   margin-top: 10px;
   padding: 8px 16px;
-  background-color: #ffdf50;
+  background-color: #f28c00;
   color: white;
   text-decoration: none;
   border-radius: 5px;
@@ -122,7 +122,7 @@ export default {
 }
 
 .button:hover {
-  background-color: #ff7701;
+  background-color: #ffdf50;
 }
 
 .modal-overlay {
