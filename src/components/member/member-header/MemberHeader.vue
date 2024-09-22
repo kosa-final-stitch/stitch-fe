@@ -11,6 +11,7 @@
  2024.09.13 박요한 | a 태그 router-link로 수정, router에 맞춰서 경로 수정.
  2024.09.16 박요한 | 로그아웃 시 localStorage JWT 토큰 제거.
  2024.09.19 박요한 | 검색창 컴포넌트 분리.
+ 2024.09.22 박요한 | 문의하기 모달 추가.
  -->
 <template>
   <header class="member-header">
@@ -44,7 +45,7 @@
               <div class="dropdown-section">
                 <h3>문의하기</h3>
                 <ul>
-                  <li><router-link to="/inquiry">1:1 문의 하러가기</router-link></li>
+                  <li><a @click="openInquiryModal">1:1 문의 하러가기</a></li>
                 </ul>
               </div>
               <div class="dropdown-section">
@@ -73,19 +74,24 @@
     </div>
 
     <search-bar />
+
+    <!-- v-if로 모달을 제어 -->
+    <inquiry-modal v-if="inquiryModalVisible" @close="inquiryModalVisible = false" />
   </header>
 </template>
 
 <script>
 import { useMemberStore } from "@/store/member-store";
 import SearchBar from "./SearchBar.vue";
+import InquiryModal from "../InquiryModal.vue";
 
 export default {
-  components: { SearchBar },
+  components: { SearchBar, InquiryModal },
   data() {
     return {
       searchText: "", // 검색창에 입력된 텍스트를 관리하는 변수
       isDropdownVisible: false, // 드롭다운 상태
+      inquiryModalVisible: false, // 모달 가시성 제어 변수
     };
   },
   computed: {
@@ -120,6 +126,9 @@ export default {
     hideDropdown() {
       this.isDropdownVisible = false;
       document.body.classList.remove("blurred"); // 블러 효과 제거
+    },
+    openInquiryModal() {
+      this.inquiryModalVisible = true; // 모달 열기
     },
   },
 };
