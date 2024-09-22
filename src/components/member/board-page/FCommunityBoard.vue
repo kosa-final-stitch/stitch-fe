@@ -3,7 +3,7 @@
 <template>
   <MemberHeader></MemberHeader>
   <div class="board-container">
-    <h1 class="board-title">정보공유 게시판</h1>
+    <h1 class="board-title">자유 게시판</h1>
     <h5 class="board-description">자유롭게 여러분의 의견을 입력하세요.</h5>
     <div class="category-tab">
       <button

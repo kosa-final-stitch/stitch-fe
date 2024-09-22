@@ -31,6 +31,8 @@ import MyReviewManagement from "@/components/member/mypage/my-activities/MyRevie
 import AcademyInfoDetail from "@/components/member/rating-info-page/AcademyInfoDetail.vue";
 import CourseInfoDetail from "@/components/member/rating-info-page/CourseInfoDetail.vue";
 import ReviewForm from "@/components/member/rating-info-page/ReviewForm.vue";
+import QnABoard from "@/components/member/board-page/QnABoard.vue";
+import InfoShareBoard from "@/components/member/board-page/InfoShareBoard.vue";
 
 // import CertificateRequest from "../components/mypage/Certification/CertificateRequest.vue";
 // import DonationPage from "../components/MyPage/DonationPage.vue";
@@ -49,15 +51,27 @@ const MemberRoutes = [
         component: FCommunityBoard,
         name: "FCommunityBoard",
       },
-      //     //   { path: 'board/qna', component: QnABoard, name: 'QnABoard' },
+      {
+        path: 'board/qna',
+        component: QnABoard,
+        name: 'QnABoard'
+      },
+      {
+        path : "board/info-share",
+        component : InfoShareBoard,
+        name : 'InfoShareBoard'
+      },
       {
         path: "board/post/:boardId",
         component: PostDetail,
         name: "PostDetail",
         props: true,
       },
-
-      //     //   { path: 'board/post-form', component: PostForm, name: 'PostForm' },
+      {
+        path: 'board/post-form',
+        component: PostForm,
+        name: 'PostForm'
+      },
       {
         path: "member/review-form/:academyId/:courseId",
         component: ReviewForm,
