@@ -166,7 +166,7 @@ h1 {
 }
 
 .submit-button {
-  background-color: #ff6600;
+  background-color: #f28c00;
   color: white;
   padding: 10px 20px;
   border: none;
