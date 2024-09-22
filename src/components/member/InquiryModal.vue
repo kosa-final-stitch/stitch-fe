@@ -17,15 +17,23 @@
 
       <label for="category">문의 유형</label>
       <select v-model="selectedCategory" id="category">
-        <option value="">카테고리</option>
-        <!-- 카테고리 옵션들 -->
+        <option value="" disabled>카테고리</option>
+        <option value="service-use">서비스 이용</option>
+        <option value="account-management">계정 관리</option>
+        <option value="payment-issue">결제 관련</option>
+        <option value="technical-support">기술 지원</option>
+        <option value="content-feedback">콘텐츠 피드백</option>
+        <option value="other">기타</option>
       </select>
+      <p v-if="categoryError" style="color: red">카테고리를 선택해 주세요.</p>
 
       <label for="title">제목</label>
       <input v-model="title" id="title" type="text" placeholder="제목을 입력하세요" />
+      <p v-if="titleError" style="color: red">제목을 입력해 주세요.</p>
 
       <label for="content">내용</label>
       <textarea v-model="content" id="content" placeholder="내용을 입력하세요"></textarea>
+      <p v-if="contentError" style="color: red">내용을 입력해 주세요.</p>
 
       <div style="text-align: center">
         <button class="submit-button" @click="submitInquiry">등록</button>
@@ -42,6 +50,9 @@ export default {
       selectedCategory: "",
       title: "",
       content: "",
+      categoryError: false,
+      titleError: false,
+      contentError: false,
     };
   },
   methods: {
@@ -49,8 +60,16 @@ export default {
       this.$emit("close"); // 부모 컴포넌트로 'close' 이벤트를 전달
     },
     submitInquiry() {
-      // 문의 등록 처리 로직
-      this.$emit("close"); // 문의 제출 후 모달 닫기
+      // 유효성 검사
+      this.categoryError = !this.selectedCategory;
+      this.titleError = !this.title.trim(); // 공백만 있을 경우도 처리
+      this.contentError = !this.content.trim(); // 공백만 있을 경우도 처리
+
+      // 모든 항목이 유효할 때만 제출
+      if (!this.categoryError && !this.titleError && !this.contentError) {
+        // 문의 등록 처리 로직
+        this.$emit("close");
+      }
     },
   },
 };
