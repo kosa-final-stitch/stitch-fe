@@ -16,8 +16,6 @@ export default {};
 
 <style scoped>
 .footer {
-  position: fixed;
-  bottom: 0;
   background-color: #f1f1f1; /* 푸터 배경색 */
   padding: 20px; /* 내부 여백 */
   text-align: center; /* 텍스트 중앙 정렬 */

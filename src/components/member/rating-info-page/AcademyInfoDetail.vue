@@ -2,44 +2,36 @@
   <div class="academy-info">
     <!-- 학원 정보 상단 -->
     <div class="info-box">
-      <p class="stars">⭐⭐⭐⭐⭐</p>
+      <!-- 학원 별점 표시 -->
       <div class="details">
+        <p class="stars">
+          <!-- 별 표시 -->
+          <span v-for="n in 5" :key="n">
+            {{ n <= Math.round(academy.rating) ? "★" : "☆" }}
+          </span>
+        </p>
+        <!-- 학원 이름, 주소, 전화번호, 웹사이트 정보 표시 -->
         <h2>{{ academy.academy_name }}</h2>
         <p>주소: {{ academy.address }}</p>
         <p>전화번호: {{ academy.phone }}</p>
         <p>
           웹사이트:
-          <a :href="academy.site_address" target="_blank">{{
-            academy.site_address
-          }}</a>
+          <a :href="academy.site_address" target="_blank">{{ academy.site_address }}</a>
         </p>
       </div>
+      <!-- 학원 차트 표시를 위한 캔버스 -->
       <div class="radar-chart">
-        <!-- 레이더 차트 (차트 라이브러리 사용 가능) -->
-        <p>Radar Chart Placeholder</p>
+        <canvas id="academyRadarChart" width="400" height="400"></canvas>
+        <!-- 차트가 그려질 캔버스 엘리먼트 -->
       </div>
     </div>
 
     <!-- 과정별 탭 -->
     <div class="tab-header">
-      <div
-        :class="{ active: selectedTab === 'upcoming' }"
-        @click="selectedTab = 'upcoming'"
-      >
-        진행 예정 과정
-      </div>
-      <div
-        :class="{ active: selectedTab === 'current' }"
-        @click="selectedTab = 'current'"
-      >
-        현재 진행중인 과정
-      </div>
-      <div
-        :class="{ active: selectedTab === 'completed' }"
-        @click="selectedTab = 'completed'"
-      >
-        진행 완료 과정
-      </div>
+      <!-- 탭 선택에 따라 '진행 예정', '현재 진행중', '진행 완료' 과정 표시 -->
+      <div :class="{ active: selectedTab === 'upcoming' }" @click="selectedTab = 'upcoming'">진행 예정 과정</div>
+      <div :class="{ active: selectedTab === 'current' }" @click="selectedTab = 'current'">현재 진행중인 과정</div>
+      <div :class="{ active: selectedTab === 'completed' }" @click="selectedTab = 'completed'">진행 완료 과정</div>
     </div>
 
     <!-- 현재 진행 중인 과정 -->
@@ -73,7 +65,12 @@
         @click="goToCourseDetail(course.course_id)"
       >
         <div class="rating-box">
-          <p class="stars">⭐⭐⭐⭐☆</p>
+          <p class="stars">
+            <!-- 별 표시 -->
+            <span v-for="n in 5" :key="n">
+              {{ n <= Math.round(coursey.rating) ? "★" : "☆" }}
+            </span>
+          </p>
         </div>
         <div class="course-details">
           <h4>{{ course.course_name }}</h4>
@@ -113,6 +110,21 @@
 <script>
 import axios from "axios";
 
+// Chart.js 관련 import 추가
+import {
+  Chart,
+  RadarController,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Chart.js에서 필요한 요소를 등록
+Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
+
 export default {
   props: ["academyId"], // URL에서 전달받은 academy_id
   data() {
@@ -123,7 +135,7 @@ export default {
         address: "",
         phone: "",
         site_address: "",
-        rating: 0,
+        rating: 0, // 학원의 평균 별점
       },
       currentCourses: [], // 현재 진행 중인 과정
       completedCourses: [], // 완료된 과정
@@ -133,6 +145,7 @@ export default {
   mounted() {
     this.fetchAcademyData(); // 학원 정보 가져오기
     this.fetchCourses(); // 강좌 정보 가져오기
+    this.fetchChartData(); // 차트 데이터를 가져와 차트를 생성
   },
   methods: {
     // 학원 정보 가져오는 메서드
@@ -146,6 +159,48 @@ export default {
         .catch((error) => {
           console.error("학원 정보를 불러오는 중 오류가 발생했습니다.", error);
         });
+    },
+    // 학원의 차트 데이터를 가져오는 메서드
+    fetchChartData() {
+      axios
+        .get(`http://localhost:8080/api/academies/${this.academyId}/chartData`)
+        .then((response) => {
+          const chartData = response.data; // 서버에서 받아온 차트 데이터
+          console.log("학원차트가져올떄.", response.data);
+          this.generateChart("academyRadarChart", chartData);
+        })
+        .catch((error) => {
+          console.error("차트 데이터를 불러오는 중 오류가 발생했습니다.", error);
+        });
+    },
+    generateChart(chartId, data) {
+      const ctx = document.getElementById(chartId).getContext("2d");
+      this.chart = new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: ["교육", "강사", "시설", "분위기", "행정", "사후관리"],
+          datasets: [
+            {
+              label: "평가",
+              data: data, // 서버에서 받은 데이터를 사용
+              backgroundColor: "rgba(54, 162, 235, 0.2)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 5,
+              ticks: {
+                stepSize: 1,
+              },
+            },
+          },
+        },
+      });
     },
     // 강좌 정보 가져오는 메서드
     fetchCourses() {
@@ -178,19 +233,13 @@ export default {
           });
 
           // 완료된 과정: 종료일 기준 내림차순 정렬
-          this.completedCourses = completedCourses.sort(
-            (a, b) => new Date(b.end_date) - new Date(a.end_date)
-          );
+          this.completedCourses = completedCourses.sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
 
           // 진행 중인 과정: 시작일 기준 내림차순 정렬
-          this.currentCourses = currentCourses.sort(
-            (a, b) => new Date(b.start_date) - new Date(a.start_date)
-          );
+          this.currentCourses = currentCourses.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
 
           // 진행 예정 과정: 시작일 기준 내림차순 정렬
-          this.upcomingCourses = upcomingCourses.sort(
-            (a, b) => new Date(b.start_date) - new Date(a.start_date)
-          );
+          this.upcomingCourses = upcomingCourses.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
         })
 
         .catch((error) => {
