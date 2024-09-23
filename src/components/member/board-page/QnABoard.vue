@@ -109,12 +109,18 @@ export default {
       if (selectedCategory === "전체") {
         filtered = this.items;
       } else {
-        return this.items.filter(item => item.category === selectedCategory);
-      }
+        filtered = this.items.filter(item => item.category === selectedCategory);      }
       // 검색어로 필터링
       if (this.searchKeyword) {
         filtered = filtered.filter(item => item.title.includes(this.searchKeyword));
       }
+      // 정렬 기준에 따라 정렬
+      if (this.activeSort === 'popular') {
+        filtered.sort((a, b) => b.views - a.views); // 조회수 내림차순으로 정렬
+      } else if (this.activeSort === 'recent') {
+        filtered.sort((a, b) => new Date(b.regdate) - new Date(a.regdate)); // 최신순 정렬
+      }
+
       return filtered;
     },
     paginatedData() {
