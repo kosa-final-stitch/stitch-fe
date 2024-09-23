@@ -4,6 +4,7 @@
  설명 : ContentArea 안에 위치하는 후원하기 버튼. 클릭 시 모달 창.
  ---------------------
  2024.09.19 박요한 | 컴포넌트 생성
+ 2024.09.20 박요한 | 포트원 연결
  -->
 
 <template>
@@ -114,15 +115,15 @@ export default {
   display: inline-block;
   margin-top: 10px;
   padding: 8px 16px;
-  background-color: #ffdf50;
+  background-color: #f28c00;
   color: white;
   text-decoration: none;
   border-radius: 5px;
   border: none;
 }
 
-.button:hover {
-  background-color: #ff7701;
+button:hover {
+  background-color: #ffdf50;
 }
 
 .modal-overlay {
@@ -166,7 +167,7 @@ h1 {
 }
 
 .submit-button {
-  background-color: #ff6600;
+  background-color: #f28c00;
   color: white;
   padding: 10px 20px;
   border: none;

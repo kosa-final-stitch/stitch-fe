@@ -27,13 +27,13 @@ export default {
   display: inline-block;
   margin-top: 10px;
   padding: 8px 16px;
-  background-color: #ffdf50;
+  background-color: #f28c00; /* 학원 목록: #f28c00; 로고: #ff7701; 게시판: #F28C28; 색 통일하기? */
   color: white;
   text-decoration: none;
   border-radius: 5px;
 }
 
 .more-button:hover {
-  background-color: #ff7701;
+  background-color: #ffdf50;
 }
 </style>
