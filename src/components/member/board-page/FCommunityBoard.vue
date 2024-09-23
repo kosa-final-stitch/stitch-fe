@@ -3,7 +3,7 @@
 <template>
   <MemberHeader></MemberHeader>
   <div class="board-container">
-    <h1 class="board-title">정보공유 게시판</h1>
+    <h1 class="board-title">자유 게시판</h1>
     <h5 class="board-description">자유롭게 여러분의 의견을 입력하세요.</h5>
     <div class="category-tab">
       <button
@@ -61,8 +61,8 @@
     </div>
     <div class="search-bar">
       <div class="search-wrapper">
-        <input type="text" placeholder="검색어를 입력하세요..." />
-        <button class="search-button">
+        <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요..." @keyup.enter="searchPosts"/>
+        <button class="search-button" @click="searchPosts">
           <i class="fas fa-search"></i>
         </button>
       </div>
@@ -99,16 +99,28 @@ export default {
       currentPage: 1,
       itemsPerPage: 10, // 한 페이지에 10개 항목
       selectedBoardId: null,  // 선택된 게시글의 boardId를 저장
+      searchKeyword: '' // 검색어 관리
     };
   },
   computed: {
     filteredItems() {
       const selectedCategory = this.categories[this.activeTab];
+      let filtered = [];
       if (selectedCategory === "전체") {
-        return this.items;
+        filtered = this.items;
       } else {
-        return this.items.filter(item => item.category === selectedCategory);
+        filtered = this.items.filter(item => item.category === selectedCategory);      }
+      // 검색어로 필터링
+      if (this.searchKeyword) {
+        filtered = filtered.filter(item => item.title.includes(this.searchKeyword));
       }
+      // 정렬 기준에 따라 정렬
+      if (this.activeSort === 'popular') {
+        filtered.sort((a, b) => b.views - a.views); // 조회수 내림차순으로 정렬
+      } else if (this.activeSort === 'recent') {
+        filtered.sort((a, b) => new Date(b.regdate) - new Date(a.regdate)); // 최신순 정렬
+      }
+      return filtered;
     },
     paginatedData() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -152,6 +164,16 @@ export default {
           .catch(error => {
             console.error("Error fetching posts:", error);
           });
+    },
+    searchPosts() {
+      if (!this.searchKeyword) {
+        this.filteredItems = this.items; // 검색어가 없으면 전체 목록을 보여줌
+      } else {
+        this.filteredItems = this.items.filter(item =>
+            item.title.includes(this.searchKeyword)
+        );
+      }
+      this.currentPage = 1; // 검색 후 첫 번째 페이지로 이동
     },
     goToPostForm() {
       this.$router.push('/board/PostForm'); // Vue Router를 사용하여 페이지 이동
