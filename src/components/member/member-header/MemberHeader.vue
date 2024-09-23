@@ -11,21 +11,34 @@
  2024.09.13 박요한 | a 태그 router-link로 수정, router에 맞춰서 경로 수정.
  2024.09.16 박요한 | 로그아웃 시 localStorage JWT 토큰 제거.
  2024.09.19 박요한 | 검색창 컴포넌트 분리.
+ 2024.09.21 김호영 | 관리자 페이지 이동 버튼 추가
  -->
-<template>
+ <template>
   <header class="member-header">
     <nav class="nav-menu">
       <div class="left-side">
         <ul class="nav-items">
+          <!-- 마이페이지 버튼: 로그인 상태일 때만 표시 -->
           <li v-if="isAuthenticated && !isMyPage">
             <router-link to="/mypage">마이페이지</router-link>
           </li>
+
+          <!-- 관리자 페이지 버튼: 관리자 권한이 있을 때만 표시 -->
+          <li v-if="isAdmin">
+            <router-link to="/admin">관리자 페이지</router-link>
+          </li>
+
+          <!-- 로그인 버튼: 비로그인 상태일 때만 표시 -->
           <li v-else-if="!isAuthenticated && !isMyPage">
             <router-link to="/login">로그인</router-link>
           </li>
+
+          <!-- 로그아웃 버튼: 로그인 상태일 때만 표시 -->
           <li v-if="isAuthenticated">
             <a @click="confirmLogout" class="logout-link">로그아웃</a>
           </li>
+
+          <!-- 회원가입 버튼: 비로그인 상태일 때만 표시 -->
           <li v-else>
             <router-link to="/signup">회원가입</router-link>
           </li>
@@ -77,50 +90,80 @@
 </template>
 
 <script>
-import { useMemberStore } from "@/store/member-store";
-import SearchBar from "./SearchBar.vue";
+import axios from 'axios';
+import { useMemberStore } from "@/store/member-store";  // Pinia 스토어 가져오기
+import SearchBar from "./SearchBar.vue";  // 검색바 컴포넌트 가져오기
 
 export default {
-  components: { SearchBar },
+  components: {
+    SearchBar,  // 검색바 컴포넌트 등록
+  },
   data() {
     return {
-      searchText: "", // 검색창에 입력된 텍스트를 관리하는 변수
-      isDropdownVisible: false, // 드롭다운 상태
+      searchText: "",  // 검색창에 입력된 텍스트 상태
+      isDropdownVisible: false,  // 드롭다운 메뉴의 표시 상태
     };
   },
   computed: {
+    // 사용자 인증 여부 확인
     isAuthenticated() {
-      const store = useMemberStore();
-      return store.isAuthenticated;
+      const store = useMemberStore();  // Pinia의 member-store 사용
+      return store.isAuthenticated;  // 인증 상태 반환
     },
-    isMyPage() {
-      return this.$route && this.$route.path.startsWith("/mypage");
+    // 관리자 권한 여부 확인
+    isAdmin() {
+      const store = useMemberStore();
+      console.log("Pinia에서 가져온 관리자 상태:", store.isAdmin);  // 관리자 상태 로그 출력
+      return store.authority && store.authority.includes('ROLE_ADMIN');  // 관리자 권한 확인 후 반환
     },
   },
   methods: {
-    goHome() {
-      this.$router.push("/");
-    },
-    confirmLogout() {
-      if (confirm("정말 로그아웃 하시겠습니까?")) {
-        this.logout();
+    // 사용자 정보를 백엔드에서 가져오는 함수
+    async fetchUserInfo() {
+      try {
+        const response = await axios.get('/api/member/info');  // API로 사용자 정보 요청
+        console.log("백엔드에서 가져온 사용자 정보:", response.data);
+        const memberStore = useMemberStore();
+
+        if (response.status === 200 && response.data) {
+          // Pinia 상태에 사용자 정보 설정
+          memberStore.setMember(response.data);
+        }
+      } catch (error) {
+        console.error("사용자 정보를 가져오는 중 오류 발생:", error);  // 오류 처리
       }
     },
+    // 홈으로 이동하는 함수
+    goHome() {
+      this.$router.push("/");  // 홈 페이지로 리다이렉트
+    },
+    // 로그아웃 확인 후 실행
+    confirmLogout() {
+      if (confirm("정말 로그아웃 하시겠습니까?")) {
+        this.logout();  // 로그아웃 실행
+      }
+    },
+    // 로그아웃 처리 함수
     logout() {
       const store = useMemberStore();
-      store.logout(); // Pinia 스토어의 로그아웃 메서드 호출
-      localStorage.removeItem("jwt"); // localStorage에서 JWT 토큰 제거
-      alert("로그아웃되었습니다.");
-      this.$router.push("/"); // 메인 페이지로 리다이렉트
+      store.logout();  // Pinia 스토어에서 로그아웃 처리
+      localStorage.removeItem('jwt');  // 로컬스토리지에서 JWT 토큰 제거
+      alert("로그아웃되었습니다.");  // 로그아웃 메시지 출력
+      this.$router.push("/");  // 메인 페이지로 리다이렉트
     },
+    // 드롭다운 메뉴 보이기
     showDropdown() {
-      this.isDropdownVisible = true;
-      document.body.classList.add("blurred"); // 블러 효과 적용
+      this.isDropdownVisible = true;  // 드롭다운 메뉴 표시
+      document.body.classList.add("blurred");  // 배경 블러 효과 적용
     },
+    // 드롭다운 메뉴 숨기기
     hideDropdown() {
-      this.isDropdownVisible = false;
-      document.body.classList.remove("blurred"); // 블러 효과 제거
+      this.isDropdownVisible = false;  // 드롭다운 메뉴 숨기기
+      document.body.classList.remove("blurred");  // 배경 블러 효과 제거
     },
+  },
+  created() {
+    this.fetchUserInfo();  // 컴포넌트가 생성될 때 사용자 정보를 가져옴
   },
 };
 </script>
