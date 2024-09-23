@@ -145,7 +145,7 @@ export default {
       if (!this.memberId || !this.courseId) {
         console.log("회원아이디 : " + this.memberId + " 코스아이디 : " + this.courseId);
         console.error("회원 ID를 가져오지 못했습니다.");
-        alert("회원 ID를 가져오지 못했습니다. 다시 시도해 주세요.");
+        alert("로그인 후 리뷰 작성이 가능합니다. 로그인 후 이용해 주세요");
         return;
       }
       const reviewData = [
@@ -174,11 +174,16 @@ export default {
           alert("리뷰가 성공적으로 저장되었습니다.");
           console.log("리뷰서버 응답:", response.data); // 서버 응답 데이터를 처리
           // 저장 후 courseDetail 페이지로 이동
-          this.$router.push({ name: "CourseInfoDetail", params: { courseId: this.courseId } });
+          this.$router.push({
+            //데이터 푸쉬로보냄
+            name: "CourseInfoDetail",
+            params: { courseId: this.courseId },
+            query: { reviews: reviewData },
+          });
         })
         .catch((error) => {
           console.error("리뷰 저장 중 오류 발생:", error);
-          alert("리뷰 저장 중 오류가 발생했습니다. 다시 시도해 주세요.");
+          alert("빈 칸을 채워주세요.");
         });
     },
   },
