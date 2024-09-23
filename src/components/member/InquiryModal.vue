@@ -44,6 +44,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
@@ -59,7 +61,7 @@ export default {
     close() {
       this.$emit("close"); // 부모 컴포넌트로 'close' 이벤트를 전달
     },
-    submitInquiry() {
+    async submitInquiry() {
       // 유효성 검사
       this.categoryError = !this.selectedCategory;
       this.titleError = !this.title.trim(); // 공백만 있을 경우도 처리
@@ -67,8 +69,19 @@ export default {
 
       // 모든 항목이 유효할 때만 제출
       if (!this.categoryError && !this.titleError && !this.contentError) {
-        // 문의 등록 처리 로직
-        this.$emit("close");
+        try {
+          // 문의 등록 처리
+          await axios.post("/api/member/inquiry", {
+            category: this.selectedCategory,
+            title: this.title,
+            content: this.content,
+          });
+          alert("문의가 성공적으로 등록되었습니다."); // 성공 메시지 출력
+          this.$emit("close"); // 모달 닫기
+        } catch (error) {
+          console.error("문의 등록 실패:", error);
+          alert("문의 등록에 실패했습니다. 다시 시도해주세요."); // 실패 시 메시지 출력
+        }
       }
     },
   },
