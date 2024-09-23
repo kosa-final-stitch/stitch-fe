@@ -20,7 +20,7 @@
       <div class="left-side">
         <ul class="nav-items">
           <!-- 마이페이지 버튼: 로그인 상태일 때만 표시 -->
-          <li v-if="isAuthenticated && !isMyPage">
+          <li v-if="isAuthenticated">
             <router-link to="/mypage">마이페이지</router-link>
           </li>
 
@@ -30,7 +30,7 @@
           </li>
 
           <!-- 로그인 버튼: 비로그인 상태일 때만 표시 -->
-          <li v-else-if="!isAuthenticated && !isMyPage">
+          <li v-else-if="!isAuthenticated">
             <router-link to="/login">로그인</router-link>
           </li>
 
@@ -112,15 +112,15 @@ export default {
     // 사용자 인증 여부 확인
     isAuthenticated() {
       const store = useMemberStore(); // Pinia의 member-store 사용
+      console.log("Pinia에서 가져온 인증 상태:", store.isAuthenticated); // 관리자 상태 로그 출력
       return store.isAuthenticated; // 인증 상태 반환
     },
-    // 관리자 권한 여부 확인
-    isAdmin() {
-      const store = useMemberStore();
-      console.log("Pinia에서 가져온 관리자 상태:", store.isAdmin); // 관리자 상태 로그 출력
-      return store.authority && store.authority.includes("ROLE_ADMIN"); // 관리자 권한 확인 후 반환
-    },
+  // 관리자 권한 여부 확인
+  isAdmin() {
+    const store = useMemberStore();
+    return store.authority && store.authority.some(auth => auth.authority === 'ROLE_ADMIN');
   },
+},
   methods: {
     // 사용자 정보를 백엔드에서 가져오는 함수
     async fetchUserInfo() {
@@ -320,6 +320,9 @@ export default {
   .nav-items li a {
     font-size: 14px; /* 화면이 작아질 때 글씨 크기를 줄이기 */
   }
+  .nav-menu {
+    font-size: 14px;
+  }
 }
 @media (max-width: 400px) {
   .nav-items {
@@ -327,6 +330,10 @@ export default {
   }
   .nav-items li a {
     font-size: 8px; /* 더 좁아지면 글씨 크기를 더 줄이기 */
+  }
+
+  .nav-menu {
+    font-size: 8px;
   }
 }
 </style>

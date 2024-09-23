@@ -26,14 +26,15 @@
       <button class="menu-item" :class="{ active: isActive('admin/pay-management') }" @click="navigateTo('admin/pay-management')">결제정보 관리</button>
       </div>
 
-      <div class="logout-container">
-        <button class="logout-btn" @click="confirmLogout">로그아웃</button>
+      <div class="main-home-container">
+        <button class="main-home-btn" @click="goMainHome">홈으로 이동</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+
 export default {
   name: 'adminSidebar',
   methods: {
@@ -43,14 +44,10 @@ export default {
   isActive(route) {
     return this.$route.path === `/${route}`;  // 앞에 / 추가
   },
-   confirmLogout() {
-      if (confirm('정말 로그아웃 하시겠습니까?')) {
-        this.logout(); // 사용자가 확인을 누르면 로그아웃 진행
+   goMainHome() {
+      if (confirm('홈으로 이동하시겠습니까?')) {
+        this.$router.push('/'); 
       }
-    },
-    logout() {
-      alert('로그아웃되었습니다.');
-        this.$router.push('/'); // 메인 페이지로 리다이렉트
     },
     goHome() {
       this.$router.push('/admin');
@@ -134,11 +131,11 @@ export default {
   border-radius: 80px;  /* 모서리를 둥글게 */
 }
 
-.logout-container {
+.main-home-container {
   margin-bottom: 20px; /* 바닥에서 약간 띄움 */
 }
 
-.logout-btn {
+.main-home-btn {
   width: 100%;
   padding: 9px;
   background-color: #555;
@@ -150,7 +147,7 @@ export default {
   box-shadow: 0px 4px 4px 1px rgb(202, 202, 202); /* 그림자 추가 */
 }
 
-.logout-btn:hover {
+.main-home-btn:hover {
   background-color: #333;
 }
 
@@ -174,7 +171,7 @@ export default {
     width: 100px;
   }
 
-  .logout-btn {
+  .main-home-btn {
     font-size: 11px;
   }
 }
@@ -198,7 +195,7 @@ export default {
     width: 80px;
   }
 
-  .logout-btn {
+  .main-home-btn {
     padding: 8px;
     font-size: 10px;
   }
@@ -223,7 +220,7 @@ export default {
     width: 60px;
   }
 
-  .logout-btn {
+  .main-home-btn {
     padding: 6px;
     font-size: 9px;
   }

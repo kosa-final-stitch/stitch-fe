@@ -10,7 +10,7 @@
  <template>
   <div class="header-container">
     <div class="page-title">{{ currentPage }}</div> <!-- 선택된 페이지 이름 -->
-    <span class="admin-name">{{ adminName }}</span> <!-- 로그인된 관리자 이름 -->
+    <span class="admin-name">현재 접속중인 관리자 : {{ adminName }}</span> <!-- 로그인된 관리자 이메일 -->
   </div>
 </template>
 
@@ -26,7 +26,7 @@
     computed: {
       adminName() {
         const store = useMemberStore();
-        return store.adminName || 'admin_name'; // 로그인된 관리자의 이름 출력
+        return store.member?.name || 'admin_name'; // 로그인된 관리자의 이름 출력
       },
     },
     watch: {
