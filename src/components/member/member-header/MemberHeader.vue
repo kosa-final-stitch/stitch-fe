@@ -11,7 +11,7 @@
  2024.09.13 박요한 | a 태그 router-link로 수정, router에 맞춰서 경로 수정.
  2024.09.16 박요한 | 로그아웃 시 localStorage JWT 토큰 제거.
  2024.09.19 박요한 | 검색창 컴포넌트 분리.
- 2024.09.22 박요한 | 문의하기 모달 추가.
+ 2024.09.22 박요한 | 문의하기 모달 추가. + 로그인 상태만 열림.
  -->
 <template>
   <header class="member-header">
@@ -45,7 +45,7 @@
               <div class="dropdown-section">
                 <h3>문의하기</h3>
                 <ul>
-                  <li><a @click="openInquiryModal">1:1 문의 하러가기</a></li>
+                  <li><a @click="handleInquiryClick">1:1 문의 하러가기</a></li>
                 </ul>
               </div>
               <div class="dropdown-section">
@@ -129,6 +129,15 @@ export default {
     },
     openInquiryModal() {
       this.inquiryModalVisible = true; // 모달 열기
+    },
+    handleInquiryClick() {
+      // 로그인 상태 확인 후 모달을 열거나 로그인 페이지로 리다이렉트
+      if (this.isAuthenticated) {
+        this.openInquiryModal();
+      } else {
+        alert("로그인이 필요합니다.");
+        this.$router.push("/login");
+      }
     },
   },
 };
