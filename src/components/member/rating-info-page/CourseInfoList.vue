@@ -2,24 +2,9 @@
   <div class="course-info">
     <!-- 과정별 탭 -->
     <div class="tab-header">
-      <div
-        :class="{ active: selectedTab === 'upcoming' }"
-        @click="selectTab('upcoming')"
-      >
-        진행 예정 과정
-      </div>
-      <div
-        :class="{ active: selectedTab === 'current' }"
-        @click="selectTab('current')"
-      >
-        현재 진행중인 과정
-      </div>
-      <div
-        :class="{ active: selectedTab === 'completed' }"
-        @click="selectTab('completed')"
-      >
-        진행 완료 과정
-      </div>
+      <div :class="{ active: selectedTab === 'upcoming' }" @click="selectTab('upcoming')">진행 예정 과정</div>
+      <div :class="{ active: selectedTab === 'current' }" @click="selectTab('current')">현재 진행중인 과정</div>
+      <div :class="{ active: selectedTab === 'completed' }" @click="selectTab('completed')">진행 완료 과정</div>
     </div>
 
     <!-- 현재 진행 중인 과정 -->
@@ -84,13 +69,9 @@
 
     <!-- 페이지네이션 -->
     <div class="pagination">
-      <button @click="previousPage" :disabled="currentPage === 1">
-        Previous
-      </button>
+      <button @click="previousPage" :disabled="currentPage === 1">Previous</button>
       <span>Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages">
-        Next
-      </button>
+      <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
     </div>
   </div>
 </template>
@@ -148,17 +129,11 @@ export default {
             }
           });
 
-          this.completedCourses = completedCourses.sort(
-            (a, b) => new Date(b.end_date) - new Date(a.end_date)
-          );
+          this.completedCourses = completedCourses.sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
 
-          this.currentCourses = currentCourses.sort(
-            (a, b) => new Date(b.start_date) - new Date(a.start_date)
-          );
+          this.currentCourses = currentCourses.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
 
-          this.upcomingCourses = upcomingCourses.sort(
-            (a, b) => new Date(b.start_date) - new Date(a.start_date)
-          );
+          this.upcomingCourses = upcomingCourses.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
         })
         .catch((error) => {
           console.error("강좌 정보를 불러오는 중 오류가 발생했습니다.", error);
