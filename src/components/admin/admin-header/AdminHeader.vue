@@ -63,9 +63,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   z-index: 900;
-  border-bottom: 1.3px solid #575757;
+  border-bottom: 1.3px solid #000000;
   /* box-shadow: -2px 6px 10px -4px rgba(0, 0, 0, 0.1); */
   height: 60px;
   
