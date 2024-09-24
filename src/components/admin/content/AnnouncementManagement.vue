@@ -6,6 +6,7 @@
  2024.09.10 김호영 | admin 초기 설정
  2024.09.17 김호영 | 공지사항 페이지 초기 디자인 및 구현 
  2024.09.18 김호영 | 작성 기능 완.
+ 2024.09.24 김호영 | 공지사항 작성 백엔드 연결.
  -->
 
  <template>
@@ -45,6 +46,7 @@
         <tr>
           <th>No.</th>
           <th>제목</th>
+          <th>작성자 ID</th>
           <th>내용</th>
           <th>작성일자</th>
           <th>수정일자</th>
@@ -56,6 +58,7 @@
         <tr v-for="(notice, index) in paginatedNotices" :key="notice.notice_id">
           <td>{{ (currentPage - 1) * noticesPerPage + index + 1 }}</td>
           <td>{{ notice.title }}</td>
+          <td>{{ notice.memberId }}</td>
           <td>{{ notice.content.slice(0, 15) }}...</td>
           <td>{{ formatDate(notice.regdate) }}</td>
           <td>{{ notice.editdate ? formatDate(notice.editdate) : '-' }}</td>
@@ -145,7 +148,9 @@
 </template>
 
 <script>
+import { useMemberStore } from '@/store/member-store';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import axios from 'axios';
 
 export default {
   components: {
@@ -169,6 +174,12 @@ export default {
     };
   },
   computed: {
+    //로그인 된 사용자의 정보를 pinia 스토어에서 갖고옴
+    adminId() {
+      const store = useMemberStore();
+      return store.member?.id || '관리자';
+    },
+
     filteredNotices() {
       return this.noticementsData.filter(notice => {
         const matchesCategory =
@@ -189,6 +200,21 @@ export default {
     },
   },
   methods: {
+    async fetchNotices() {
+      try {
+        const token = localStorage.getItem('jwt'); // JWT 토큰
+        const response = await axios.get('/api/notices', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(response.data)
+        // 서버로부터 공지사항 데이터를 받아오면 noticementsData에 저장
+        this.noticementsData = response.data;
+      } catch (error) {
+        console.error('공지사항 데이터를 불러오는 중 오류 발생:', error);
+      }
+    },
     formatDate(date) {
       const d = new Date(date);
       return d.toISOString().replace('T', ' ').substring(0, 10);
@@ -235,21 +261,28 @@ export default {
     closeCreateModal() {
       this.isCreateModalOpen = false;
     },
-    createNotice() {
-      const newNoticeId = this.noticementsData.length + 1; // 임시로 ID 생성
-      const today = new Date().toISOString().split('T')[0]; // 오늘 날짜 생성
+  // 공지사항 작성 요청
+  async createNotice() {
+    const today = new Date().toISOString().split('T')[0]; // 오늘 날짜 생성
+    
+    // 공지사항 데이터를 서버로 전송
+    const newNotice = {
+      title: this.newNotice.title,
+      content: this.newNotice.content,
+      regdate: today, // 등록일자
+      member_id: this.adminId, // 현재 로그인한 관리자 ID
+    };
 
-      const newNotice = {
-        notice_id: newNoticeId,
-        member_id: 103, // 임시 member_id
-        title: this.newNotice.title,
-        content: this.newNotice.content,
-        regdate: today, // 등록일자
-        editdate: null,
-        status: 'public', // 상태 기본값
-      };
+    try {
+      const token = localStorage.getItem('jwt'); // JWT 토큰
+      const response = await axios.post('/api/notices', newNotice, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      this.noticementsData.push(newNotice); // 배열에 새 공지사항 추가
+      // 서버에서 응답 성공 시
+      console.log('공지사항이 성공적으로 저장되었습니다:', response.data);
 
       // 작성 완료 모달 표시
       this.isCreateSuccessModalOpen = true;
@@ -262,29 +295,18 @@ export default {
       // 모달 닫기 및 초기화
       this.closeCreateModal();
       this.newNotice = { title: '', content: '', status: 'public' };
-    },
+
+      // 공지사항 목록 새로고침
+      this.fetchNotices();
+
+    } catch (error) {
+      console.error('공지사항 작성 중 오류 발생:', error);
+    }
   },
-  mounted() {
-    this.noticementsData = [
-      {
-        notice_id: 1,
-        member_id: 101,
-        title: '공지사항 1',
-        content: '공지사항 내용 1',
-        regdate: '2024-09-10',
-        editdate: '2024-09-12',
-        status: 'public',
-      },
-      {
-        notice_id: 2,
-        member_id: 102,
-        title: '공지사항 2',
-        content: '공지사항 내용 2',
-        regdate: '2024-09-11',
-        editdate: null,
-        status: 'private',
-      },
-    ];
+},
+mounted() {
+    // 페이지가 로드될 때 공지사항 데이터를 불러옴
+    this.fetchNotices();
   },
 };
 </script>

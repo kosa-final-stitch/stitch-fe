@@ -8,6 +8,7 @@
  2024.09.13 김호영 | 디자인 완 (코드 정리 미완).
  2024.09.19 김호영 | 날짜 형식 수정.
  2024.09.22 김호영 | 사용자 정보 백엔드와 연동.
+ 2024.09.23 김호영 | 사용자 삭제 기능 백엔드와 연동 (삭제 모달 안닫힘 안사라짐 점검 필요).
  -->
 
  <template>
@@ -99,6 +100,28 @@
         </tr>
       </tbody>
     </table>
+
+        <!-- 삭제 확인 모달 -->
+    <div v-if="isDeleteModalOpen" class="modal-overlay">
+      <div class="modal-content">
+        <h3>정말 삭제하시겠습니까?</h3>
+        <p>선택하신 이메일 : {{ memberToDelete?.email }}</p>
+        <div class="modal-buttons">
+          <button @click="deleteMember">확인</button>
+          <button @click="cancelDelete">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 삭제 완료 모달 -->
+    <div v-show="isDeleteSuccessModalOpen" class="modal-success-overlay">
+      <div class="modal-success-content">
+        <div class="modal-icon-container">
+          <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
+        </div>
+        <p>삭제가 완료되었습니다</p>
+      </div>
+    </div>
 
     <!-- 페이지네이션 -->
     <div class="pagination">
@@ -202,40 +225,60 @@ export default {
     console.log('삭제하려는 사용자:', this.memberToDelete); // 로그로 삭제할 사용자 확인
     this.isDeleteModalOpen = true; // 모달 열기
   },
-  deleteMember() {
+  cancelDelete() {
+        console.log('취소 버튼 클릭됨');
+        console.log('isDeleteModalOpen:', this.isDeleteModalOpen);
+        this.isDeleteModalOpen = false; // 모달 닫기
+        console.log('isDeleteModalOpen:', this.isDeleteModalOpen);
+        this.memberToDelete = null; // 초기화 
+        this.$nextTick(() => {
+        console.log('모달 상태 및 멤버 초기화 완료');
+        });
+      },
+
+  async deleteMember() {
       if (!this.memberToDelete) {
         console.error('삭제할 사용자가 설정되지 않았습니다.');
         return;
       }
+
+      try {
+      // 실제 DB에서 사용자 삭제 요청
+      const token = localStorage.getItem('jwt'); // 저장된 JWT 토큰 가져오기
+      await axios.delete(`/api/members/${this.memberToDelete.email}`, {
+        headers: {
+          Authorization: `Bearer ${token}` // 토큰을 Authorization 헤더에 포함
+        }
+      });
+
       console.log('삭제할 사용자:', this.memberToDelete); // 삭제하려는 사용자 정보 로그
       this.members = this.members.filter(u => u.email !== this.memberToDelete.email); // 사용자 삭제
       this.isDeleteModalOpen = false; // 삭제 확인 모달 닫기
       this.isDeleteSuccessModalOpen = true;
-      this.memberToDelete = null; // 초기화
-
+ 
       // 일정시간 이후 자동으로 모달 close
       setTimeout(() => {
-      this.isDeleteSuccessModalOpen = false;
-    }, 1500);
+        this.isDeleteSuccessModalOpen = false;
+        this.memberToDelete = null; // 초기화
+      }, 1500);   
+    } catch (error) {
+      console.error("사용자 삭제 중 오류 발생: ", error);
+    }
   },
-    cancelDelete() {
-      this.isDeleteModalOpen = false; // 모달 닫기
-      this.memberToDelete = null; // 초기화 
+      closeSuccessModal() {
+        this.isDeleteSuccessModalOpen = false;
+      },
+      // 페이지 이동 메서드
+      goToPage(page) {
+        if (page >= 1 && page <= this.totalPages) {
+          this.currentPage = page;
+        }
+      },
     },
-    closeSuccessModal() {
-      this.isDeleteSuccessModalOpen = false;
-    },
-    // 페이지 이동 메서드
-    goToPage(page) {
-      if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page;
-      }
-    },
-  },
-  created() {
-    // 컴포넌트가 로드될 때 API 호출
-    this.fetchMembers();
-  }
+    created() {
+      // 컴포넌트가 로드될 때 API 호출
+      this.fetchMembers();
+    }
 };
 </script>
 
@@ -305,7 +348,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1001; /* 위에 배치 */
+  z-index: 1003; /* 위에 배치 */
 }
 
 /* 모달 콘텐츠 스타일 */
