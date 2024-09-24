@@ -8,6 +8,7 @@ module.exports = defineConfig({
     proxy: {
       "/api": {
         target: "http://localhost:8080", // Spring Boot가 동작하는 서버
+        // target: process.env.VUE_APP_API_URL, // 공유용: localhost 대신 로컬 IP를 사용
         ws: false, // 웹소켓 비활성화
         changeOrigin: true,
       },
