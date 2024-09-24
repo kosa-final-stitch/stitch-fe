@@ -5,6 +5,7 @@
  ---------------------
  2024.09.19 박요한 | 컴포넌트 생성
  2024.09.20 박요한 | 포트원 연결
+ 2024.09.24 박요한 | 결제 성공 로직
  -->
 
 <template>
@@ -18,10 +19,10 @@
 
         <select v-model="category" class="donation-select">
           <option value="" disabled>카테고리</option>
-          <option value="기부">기부하기</option>
+          <option value="후원">후원하기</option>
         </select>
 
-        <input type="text" placeholder="기부금액" v-model="donationAmount" class="donation-input" /> 원
+        <input type="text" placeholder="후원금액" v-model="donationAmount" class="donation-input" /> 원
 
         <p class="donation-message">
           모든 사람이 다양한 교육 정보를 빠르게 얻을 수 있는 세상을 만들기 위해, 모두가 함께하는 공간을 만들기 위해,
@@ -33,7 +34,9 @@
           꿈을 향해 나아갈 수 있는 힘이 됩니다.
         </p>
 
-        <button class="submit-button" @click="submitDonation">후원</button>
+        <button :disabled="loading" class="submit-button" @click="submitDonation">
+          {{ loading ? "결제 처리 중..." : "후원" }}
+        </button>
         <button class="close-button" @click="closeModal">닫기</button>
       </div>
     </div>
@@ -42,6 +45,7 @@
 
 <script>
 import axios from "axios";
+import { useMemberStore } from "@/store/member-store";
 
 export default {
   data() {
@@ -49,6 +53,7 @@ export default {
       showModal: false,
       category: "",
       donationAmount: "",
+      loading: false, // 로딩 상태 추가
     };
   },
   methods: {
@@ -57,52 +62,71 @@ export default {
     },
     closeModal() {
       this.showModal = false;
+      this.loading = false; // 모달 닫을 때 로딩 상태 초기화
     },
-    submitDonation() {
+    async submitDonation() {
       if (!this.donationAmount || isNaN(this.donationAmount) || Number(this.donationAmount) <= 0) {
         alert("올바른 금액을 입력해주세요.");
         return;
       }
 
-      // PortOne(아임포트) 결제 처리
-      const IMP = window.IMP;
-      const userCode = process.env.VUE_APP_IMP_USER_CODE; // 아임포트에서 발급받은 가맹점 식별 코드
-      IMP.init(userCode); // 아임포트 초기화
+      this.loading = true; // 결제 시작 시 로딩 상태
 
-      IMP.request_pay(
-        {
-          pg: "html5_inicis", // PG사 선택 (여기서는 이니시스 예시)
-          pay_method: "card", // 결제 방식 (카드)
-          merchant_uid: `mid_${new Date().getTime()}`, // 가맹점 고유 주문번호
-          name: "기부금", // 결제 이름
-          amount: this.donationAmount, // 사용자 입력 금액
-          buyer_email: "test@test.com",
-          buyer_name: "홍길동",
-          buyer_tel: "01012345678",
-          buyer_addr: "서울특별시 강남구",
-          buyer_postcode: "12345",
-        },
-        (rsp) => {
-          if (rsp.success) {
-            // 결제 성공 처리
-            this.handlePaymentSuccess(rsp);
-          } else {
-            // 결제 실패 처리
-            alert(`결제 실패: ${rsp.error_msg}`);
-          }
-        }
-      );
+      try {
+        const memberStore = useMemberStore(); // Pinia 스토어에서 유저 정보 접근
+        const member = memberStore.member || {}; // 로그인된 유저 정보 (없으면 빈 객체)
+
+        // PortOne(아임포트) 결제 처리
+        const IMP = window.IMP;
+        const userCode = process.env.VUE_APP_IMP_USER_CODE; // 아임포트에서 발급받은 가맹점 식별 코드
+        IMP.init(userCode); // 아임포트 초기화
+
+        await new Promise((resolve, reject) => {
+          IMP.request_pay(
+            {
+              pg: "html5_inicis", // PG사 선택 (여기서는 이니시스 예시)
+              pay_method: "card", // 결제 방식 (카드)
+              merchant_uid: `mid_${new Date().getTime()}`, // 가맹점 고유 주문번호
+              name: "후원금", // 결제 이름
+              amount: this.donationAmount, // 사용자 입력 금액
+              buyer_email: member?.email || "anonymous@domain.com", // 유저 이메일
+              buyer_name: member?.name || "익명", // 유저 이름
+              buyer_tel: member?.phone || "010-0000-0000", // 유저 전화번호
+              buyer_addr: member?.address || "주소 정보 없음", // 유저 주소
+              buyer_postcode: member?.postcode || "00000", // 우편번호 (없는 경우 기본값)
+            },
+            (rsp) => {
+              if (rsp.success) {
+                this.handlePaymentSuccess(rsp); // 결제 성공 처리
+                resolve(rsp); // Promise 성공 처리
+              } else {
+                reject(new Error(rsp.error_msg)); // 결제 실패 처리
+              }
+            }
+          );
+        });
+      } catch (error) {
+        alert(`결제 실패: ${error.message}`);
+      } finally {
+        this.loading = false; // 결제 완료 후 로딩 상태 해제
+      }
     },
     async handlePaymentSuccess(paymentData) {
       try {
-        // 서버로 결제 결과 전송 로직
-        const response = await axios.post("/api/payment/complete", paymentData); // await로 axios 처리
+        // 결제 정보를 서버로 전송하여 저장
+        const response = await axios.post("/api/payment/complete", {
+          amount: paymentData.paid_amount, // 결제 금액
+          method: paymentData.pay_method, // 결제 방식 (예: 카드)
+          category: "후원", // 결제 카테고리 (후원)
+          status: "completed", // 결제 상태 (완료)
+        });
+
         if (response) {
           alert("결제가 성공적으로 완료되었습니다.");
+          this.closeModal(); // 모달 닫기
         }
-        this.closeModal(); // 모달 닫기
       } catch (error) {
-        console.error(error); // 에러 로그
+        console.error("결제 처리 중 오류가 발생했습니다.", error);
         alert("결제 처리 중 오류가 발생했습니다.");
       }
     },
