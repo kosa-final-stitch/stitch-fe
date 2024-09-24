@@ -13,33 +13,35 @@
     <button @click="openModal" class="button">후원하기</button>
 
     <!-- 모달 -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <h1>후원하기</h1>
+    <teleport to="body">
+      <div v-if="showModal" class="modal-overlay" @click="closeModal">
+        <div class="modal-content" @click.stop>
+          <h1>후원하기</h1>
 
-        <select v-model="category" class="donation-select">
-          <option value="" disabled>카테고리</option>
-          <option value="후원">후원하기</option>
-        </select>
+          <select v-model="category" class="donation-select">
+            <option value="" disabled>카테고리</option>
+            <option value="후원">후원하기</option>
+          </select>
 
-        <input type="text" placeholder="후원금액" v-model="donationAmount" class="donation-input" /> 원
+          <input type="text" placeholder="후원금액" v-model="donationAmount" class="donation-input" /> 원
 
-        <p class="donation-message">
-          모든 사람이 다양한 교육 정보를 빠르게 얻을 수 있는 세상을 만들기 위해, 모두가 함께하는 공간을 만들기 위해,
-          여러분의 후원을 부탁드립니다.
-        </p>
+          <p class="donation-message">
+            모든 사람이 다양한 교육 정보를 빠르게 얻을 수 있는 세상을 만들기 위해, 모두가 함께하는 공간을 만들기 위해,
+            여러분의 후원을 부탁드립니다.
+          </p>
 
-        <p class="donation-message">
-          작은 관심과 지원이 더 나은 미래를 여는 큰 힘이 됩니다. 여러분의 기부는 더 많은 사람들이 필요한 정보를 얻고,
-          꿈을 향해 나아갈 수 있는 힘이 됩니다.
-        </p>
+          <p class="donation-message">
+            작은 관심과 지원이 더 나은 미래를 여는 큰 힘이 됩니다. 여러분의 기부는 더 많은 사람들이 필요한 정보를 얻고,
+            꿈을 향해 나아갈 수 있는 힘이 됩니다.
+          </p>
 
-        <button :disabled="loading" class="submit-button" @click="submitDonation">
-          {{ loading ? "결제 처리 중..." : "후원" }}
-        </button>
-        <button class="close-button" @click="closeModal">닫기</button>
+          <button :disabled="loading" class="submit-button" @click="submitDonation">
+            {{ loading ? "결제 처리 중..." : "후원" }}
+          </button>
+          <button class="close-button" @click="closeModal">닫기</button>
+        </div>
       </div>
-    </div>
+    </teleport>
   </div>
 </template>
 
@@ -140,16 +142,20 @@ export default {
 .button {
   display: inline-block;
   margin-top: 10px;
-  padding: 8px 16px;
+  padding: 12px 24px;
   background-color: #f28c00;
   color: white;
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: 50px; /* 둥근 버튼 */
   border: none;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
+.button:hover {
   background-color: #ffdf50;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* 호버 시 그림자 강조 */
 }
 
 .modal-overlay {
