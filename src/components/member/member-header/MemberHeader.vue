@@ -14,6 +14,7 @@
  2024.09.21 김호영 | 관리자 페이지 이동 버튼 추가
  2024.09.22 박요한 | 문의하기 모달 추가. + 로그인 상태만 열림.
  2024.09.23 김호영 | 관리자 로그인시 관리자 페이지 이동 상태 추가.
+ 2024.09.24 박요한 | fetchUserInfo 로그인된 경우만 실행.
  -->
 <template>
   <header class="member-header">
@@ -116,12 +117,12 @@ export default {
       console.log("Pinia에서 가져온 인증 상태:", store.isAuthenticated); // 관리자 상태 로그 출력
       return store.isAuthenticated; // 인증 상태 반환
     },
-  // 관리자 권한 여부 확인
-  isAdmin() {
-    const store = useMemberStore();
-    return store.authority && store.authority.some(auth => auth.authority === 'ROLE_ADMIN');
+    // 관리자 권한 여부 확인
+    isAdmin() {
+      const store = useMemberStore();
+      return store.authority && store.authority.some((auth) => auth.authority === "ROLE_ADMIN");
+    },
   },
-},
   methods: {
     // 사용자 정보를 백엔드에서 가져오는 함수
     async fetchUserInfo() {
@@ -180,7 +181,9 @@ export default {
     },
   },
   created() {
-    this.fetchUserInfo(); // 컴포넌트가 생성될 때 사용자 정보를 가져옴
+    if (this.isAuthenticated) {
+      this.fetchUserInfo(); // 로그인된 경우에만 사용자 정보를 가져옴
+    }
   },
 };
 </script>
