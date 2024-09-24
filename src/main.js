@@ -19,9 +19,6 @@ import MemberApp from "./components/member/MemberApp.vue"; // 기본 앱은 Memb
 import "@fortawesome/fontawesome-free/css/all.css";
 import "@fortawesome/fontawesome-free/js/all.js";
 
-// JWT 디코딩을 위한 라이브러리 임포트
-import jwt_decode from "jwt-decode";
-
 import axios from "axios";
 
 // Axios 인터셉터 설정
@@ -86,13 +83,16 @@ const router = createRouter({
 // 전역 가드 설정
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem("jwt"); // 토큰 여부로 인증 확인
+  const memberStore = useMemberStore(); // Pinia 스토어 가져오기
+  const isAdmin = memberStore.isAdmin; // 관리자 여부 확인
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    // 인증이 필요한 라우트에 접근 시
     if (!isAuthenticated) {
-      next({ name: "Login" }); // 인증되지 않았으면 로그인 페이지로 리디렉션
+      next({ name: "Login" }); // 인증되지 않으면 로그인 페이지로 이동
+    } else if (to.matched.some((record) => record.meta.requiresAdmin) && !isAdmin) {
+      next({ name: "NotAuthorized" }); // 관리자가 아닌 경우 접근 불가 처리
     } else {
-      next(); // 인증된 경우 그대로 진행
+      next();
     }
   } else {
     next(); // 인증이 필요 없는 페이지는 그대로 진행
@@ -104,36 +104,13 @@ const app = createApp(MemberApp); // 기본 앱으로 MemberApp 사용
 app.use(router); // 라우터 적용
 app.use(pinia); // Pinia 적용
 
+
+
 // Pinia 스토어를 콘솔에서 접근할 수 있게 설정
 import { useMemberStore } from "@/store/member-store"; // Pinia 스토어 가져오기
 window.memberStore = useMemberStore(); // Pinia 스토어를 window 객체에 할당
 
-import { useAdminStore } from "./store/admin-store";
-window.adminStore = useAdminStore();
 
 // FontAwesomeIcon을 전역 컴포넌트로 등록
 app.component("font-awesome-icon", FontAwesomeIcon);
-
-// JWT 토큰을 통해 권한 정보 설정
-const token = localStorage.getItem("jwt");
-if (token) {
-  console.log("메인js에서 토큰 가져오기: " + token);
-
-  try {
-    const decodedToken = jwt_decode(token); // 토큰 디코딩
-    console.log("디코딩된 토큰: ", decodedToken);
-
-    // 사용자 정보 및 권한을 Pinia store에 설정
-    const store = useMemberStore();
-    store.setToken(token); // 토큰을 사용하여 스토어에 권한 정보 설정
-
-    if (decodedToken.roles.includes("ROLE_ADMIN")) {
-      console.log("관리자 권한 확인됨.");
-      store.setMember({ ...store.member, authority: decodedToken.roles }); // 관리자 권한 설정
-    }
-  } catch (error) {
-    console.error("토큰 디코딩 중 오류 발생:", error);
-  }
-}
-
 app.mount("#app"); // #app에 마운트
