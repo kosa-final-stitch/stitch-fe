@@ -140,16 +140,20 @@ export default {
 .button {
   display: inline-block;
   margin-top: 10px;
-  padding: 8px 16px;
+  padding: 12px 24px;
   background-color: #f28c00;
   color: white;
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: 50px; /* 둥근 버튼 */
   border: none;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
+.button:hover {
   background-color: #ffdf50;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* 호버 시 그림자 강조 */
 }
 
 .modal-overlay {
