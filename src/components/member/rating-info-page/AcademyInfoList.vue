@@ -9,7 +9,9 @@
         @click="goToAcademyDetail(academy.academy_id)"
       >
         <div class="academy-details">
-          <div class="stars">★★★★★</div>
+          <p class="stars">
+            <span v-for="n in 5" :key="n">{{ n <= academy.rating ? "★" : "☆" }}</span>
+          </p>
           <h3>{{ academy.academy_name }}</h3>
           <p>주소: {{ academy.address }}</p>
           <p>전화번호: {{ academy.phone }}</p>
@@ -19,13 +21,9 @@
 
     <!-- 페이지네이션 -->
     <div class="pagination">
-      <button @click="previousPage" :disabled="currentPage === 1">
-        Previous
-      </button>
+      <button @click="previousPage" :disabled="currentPage === 1">Previous</button>
       <span>Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages">
-        Next
-      </button>
+      <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
     </div>
   </div>
 </template>
@@ -60,16 +58,25 @@ export default {
     // 학원 리스트 가져오는 메서드
     fetchAcademies() {
       axios
-        .get("http://localhost:8080/api/academies/academy") // 학원 리스트 API 엔드포인트
+        .get(`http://localhost:8080/api/academies/academy`) // 학원 리스트 API 엔드포인트
         .then((response) => {
           this.academyList = response.data;
           console.log("학원정보리스트실행.", response.data);
         })
         .catch((error) => {
-          console.error(
-            "학원 리스트를 불러오는 중 오류가 발생했습니다.",
-            error
-          );
+          console.error("학원 리스트를 불러오는 중 오류가 발생했습니다.", error);
+        });
+    },
+    // 학원 평균 별점 가져오는 메서드
+    fetchAcademyRating() {
+      axios
+        .get(`http://localhost:8080/api/academies/academy/${this.academyId}/rating`)
+        .then((response) => {
+          this.academy.rating = response.data; // 서버에서 받아온 평균 별점 저장
+          console.log("학원 평균 별점:", response.data);
+        })
+        .catch((error) => {
+          console.error("학원 평균 별점을 불러오는 중 오류가 발생했습니다.", error);
         });
     },
     // 페이지네이션 - 이전 페이지

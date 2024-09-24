@@ -1,96 +1,35 @@
 <template>
-  <!-- 메인 컨테이너 -->
   <div class="post-management">
     <h1>게시판 글 관리</h1>
     <p>회원님께서 작성한 게시글 정보입니다.</p>
 
     <!-- 탭 버튼 -->
     <div class="tabs">
-      <!-- 정보공유 게시판 탭 -->
-      <button
-        :class="{ active: selectedTab === 'info' }"
-        @click="selectedTab = 'info'"
-      >
-        정보공유 게시판
-      </button>
-      <!-- Q&A 탭 -->
-      <button
-        :class="{ active: selectedTab === 'qna' }"
-        @click="selectedTab = 'qna'"
-      >
-        Q&A
-      </button>
-      <!-- 자유게시판 탭 -->
-      <button
-        :class="{ active: selectedTab === 'free' }"
-        @click="selectedTab = 'free'"
-      >
-        자유게시판
-      </button>
+      <button :class="{ active: selectedTab === 'info' }" @click="selectedTab = 'info'">정보공유 게시판</button>
+      <button :class="{ active: selectedTab === 'qna' }" @click="selectedTab = 'qna'">Q&A</button>
+      <button :class="{ active: selectedTab === 'free' }" @click="selectedTab = 'free'">자유게시판</button>
     </div>
 
-    <!-- 정보공유 게시판 테이블 -->
-    <table v-if="selectedTab === 'info'">
+    <!-- 게시글 테이블 -->
+    <table>
       <thead>
         <tr>
           <th></th>
           <th>번호</th>
+          <th>제목</th>
           <th>내용</th>
           <th>작성일</th>
           <th>최종 수정일</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(post, index) in infoPosts" :key="index">
+        <tr v-for="(post, index) in filteredPosts" :key="index">
           <td><input type="checkbox" /></td>
           <td>{{ index + 1 }}</td>
+          <td>{{ post.title }}</td>
           <td>{{ post.content }}</td>
-          <td>{{ post.createdAt }}</td>
-          <td>{{ post.updatedAt }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Q&A 게시판 테이블 -->
-    <table v-if="selectedTab === 'qna'">
-      <thead>
-        <tr>
-          <th></th>
-          <th>번호</th>
-          <th>내용</th>
-          <th>작성일</th>
-          <th>최종 수정일</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(post, index) in qnaPosts" :key="index">
-          <td><input type="checkbox" /></td>
-          <td>{{ index + 1 }}</td>
-          <td>{{ post.content }}</td>
-          <td>{{ post.createdAt }}</td>
-          <td>{{ post.updatedAt }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- 자유게시판 테이블 -->
-    <table v-if="selectedTab === 'free'">
-      <thead>
-        <tr>
-          <th></th>
-          <th>번호</th>
-          <th>내용</th>
-          <th>작성일</th>
-          <th>최종 수정일</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(post, index) in freePosts" :key="index">
-          <td><input type="checkbox" /></td>
-          <td>{{ index + 1 }}</td>
-          <td>{{ post.content }}</td>
-          <td>{{ post.createdAt }}</td>
-          <td>{{ post.updatedAt }}</td>
+          <td>{{ formatDate(post.regdate) }}</td>
+          <td>{{ formatDate(post.editdate) }}</td>
         </tr>
       </tbody>
     </table>
@@ -103,50 +42,49 @@ import axios from "axios";
 export default {
   data() {
     return {
-      selectedTab: "info", // 기본 선택된 탭
-      infoPosts: [], // 정보공유 게시판 데이터
-      qnaPosts: [], // Q&A 게시판 데이터
-      freePosts: [], // 자유게시판 데이터
+      selectedTab: "info", // 기본 탭 설정
+      posts: [], // 모든 게시글 데이터를 저장
+      userId: null, // 로그인한 사용자 ID
     };
   },
-  methods: {
-    fetchPosts() {
-      // 정보공유 게시판 데이터 가져오기
-      axios
-        .get("http://localhost:8080/api/info-posts") // 실제 API 경로를 입력
-        .then((response) => {
-          this.infoPosts = response.data;
-        })
-        .catch((error) => {
-          console.error(
-            "정보공유 게시판 데이터를 가져오는 중 오류 발생",
-            error
-          );
-        });
-
-      // Q&A 게시판 데이터 가져오기
-      axios
-        .get("http://localhost:8080/api/qna-posts") // 실제 API 경로를 입력
-        .then((response) => {
-          this.qnaPosts = response.data;
-        })
-        .catch((error) => {
-          console.error("Q&A 게시판 데이터를 가져오는 중 오류 발생", error);
-        });
-
-      // 자유게시판 데이터 가져오기
-      axios
-        .get("http://localhost:8080/api/free-posts") // 실제 API 경로를 입력
-        .then((response) => {
-          this.freePosts = response.data;
-        })
-        .catch((error) => {
-          console.error("자유게시판 데이터를 가져오는 중 오류 발생", error);
-        });
+  computed: {
+    // 선택된 탭에 따라 게시글을 필터링
+    filteredPosts() {
+      return this.posts.filter((post) => post.category === this.selectedTab); // category로 필터링
     },
   },
   mounted() {
-    this.fetchPosts(); // 컴포넌트가 마운트되면 데이터를 가져옴
+    this.fetchUserInfo(); // 컴포넌트가 마운트되면 사용자 정보 및 게시글 데이터를 가져옴
+  },
+  methods: {
+    fetchPosts() {
+      // 로그인한 사용자 ID로 게시글을 가져옴
+      axios
+        .get(`http://localhost:8080/api/board/community/${this.userId}`)
+        .then((response) => {
+          this.posts = response.data; // 모든 게시글을 저장
+        })
+        .catch((error) => {
+          console.error("게시글 데이터를 가져오는 중 오류 발생", error);
+        });
+    },
+    // 사용자 정보를 서버에서 가져옴 (로그인한 사용자)
+    fetchUserInfo() {
+      axios
+        .get("http://localhost:8080/api/member/info")
+        .then((response) => {
+          this.userId = response.data.id; // 로그인한 사용자 ID 저장
+          console.log("게시판의 로그인된 유저아이디:", this.userId); // userId 로그 확인
+          this.fetchPosts(); // 사용자 ID로 게시글 호출
+        })
+        .catch((error) => {
+          console.error("회원 정보를 불러오는 중 오류 발생", error);
+        });
+    },
+    // 날짜 형식 변환
+    formatDate(date) {
+      return new Date(date).toLocaleDateString();
+    },
   },
 };
 </script>
