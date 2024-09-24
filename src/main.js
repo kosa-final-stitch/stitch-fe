@@ -1,4 +1,4 @@
-//  담당자: 김호영 
+//  담당자: 김호영
 //  시작 일자: 2024.09.04
 //  설명 : 기본 설정 설정
 //  ---------------------
@@ -7,7 +7,7 @@
 //  2024.09.10 김호영 | admin 라우터 설정
 //  2024.09.12 김호영 | Font Awesome 설정.
 //  2024.09.16 박요한 | localStorage.getItem("jwt") 로 변경.
-//  2024.09.18 박요한 | 전역 가드 설정 추가(로그인 리디렉트). faHeart 아이콘 추가.
+//  2024.09.18 박요한 | 전역 가드 설정 추가(로그인 리다이렉트). faHeart 아이콘 추가.
 
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
@@ -20,7 +20,7 @@ import "@fortawesome/fontawesome-free/css/all.css";
 import "@fortawesome/fontawesome-free/js/all.js";
 
 // JWT 디코딩을 위한 라이브러리 임포트
-import jwt_decode from 'jwt-decode';
+import jwt_decode from "jwt-decode";
 
 import axios from "axios";
 
@@ -105,10 +105,10 @@ app.use(router); // 라우터 적용
 app.use(pinia); // Pinia 적용
 
 // Pinia 스토어를 콘솔에서 접근할 수 있게 설정
-import { useMemberStore } from '@/store/member-store'; // Pinia 스토어 가져오기
+import { useMemberStore } from "@/store/member-store"; // Pinia 스토어 가져오기
 window.memberStore = useMemberStore(); // Pinia 스토어를 window 객체에 할당
 
-import { useAdminStore } from './store/admin-store';
+import { useAdminStore } from "./store/admin-store";
 window.adminStore = useAdminStore();
 
 // FontAwesomeIcon을 전역 컴포넌트로 등록
@@ -118,7 +118,7 @@ app.component("font-awesome-icon", FontAwesomeIcon);
 const token = localStorage.getItem("jwt");
 if (token) {
   console.log("메인js에서 토큰 가져오기: " + token);
-  
+
   try {
     const decodedToken = jwt_decode(token); // 토큰 디코딩
     console.log("디코딩된 토큰: ", decodedToken);
@@ -126,8 +126,8 @@ if (token) {
     // 사용자 정보 및 권한을 Pinia store에 설정
     const store = useMemberStore();
     store.setToken(token); // 토큰을 사용하여 스토어에 권한 정보 설정
-    
-    if (decodedToken.roles.includes('ROLE_ADMIN')) {
+
+    if (decodedToken.roles.includes("ROLE_ADMIN")) {
       console.log("관리자 권한 확인됨.");
       store.setMember({ ...store.member, authority: decodedToken.roles }); // 관리자 권한 설정
     }

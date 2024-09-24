@@ -2,15 +2,10 @@
   <div class="academy-info">
     <!-- 학원 정보 상단 -->
     <div class="info-box">
-      <!-- 학원 별점 표시 -->
       <div class="details">
         <p class="stars">
-          <!-- 별 표시 -->
-          <span v-for="n in 5" :key="n">
-            {{ n <= Math.round(academy.rating) ? "★" : "☆" }}
-          </span>
+          <span v-for="n in 5" :key="n">{{ n <= academy.rating ? "★" : "☆" }}</span>
         </p>
-        <!-- 학원 이름, 주소, 전화번호, 웹사이트 정보 표시 -->
         <h2>{{ academy.academy_name }}</h2>
         <p>주소: {{ academy.address }}</p>
         <p>전화번호: {{ academy.phone }}</p>
@@ -19,16 +14,13 @@
           <a :href="academy.site_address" target="_blank">{{ academy.site_address }}</a>
         </p>
       </div>
-      <!-- 학원 차트 표시를 위한 캔버스 -->
       <div class="radar-chart">
-        <canvas id="academyRadarChart" width="400" height="400"></canvas>
-        <!-- 차트가 그려질 캔버스 엘리먼트 -->
+        <canvas id="radarChart" width="400" height="400"></canvas>
       </div>
     </div>
 
     <!-- 과정별 탭 -->
     <div class="tab-header">
-      <!-- 탭 선택에 따라 '진행 예정', '현재 진행중', '진행 완료' 과정 표시 -->
       <div :class="{ active: selectedTab === 'upcoming' }" @click="selectedTab = 'upcoming'">진행 예정 과정</div>
       <div :class="{ active: selectedTab === 'current' }" @click="selectedTab = 'current'">현재 진행중인 과정</div>
       <div :class="{ active: selectedTab === 'completed' }" @click="selectedTab = 'completed'">진행 완료 과정</div>
@@ -66,10 +58,10 @@
       >
         <div class="rating-box">
           <p class="stars">
-            <!-- 별 표시 -->
             <span v-for="n in 5" :key="n">
-              {{ n <= Math.round(coursey.rating) ? "★" : "☆" }}
+              {{ n <= Math.round(course.rating) ? "★" : "☆" }}
             </span>
+            {{ course.rating }}
           </p>
         </div>
         <div class="course-details">
@@ -122,7 +114,6 @@ import {
   Legend,
 } from "chart.js";
 
-// Chart.js에서 필요한 요소를 등록
 Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
 export default {
@@ -135,7 +126,7 @@ export default {
         address: "",
         phone: "",
         site_address: "",
-        rating: 0, // 학원의 평균 별점
+        rating: 0, // 평균 별점
       },
       currentCourses: [], // 현재 진행 중인 과정
       completedCourses: [], // 완료된 과정
@@ -145,8 +136,9 @@ export default {
   mounted() {
     this.fetchAcademyData(); // 학원 정보 가져오기
     this.fetchCourses(); // 강좌 정보 가져오기
-    this.fetchChartData(); // 차트 데이터를 가져와 차트를 생성
+    this.fetchAcademyRating(); // 학원 평균 별점 가져오기
   },
+
   methods: {
     // 학원 정보 가져오는 메서드
     fetchAcademyData() {
@@ -154,37 +146,87 @@ export default {
         .get(`http://localhost:8080/api/academies/academy/${this.academyId}`) // props로 받은 id 사용
         .then((response) => {
           this.academy = response.data; // 서버에서 받아온 학원 정보 저장
-          console.log("학원정보디테일실행.", response.data);
+          console.log("학원 정보: ", response.data);
+          this.fetchReviewData(); // 리뷰 데이터를 불러와 차트 생성
         })
         .catch((error) => {
           console.error("학원 정보를 불러오는 중 오류가 발생했습니다.", error);
         });
     },
-    // 학원의 차트 데이터를 가져오는 메서드
-    fetchChartData() {
+    // 학원 평균 별점 가져오는 메서드
+    fetchAcademyRating() {
       axios
-        .get(`http://localhost:8080/api/academies/${this.academyId}/chartData`)
+        .get(`http://localhost:8080/api/academies/academy/${this.academyId}/rating`)
         .then((response) => {
-          const chartData = response.data; // 서버에서 받아온 차트 데이터
-          console.log("학원차트가져올떄.", response.data);
-          this.generateChart("academyRadarChart", chartData);
+          this.academy.rating = response.data; // 서버에서 받아온 평균 별점 저장
+          console.log("학원 평균 별점: ", response.data);
         })
         .catch((error) => {
-          console.error("차트 데이터를 불러오는 중 오류가 발생했습니다.", error);
+          console.error("학원 평균 별점을 불러오는 중 오류가 발생했습니다.", error);
         });
     },
-    generateChart(chartId, data) {
-      const ctx = document.getElementById(chartId).getContext("2d");
+
+    // 리뷰 데이터 가져오는 메서드 추가
+    fetchReviewData() {
+      axios
+        .get(`http://localhost:8080/api/academies/reviews/${this.academyId}`)
+        .then((response) => {
+          const reviewData = response.data;
+          console.log("리뷰 데이터: ", reviewData);
+          this.generateChart(reviewData); // 리뷰 데이터를 차트에 전달
+        })
+        .catch((error) => {
+          console.error("리뷰 데이터를 불러오는 중 오류가 발생했습니다.", error);
+        });
+    },
+
+    // 차트 생성 함수
+    generateChart(reviewData) {
+      if (this.chart) {
+        this.chart.destroy(); // 기존 차트가 있으면 삭제
+      }
+
+      const totalReviews = reviewData.length;
+      const totalRatings = {
+        education: 0,
+        instructor: 0,
+        facility: 0,
+        atmosphere: 0,
+        management: 0,
+        later: 0,
+      };
+
+      // 각 항목에 대한 총점을 계산
+      reviewData.forEach((review) => {
+        totalRatings.education += review.educationRating || 0;
+        totalRatings.instructor += review.instructorRating || 0;
+        totalRatings.facility += review.facilityRating || 0;
+        totalRatings.atmosphere += review.atmosphereRating || 0;
+        totalRatings.management += review.managementRating || 0;
+        totalRatings.later += review.laterRating || 0;
+      });
+
+      // 각 항목에 대한 평균 평점 계산
+      const averageRatings = {
+        education: (totalRatings.education / totalReviews).toFixed(1),
+        instructor: (totalRatings.instructor / totalReviews).toFixed(1),
+        facility: (totalRatings.facility / totalReviews).toFixed(1),
+        atmosphere: (totalRatings.atmosphere / totalReviews).toFixed(1),
+        management: (totalRatings.management / totalReviews).toFixed(1),
+        later: (totalRatings.later / totalReviews).toFixed(1),
+      };
+
+      const ctx = document.getElementById("radarChart").getContext("2d");
       this.chart = new Chart(ctx, {
         type: "radar",
         data: {
           labels: ["교육", "강사", "시설", "분위기", "행정", "사후관리"],
           datasets: [
             {
-              label: "평가",
-              data: data, // 서버에서 받은 데이터를 사용
-              backgroundColor: "rgba(54, 162, 235, 0.2)",
-              borderColor: "rgba(54, 162, 235, 1)",
+              label: "평균 평점",
+              data: Object.values(averageRatings),
+              backgroundColor: "rgba(255, 99, 132, 0.2)",
+              borderColor: "rgba(255, 99, 132, 1)",
               borderWidth: 1,
             },
           ],
@@ -202,12 +244,13 @@ export default {
         },
       });
     },
+
     // 강좌 정보 가져오는 메서드
     fetchCourses() {
       axios
         .get(`http://localhost:8080/api/academies/courses/${this.academyId}`) // props로 받은 id 사용
         .then((response) => {
-          console.log("강좌 목록 응답: ", response.data);
+          console.log("아카데미 인포 강좌 목록 응답: ", response.data);
           const today = new Date(); // 오늘 날짜
           const upcomingCourses = []; // 진행 예정 과정 리스트
           const currentCourses = []; // 현재 진행 중인 과정 리스트
@@ -246,11 +289,13 @@ export default {
           console.error("강좌 정보를 불러오는 중 오류가 발생했습니다.", error);
         });
     },
+
     // 날짜 형식 변환
     formatDate(date) {
       const options = { year: "numeric", month: "2-digit", day: "2-digit" };
       return new Date(date).toLocaleDateString("ko-KR", options);
     },
+
     goToCourseDetail(courseId) {
       const academyId = this.academyId; // props로 받은 academyId 사용
       this.$router.push({
@@ -261,24 +306,24 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 /* academy-info: 학원 정보를 담고 있는 컨테이너 박스 */
 .academy-info {
-  max-width: 900px; /* 최대 너비를 900px로 설정하여 중앙 정렬 */
-  margin: 0 auto; /* 좌우 여백을 자동으로 하여 가운데 정렬 */
-  padding: 20px; /* 전체 컨테이너에 패딩 추가 */
-  background-color: #fff; /* 배경을 흰색으로 설정 */
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
 }
 
-/* info-box: 학원 정보를 포함하는 박스 */
 .info-box {
-  display: flex; /* 학원 정보와 레이더 차트를 가로로 나열 */
-  justify-content: space-between; /* 학원 정보와 차트 사이 간격 유지 */
-  border: 1px solid #ddd; /* 외곽선 */
-  padding: 20px; /* 내부 패딩 */
-  margin-bottom: 20px; /* 아래쪽 간격 */
-  background-color: #f9f9f9; /* 배경을 연한 회색으로 */
-  border-radius: 10px; /* 모서리를 둥글게 설정 */
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
 }
 
 /* 탭 스타일 */
@@ -296,53 +341,51 @@ export default {
 }
 
 .tab-header div.active {
-  border-bottom: 2px solid #f28c00; /* 선택된 탭에 주황색 경계선 */
+  border-bottom: 2px solid #f28c00;
   font-weight: bold;
   color: #f28c00;
 }
 
 /* course-section: 과정 섹션 박스 */
 .course-section {
-  margin-bottom: 20px; /* 과정 섹션 간 간격 */
-  padding-top: 20px; /* 섹션 상단에 패딩 추가 */
-  /* border-top: 2px solid #f28c00; 섹션 상단에 색상있는 경계선 추가 */
+  margin-bottom: 20px;
+  padding-top: 20px;
 }
-/* course-card: 개별 과정 카드 */
+
 .course-card {
   display: flex;
-  flex-direction: column; /* 세로 방향으로 배치되도록 수정 */
-  justify-content: flex-start; /* 왼쪽 정렬 */
-  align-items: flex-start; /* 수직 방향으로 왼쪽 정렬 */
-  border: 1px solid #ddd; /* 외곽선 */
-  padding: 20px; /* 내부 패딩 */
-  margin-bottom: 10px; /* 아래쪽 간격 */
-  background-color: #fff; /* 카드 배경을 흰색으로 설정 */
-  border-radius: 10px; /* 모서리를 둥글게 설정 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 약간의 그림자 추가 */
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin-bottom: 10px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* rating-box: 별점 박스 */
 .rating-box {
-  display: block; /* 별점을 한 줄에 배치 */
-  margin-bottom: 10px; /* 별점 아래쪽 간격 */
-  text-align: left; /* 왼쪽 정렬 */
-  width: 100%; /* 전체 너비 사용 */
+  display: block;
+  margin-bottom: 10px;
+  text-align: left;
+  width: 100%;
 }
 
 /* stars: 별점 */
 .stars {
-  font-size: 24px; /* 별 크기 조정 */
-  margin-bottom: 10px; /* 별점과 제목 사이 간격 조정 */
-  display: block; /* 별을 한 줄에 배치 */
+  font-size: 24px;
+  margin-bottom: 10px;
+  display: block;
 }
 
 .course-details {
-  flex: 1; /* 과정 정보가 남은 공간을 차지하도록 설정 */
-  width: 100%; /* 전체 너비 사용 */
+  flex: 1;
+  width: 100%;
 }
 
-/* 학원 정보 */
 .details {
-  margin-bottom: 10px; /* 학원 정보 아래쪽에 간격 추가 */
+  margin-bottom: 10px;
 }
 </style>

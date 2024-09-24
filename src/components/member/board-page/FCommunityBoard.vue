@@ -1,5 +1,4 @@
 <!--작성자 : 박주희 -->
-
 <template>
   <MemberHeader></MemberHeader>
   <div class="board-container">
@@ -7,10 +6,10 @@
     <h5 class="board-description">자유롭게 여러분의 의견을 입력하세요.</h5>
     <div class="category-tab">
       <button
-          v-for="(category, index) in categories"
-          :key="index"
-          :class="{ active: activeTab === index }"
-          @click="activeTab = index"
+        v-for="(category, index) in categories"
+        :key="index"
+        :class="{ active: activeTab === index }"
+        @click="activeTab = index"
       >
         {{ category }}
       </button>
@@ -18,50 +17,40 @@
     <div class="board-header">
       <button class="write" @click="goToPostForm">글쓰기</button>
       <div class="sort-options">
-         <span
-             :class="{ active: activeSort === 'recent' }"
-             @click="setActiveSort('recent')"
-         >
-          최근순
-        </span>
-        <span
-            :class="{ active: activeSort === 'popular' }"
-            @click="setActiveSort('popular')"
-        >
-          인기순
-        </span>
+        <span :class="{ active: activeSort === 'recent' }" @click="setActiveSort('recent')"> 최근순 </span>
+        <span :class="{ active: activeSort === 'popular' }" @click="setActiveSort('popular')"> 인기순 </span>
       </div>
     </div>
     <div class="table-container">
       <table class="board-table">
         <thead>
-        <tr>
-          <th>번호</th>
-          <th>제목</th>
-          <th>작성자</th>
-          <th>등록일</th>
-        </tr>
+          <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>등록일</th>
+          </tr>
         </thead>
         <tbody>
-        <tr v-for="(item, index) in paginatedData" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td @click="goToPostDetail(item.boardId)" class="clickable">{{ item.title }}</td>
-          <td>{{ item.nickname }}</td>
-          <td>{{formatDate(item.regdate) }}</td>
-        </tr>
-        <!-- 빈 항목을 채우기 위한 추가 빈 줄 -->
-        <tr v-for="i in emptyRows" :key="'empty-' + i">
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-        </tr>
+          <tr v-for="(item, index) in paginatedData" :key="index">
+            <td>{{ index + 1 }}</td>
+            <td @click="goToPostDetail(item.boardId)" class="clickable">{{ item.title }}</td>
+            <td>{{ item.nickname }}</td>
+            <td>{{ formatDate(item.regdate) }}</td>
+          </tr>
+          <!-- 빈 항목을 채우기 위한 추가 빈 줄 -->
+          <tr v-for="i in emptyRows" :key="'empty-' + i">
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
         </tbody>
       </table>
     </div>
     <div class="search-bar">
       <div class="search-wrapper">
-        <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요..." @keyup.enter="searchPosts"/>
+        <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요..." @keyup.enter="searchPosts" />
         <button class="search-button" @click="searchPosts">
           <i class="fas fa-search"></i>
         </button>
@@ -69,20 +58,16 @@
     </div>
 
     <div class="pagination">
-      <button @click="previousPage" :disabled="currentPage === 1">
-        &larr; Previous
-      </button>
+      <button @click="previousPage" :disabled="currentPage === 1">&larr; Previous</button>
       <span :class="{ active: true }">{{ currentPage }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages">
-        Next &rarr;
-      </button>
+      <button @click="nextPage" :disabled="currentPage === totalPages">Next &rarr;</button>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import MemberHeader from '../member-header/MemberHeader.vue';
+import axios from "axios";
+import MemberHeader from "../member-header/MemberHeader.vue";
 // import PostDetail from './PostDetail.vue';  // 자식 컴포넌트를 import
 
 export default {
@@ -92,14 +77,14 @@ export default {
   },
   data() {
     return {
-      categories: ["전체","취업정보", "시험정보", "공부방법", "기업정보", "국비정보"],
+      categories: ["전체", "취업정보", "시험정보", "공부방법", "기업정보", "국비정보"],
       activeTab: 0, // 현재 선택된 탭을 관리하는 변수
-      activeSort: 'recent',
+      activeSort: "recent",
       items: [],
       currentPage: 1,
       itemsPerPage: 10, // 한 페이지에 10개 항목
-      selectedBoardId: null,  // 선택된 게시글의 boardId를 저장
-      searchKeyword: '' // 검색어 관리
+      selectedBoardId: null, // 선택된 게시글의 boardId를 저장
+      searchKeyword: "", // 검색어 관리
     };
   },
   computed: {
@@ -109,15 +94,16 @@ export default {
       if (selectedCategory === "전체") {
         filtered = this.items;
       } else {
-        filtered = this.items.filter(item => item.category === selectedCategory);      }
+        filtered = this.items.filter((item) => item.category === selectedCategory);
+      }
       // 검색어로 필터링
       if (this.searchKeyword) {
-        filtered = filtered.filter(item => item.title.includes(this.searchKeyword));
+        filtered = filtered.filter((item) => item.title.includes(this.searchKeyword));
       }
       // 정렬 기준에 따라 정렬
-      if (this.activeSort === 'popular') {
+      if (this.activeSort === "popular") {
         filtered.sort((a, b) => b.views - a.views); // 조회수 내림차순으로 정렬
-      } else if (this.activeSort === 'recent') {
+      } else if (this.activeSort === "recent") {
         filtered.sort((a, b) => new Date(b.regdate) - new Date(a.regdate)); // 최신순 정렬
       }
       return filtered;
@@ -137,54 +123,53 @@ export default {
   },
   methods: {
     formatDate(date) {
-      if (!date) return '날짜 없음'; // date가 없을 경우 처리
+      if (!date) return "날짜 없음"; // date가 없을 경우 처리
 
       // date가 문자열일 때 처리
       try {
         const parsedDate = new Date(date);
         if (isNaN(parsedDate.getTime())) {
-          return '유효하지 않은 날짜'; // 유효하지 않은 날짜일 경우 처리
+          return "유효하지 않은 날짜"; // 유효하지 않은 날짜일 경우 처리
         }
         return parsedDate.toLocaleDateString(); // 날짜만 표시
       } catch (error) {
-        return '날짜 없음'; // 변환 중 오류가 발생하면 기본값 반환
+        return "날짜 없음"; // 변환 중 오류가 발생하면 기본값 반환
       }
     },
 
-  // 게시글 목록을 불러오는 메서드 정의
+    // 게시글 목록을 불러오는 메서드 정의
     fetchPosts() {
-      axios.get('/api/board/community/all')
-          .then(response => {
-            this.items = response.data; // 받아온 데이터를 items 배열에 저장
-            console.log('Fetched items:', this.items); // 데이터 확인
-            if (this.items.length > 0) {
-              console.log('First item boardId:', this.items[0].boardId); // 첫 번째 항목의 boardId 확인
-            }
-          })
-          .catch(error => {
-            console.error("Error fetching posts:", error);
-          });
+      axios
+        .get("/api/board/community/all")
+        .then((response) => {
+          this.items = response.data; // 받아온 데이터를 items 배열에 저장
+          console.log("Fetched items:", this.items); // 데이터 확인
+          if (this.items.length > 0) {
+            console.log("First item boardId:", this.items[0].boardId); // 첫 번째 항목의 boardId 확인
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching posts:", error);
+        });
     },
     searchPosts() {
       if (!this.searchKeyword) {
         this.filteredItems = this.items; // 검색어가 없으면 전체 목록을 보여줌
       } else {
-        this.filteredItems = this.items.filter(item =>
-            item.title.includes(this.searchKeyword)
-        );
+        this.filteredItems = this.items.filter((item) => item.title.includes(this.searchKeyword));
       }
       this.currentPage = 1; // 검색 후 첫 번째 페이지로 이동
     },
     goToPostForm() {
-      this.$router.push('/board/PostForm'); // Vue Router를 사용하여 페이지 이동
+      this.$router.push("/board/PostForm"); // Vue Router를 사용하여 페이지 이동
     },
     goToPostDetail(boardId) {
-      console.log('Board ID:', boardId);  // boardId 값이 제대로 들어오는지 확인
+      console.log("Board ID:", boardId); // boardId 값이 제대로 들어오는지 확인
       if (!boardId) {
-        console.error('Board ID is null or undefined');
+        console.error("Board ID is null or undefined");
         return;
       }
-      this.$router.push({ name: 'PostDetail', params: { boardId } }); // 라우터를 통해 페이지 이동
+      this.$router.push({ name: "PostDetail", params: { boardId } }); // 라우터를 통해 페이지 이동
     },
     setActiveSort(sortType) {
       this.activeSort = sortType;
@@ -227,7 +212,7 @@ export default {
   color: #666;
 }
 
-.category-tab{
+.category-tab {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -235,10 +220,9 @@ export default {
   border-radius: 50px; /* 둥근 테두리 */
   padding: 10px;
   width: 100%;
-  max-width : 700px;
+  max-width: 700px;
   height: 20px;
   margin: 0 auto; /* 가운데 정렬 */
-
 }
 
 /* 카테고리 탭 버튼 스타일 */
@@ -330,7 +314,8 @@ export default {
   margin-bottom: 20px;
 }
 
-.board-table th, .board-table td {
+.board-table th,
+.board-table td {
   border: none;
   border-bottom: 1px solid #ddd; /* 가로선만 남김 */
   padding: 10px;
@@ -387,7 +372,9 @@ export default {
   color: #333;
   cursor: pointer;
   border-radius: 30px; /* 둥근 모서리 */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .pagination button:disabled {
@@ -417,6 +404,4 @@ export default {
   color: #007bff;
   text-decoration: underline;
 }
-
-
 </style>

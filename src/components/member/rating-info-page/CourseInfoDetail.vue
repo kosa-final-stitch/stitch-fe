@@ -128,7 +128,7 @@ export default {
         end_date: "",
         lector: "",
         title_link: "",
-        reviews: [] || this.initialReviews || [], // prop에서 받은 리뷰 데이터를 기본값으로 설정
+        reviews: [] || this.initialReviews, // prop에서 받은 리뷰 데이터를 기본값으로 설정
       }, // 코스 상세 정보를 저장할 객체
       chart: null, // 차트를 저장할 변수 추가
       currentPage: 1, // 현재 페이지
@@ -148,6 +148,8 @@ export default {
         .get(`http://localhost:8080/api/courses/${courseId}`)
         .then((response) => {
           this.course = response.data;
+          const reviewData = response.data;
+          console.log("코스디테일:", reviewData); // 데이터를 확인
           this.course.completed = this.checkIfCourseCompleted(); // 완료 여부 확인
         })
         .catch((error) => {
@@ -183,15 +185,13 @@ export default {
       axios
         .get(`http://localhost:8080/api/courses/${courseId}/reviews`)
         .then((response) => {
-          const reviewData = response.data || [];
-          console.log("리뷰 데이터:", reviewData); // 데이터를 확인
+          const reviewData = response.data;
+          console.log("받아온 리뷰 데이터:", reviewData); // 데이터를 확인
           this.course.reviews = reviewData;
-
           // 리뷰가 있을 경우 별점 평균 계산
           if (reviewData.length > 0) {
             this.calculateAverageRating(reviewData);
           }
-
           if (Array.isArray(reviewData)) {
             this.generateChartFromData(reviewData);
           } else {
