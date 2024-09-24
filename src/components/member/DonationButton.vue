@@ -63,6 +63,8 @@ export default {
     closeModal() {
       this.showModal = false;
       this.loading = false; // 모달 닫을 때 로딩 상태 초기화
+      this.category = "";
+      this.donationAmount = "";
     },
     async submitDonation() {
       if (!this.donationAmount || isNaN(this.donationAmount) || Number(this.donationAmount) <= 0) {
