@@ -1,4 +1,4 @@
-//  담당자: 김호영 
+//  담당자: 김호영
 //  시작 일자: 2024.09.04
 //  설명 : 기본 설정 설정
 //  ---------------------
@@ -7,7 +7,7 @@
 //  2024.09.10 김호영 | admin 라우터 설정
 //  2024.09.12 김호영 | Font Awesome 설정.
 //  2024.09.16 박요한 | localStorage.getItem("jwt") 로 변경.
-//  2024.09.18 박요한 | 전역 가드 설정 추가(로그인 리디렉트). faHeart 아이콘 추가.
+//  2024.09.18 박요한 | 전역 가드 설정 추가(로그인 리다이렉트). faHeart 아이콘 추가.
 
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
@@ -107,7 +107,7 @@ app.use(pinia); // Pinia 적용
 
 
 // Pinia 스토어를 콘솔에서 접근할 수 있게 설정
-import { useMemberStore } from '@/store/member-store'; // Pinia 스토어 가져오기
+import { useMemberStore } from "@/store/member-store"; // Pinia 스토어 가져오기
 window.memberStore = useMemberStore(); // Pinia 스토어를 window 객체에 할당
 
 

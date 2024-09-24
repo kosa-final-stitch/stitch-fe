@@ -28,11 +28,11 @@
       <p v-if="categoryError" style="color: red">카테고리를 선택해 주세요.</p>
 
       <label for="title">제목</label>
-      <input v-model="title" id="title" type="text" placeholder="제목을 입력하세요" />
+      <input v-model="title" id="title" type="text" maxlength="85" placeholder="제목을 입력하세요" />
       <p v-if="titleError" style="color: red">제목을 입력해 주세요.</p>
 
       <label for="content">내용</label>
-      <textarea v-model="content" id="content" placeholder="내용을 입력하세요"></textarea>
+      <textarea v-model="content" id="content" maxlength="333" placeholder="내용을 입력하세요"></textarea>
       <p v-if="contentError" style="color: red">내용을 입력해 주세요.</p>
 
       <div style="text-align: center">
@@ -133,6 +133,7 @@ textarea {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
 textarea {
