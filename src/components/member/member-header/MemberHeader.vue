@@ -20,7 +20,7 @@
       <div class="left-side">
         <ul class="nav-items">
           <!-- 마이페이지 버튼: 로그인 상태일 때만 표시 -->
-          <li v-if="isAuthenticated && !isMyPage">
+          <li v-if="isAuthenticated">
             <router-link to="/mypage">마이페이지</router-link>
           </li>
 
@@ -30,7 +30,7 @@
           </li>
 
           <!-- 로그인 버튼: 비로그인 상태일 때만 표시 -->
-          <li v-else-if="!isAuthenticated && !isMyPage">
+          <li v-else-if="!isAuthenticated">
             <router-link to="/login">로그인</router-link>
           </li>
 
