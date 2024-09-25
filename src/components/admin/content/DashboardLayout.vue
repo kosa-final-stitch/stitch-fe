@@ -446,11 +446,6 @@ export default {
       }
     },
 
-
-
-
-
-
     formatDate(date) {
       const d = new Date(date);
       return d.toISOString().substring(0, 10); // YYYY-MM-DD 형식으로 변환
