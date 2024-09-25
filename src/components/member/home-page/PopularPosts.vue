@@ -103,6 +103,10 @@ export default {
   margin: 0 auto;
 }
 
+h2 {
+  padding: 1%;
+}
+
 .board-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -118,6 +122,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  padding: 1%;
 }
 
 .section-header h3 {

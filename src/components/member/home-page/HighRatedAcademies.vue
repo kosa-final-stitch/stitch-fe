@@ -88,6 +88,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  padding: 1%;
 }
 
 .header-row h2 {
