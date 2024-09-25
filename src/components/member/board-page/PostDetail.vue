@@ -78,8 +78,8 @@
 <!--            &lt;!&ndash; 신고 버튼은 본인 댓글이 아닐 때만 표시 &ndash;&gt;-->
 <!--          <button class="report-button" v-if="comment.authorId !== currentUser.memberId" @click="openReportModal(comment)">신고</button>-->
             <!-- 본인 글일 때만 수정/삭제 버튼 렌더링 -->
-            <button class="edit-button"  @click="toggleEditMode">수정</button>
-            <button class="delete-button" @click="confirmDelete">삭제</button>
+            <button class="edit-button"  @click="toggleEditComment(comment)">수정</button>
+            <button class="delete-button" @click="confirmDeleteComment(comment.commentId)">삭제</button>
             <!-- 본인 글이 아닐 때만 신고 버튼 렌더링 -->
             <button class="report-button" @click="openReportModal(post)">신고</button>
           </span>
@@ -563,6 +563,20 @@ export default {
   margin-top: 20px;
   line-height: 1.5;
 }
+
+/* 댓글 수정 텍스트 영역 스타일 */
+.edit-comment-content {
+  width: 98%; /* 너비를 100%로 설정 */
+  height: 50px; /* 높이를 150px로 설정 */
+  padding: 10px; /* 안쪽 여백 추가 */
+  font-size: 14px; /* 글자 크기 조정 */
+  border: 1px solid #ddd; /* 테두리 설정 */
+  border-radius: 4px; /* 테두리 둥글게 */
+  resize: both; /* 크기 조절 가능하도록 설정 */
+  overflow: auto; /* 내용이 넘칠 경우 스크롤 표시 */
+}
+
+
 
 .comment-form {
   display: flex;

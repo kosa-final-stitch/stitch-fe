@@ -46,7 +46,7 @@
     <div class="social-login mt-4">
       <div class="social-icons flex justify-center space-x-4">
         <img src="@/assets/kakao-icon.png" alt="Kakao 로그인" class="w-10 h-10" />
-        <img src="@/assets/google-icon.png" alt="Google 로그인" class="w-10 h-10" />
+        <img @click="googleLogin" src="@/assets/google-icon.png" alt="Google 로그인" class="w-10 h-10" />
       </div>
     </div>
   </div>
@@ -105,6 +105,10 @@ export default {
       } else {
         alert('이메일과 비밀번호를 입력해주세요.');
       }
+    },
+    googleLogin() {
+      // 구글 소셜 로그인 URL로 리다이렉트
+      window.location.href = 'http://localhost:8080/login/oauth2/code/google';
     }
   }
 };
