@@ -5,11 +5,16 @@
  ---------------------
  2024.09.13 박요한 | 컴포넌트 생성.
  2024.09.17 박요한 | 구체화.
+ 2024.09.25 박요한 | 더보기 버튼 위치 조정.
  -->
 
 <template>
   <div class="high-rated-courses">
-    <h2>평점 높은 교육 과정</h2>
+    <div class="header-row">
+      <h2>평점 높은 교육 과정</h2>
+      <!-- 더보기 버튼 -->
+      <MoreButton to="/academies/academy" />
+    </div>
     <div class="course-container">
       <div
         v-for="(course, index) in courses"
@@ -27,8 +32,6 @@
         </div>
       </div>
     </div>
-
-    <more-button to="/academies/courses" />
   </div>
 </template>
 
@@ -80,6 +83,17 @@ export default {
 <style scoped>
 .high-rated-courses {
   margin: 0 auto;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.header-row h2 {
+  margin: 0;
 }
 
 .course-container {

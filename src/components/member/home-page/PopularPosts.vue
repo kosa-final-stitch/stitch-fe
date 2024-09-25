@@ -5,6 +5,7 @@
  ---------------------
  2024.09.13 박요한 | 컴포넌트 생성.
  2024.09.18 박요한 | 구체화.
+ 2024.09.25 박요한 | 더보기 버튼 위치 조정.
  -->
 
 <template>
@@ -13,32 +14,38 @@
     <div class="board-container">
       <!-- 정보 공유 게시판 -->
       <div class="board-section" v-if="infoSharePost">
-        <h3>정보 공유</h3>
+        <div class="section-header">
+          <h3>정보 공유</h3>
+          <more-button to="/board/info-share" />
+        </div>
         <div class="post-card">
           <p>{{ infoSharePost.title }}</p>
           <p>조회수: {{ infoSharePost.views }}</p>
         </div>
-        <more-button to="/board/info-share" />
       </div>
 
       <!-- 자유 게시판 -->
       <div class="board-section" v-if="freeCommunityPost">
-        <h3>자유 게시판</h3>
+        <div class="section-header">
+          <h3>자유 게시판</h3>
+          <more-button to="/board/free-community" />
+        </div>
         <div class="post-card">
           <p>{{ freeCommunityPost.title }}</p>
           <p>조회수: {{ freeCommunityPost.views }}</p>
         </div>
-        <more-button to="/board/free-community" />
       </div>
 
       <!-- Q&A 게시판 -->
       <div class="board-section" v-if="qnaPost">
-        <h3>Q&A 게시판</h3>
+        <div class="section-header">
+          <h3>Q&A 게시판</h3>
+          <more-button to="/board/qna" />
+        </div>
         <div class="post-card">
           <p>{{ qnaPost.title }}</p>
           <p>조회수: {{ qnaPost.views }}</p>
         </div>
-        <more-button to="/board/qna" />
       </div>
     </div>
   </div>
@@ -99,11 +106,22 @@ export default {
 .board-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 20px;
 }
 
 .board-section {
   margin-bottom: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.section-header h3 {
+  margin: 0;
 }
 
 .post-card {
