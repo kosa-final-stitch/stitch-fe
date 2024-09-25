@@ -19,10 +19,10 @@
             @blur="isDropdownOpen = false"
             @change="isDropdownOpen = false">
             <option value="all">전체</option>
-            <option value="complete">처리 완료</option>
+            <option value="completed">처리 완료</option>
             <option value="pending">미처리</option>
             <option value="card">카드</option>
-            <option value="cash">계좌이체</option>
+            <option value="account">계좌이체</option>
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" 
@@ -62,7 +62,7 @@
           <td>{{ pay.memberId || '-' }}</td>
           <td>{{ pay.memberName || '-' }}</td> 
           <td>{{ pay.category }}</td> <!-- 결제 항목 -->
-          <td>{{ pay.amount }}</td> <!-- 결제 금액 -->
+          <td>{{ formatAmount(pay.amount) }} 원</td> <!-- 결제 금액 -->
           <td>{{ pay.method === 'card' ? '카드' : '계좌이체' }}</td>
           <td>{{ pay.status === 'pending' ? '미처리' : '처리 완료' }}</td>
           <td>
@@ -173,6 +173,12 @@ export default {
     },
   },
   methods: {
+
+    // 결제 금액 형식 메서드
+    formatAmount(value) {
+      if (!value) return '0'; // 값이 없으면 0 반환
+      return value.toLocaleString(); // 세 자리마다 쉼표 추가
+    },
     // 날짜 형식 메서드
     formatDate(date) {
       if (!date) {

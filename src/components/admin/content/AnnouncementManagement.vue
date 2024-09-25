@@ -59,7 +59,7 @@
           <td>{{ (currentPage - 1) * noticesPerPage + index + 1 }}</td>
           <td>{{ notice.title }}</td>
           <td>{{ notice.adminName }}</td>
-          <td>{{ notice.content.slice(0, 15) }}...</td>
+          <td>{{ notice.content.slice(0, 40) }}...</td>
           <td>{{ formatDate(notice.regdate) }}</td>
           <td>{{ notice.editdate ? formatDate(notice.editdate) : '-' }}</td>
           <td>{{ notice.status === 'public' ? '공개' : '비공개' }}</td>
