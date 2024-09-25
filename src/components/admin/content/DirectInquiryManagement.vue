@@ -182,12 +182,14 @@ export default {
             Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
           },
         });
+        console.log("불러온 문의사항 데이터:", response.data); // 데이터 구조 확인
         this.directmentsData = response.data;
       } catch (error) {
         console.error('문의사항 데이터를 불러오는 중 오류 발생:', error);
       }
     },
     openDirectAnswerModal(direct) {
+      console.log(direct); // direct 객체의 내용을 출력하여 inquiryId가 있는지 확인
       this.selectedDirect = direct;
       this.isDirectAnswerModalOpen = true;
     },
@@ -198,26 +200,23 @@ export default {
     // 답변 async 추가
     async submitDirectAnswer() {
       if (!this.selectedDirect) return;
-
       try {
         const token = localStorage.getItem('jwt');
-
       // 관리자 답변 API 호출
       await axios.post(`/api/member/inquiry/${this.selectedDirect.inquiryId}/answer`, 
       {
         answer: this.answerContent, // 답변 내용
+        status: 'answered'
       },
       {
       headers: {
         Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
       },
     });
-
         // 답변 저장 로직 (백엔드 연동 부분이 없으므로 프론트엔드에서 임시 저장)
         this.selectedDirect.ansdate = new Date().toISOString().split('T')[0];
         this.selectedDirect.status = 'answered';
         this.selectedDirect.answer = this.answerContent;
-
         // directmentsData에서 해당 문의를 찾아서 업데이트
         const directIndex = this.directmentsData.findIndex(
           (direct) => direct.direct_id === this.selectedDirect.direct_id);
@@ -225,13 +224,10 @@ export default {
           // 데이터 갱신
           this.directmentsData.splice(directIndex, 1, { ...this.selectedDirect });
         }
-
         // 모달 닫기 및 초기화
         this.closeDirectAnswerModal();
-
         // 조치 완료 후 변경 완료 모달을 표시
         this.isChangeSuccessModalOpen = true;
-
         // 일정 시간 후 변경 완료 모달을 자동으로 닫기
         setTimeout(() => {
           this.isChangeSuccessModalOpen = false;
