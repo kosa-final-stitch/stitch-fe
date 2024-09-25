@@ -123,6 +123,8 @@ h2 {
   align-items: center;
   margin-bottom: 10px;
   padding: 1%;
+  margin-left: 3%;
+  margin-right: 3%;
 }
 
 .section-header h3 {
