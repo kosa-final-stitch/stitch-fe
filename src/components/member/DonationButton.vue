@@ -83,6 +83,7 @@ export default {
         // PortOne(아임포트) 결제 처리
         const IMP = window.IMP;
         const userCode = process.env.VUE_APP_IMP_USER_CODE; // 아임포트에서 발급받은 가맹점 식별 코드
+        console.log("내 코드" + userCode);
         IMP.init(userCode); // 아임포트 초기화
 
         await new Promise((resolve, reject) => {
