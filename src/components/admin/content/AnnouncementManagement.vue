@@ -46,7 +46,7 @@
         <tr>
           <th>No.</th>
           <th>제목</th>
-          <th>작성자 ID</th>
+          <th>작성자</th>
           <th>내용</th>
           <th>작성일자</th>
           <th>수정일자</th>
@@ -58,7 +58,7 @@
         <tr v-for="(notice, index) in paginatedNotices" :key="notice.notice_id">
           <td>{{ (currentPage - 1) * noticesPerPage + index + 1 }}</td>
           <td>{{ notice.title }}</td>
-          <td>{{ notice.memberId }}</td>
+          <td>{{ notice.adminName }}</td>
           <td>{{ notice.content.slice(0, 15) }}...</td>
           <td>{{ formatDate(notice.regdate) }}</td>
           <td>{{ notice.editdate ? formatDate(notice.editdate) : '-' }}</td>
@@ -208,6 +208,7 @@ export default {
             Authorization: `Bearer ${token}`,
           },
         });
+
         console.log(response.data)
         // 서버로부터 공지사항 데이터를 받아오면 noticementsData에 저장
         this.noticementsData = response.data;
