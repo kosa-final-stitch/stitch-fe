@@ -132,7 +132,7 @@ export default {
   border-radius: 10px;
   padding: 5px 10px;
   width: 50%;
-  height: 40px;
+  height: 30px;
   max-width: 1000px;
   position: relative;
 }
@@ -141,7 +141,7 @@ export default {
   border: none;
   outline: none;
   flex-grow: 1;
-  font-size: 18px;
+  font-size: 15px;
   padding: 5px;
 }
 

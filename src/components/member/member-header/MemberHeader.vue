@@ -191,7 +191,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 0;
+  padding: 15px 0;
   background-color: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   position: fixed;
@@ -220,7 +220,7 @@ export default {
   list-style: none;
   display: flex;
   gap: 30px;
-  font-size: 18px;
+  font-size: 15px;
   margin: 0;
   flex-wrap: nowrap;
 }
@@ -247,7 +247,7 @@ export default {
 /* 드롭다운 애니메이션 */
 .dropdown-container {
   position: absolute;
-  top: 44px;
+  top: 38px;
   left: 0;
   right: 0;
   background-color: white;
@@ -309,7 +309,7 @@ export default {
 }
 
 .logo {
-  max-width: 150px;
+  max-width: 130px;
 }
 
 /* 반응형 처리를 위한 추가 */
