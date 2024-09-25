@@ -17,7 +17,7 @@
 
         <div class="top-box">
           <h6>
-            <span class="left-text">전체 사용자 수 :</span> 
+            <span class="left-text">전체 가입자 수 :</span> 
             <span class="member-count">{{ totalMembersCount }} 명</span> <!-- 전체 사용자 수 출력 -->
           </h6>
           <div class="yellow-line"></div>
@@ -47,11 +47,11 @@
       <div class="middle-boxes">
 
         <div class="middle-box">
-          사용자 수 비교 그래프
+          <canvas id="userComparisonChart"></canvas>
         </div>
 
         <div class="middle-box">
-          결제 비교 그래프
+          <canvas id="paymentComparisonChart"></canvas> <!-- 월별 결제 금액 그래프 -->
         </div>
 
         <div class="middle-box">
@@ -97,6 +97,10 @@
 
 <script>
 import axios from 'axios';  // axios 추가
+import { Chart, LineController, LineElement, PointElement, LinearScale, Title, CategoryScale } from 'chart.js'; // 필요한 Chart.js 구성 요소 추가
+
+Chart.register(LineController, LineElement, PointElement, LinearScale, Title, CategoryScale);
+
 export default {
   data() {
     return {
@@ -133,6 +137,19 @@ export default {
         // 응답 데이터가 배열인지 확인
         if (Array.isArray(response.data)) {
           this.members = response.data;
+          // 월별 사용자 수 초기화 (1월부터 12월까지)
+          const monthlyUserCounts = Array(12).fill(0);
+
+          // 각 회원의 등록 날짜를 기반으로 월별 카운트 계산
+          this.members.forEach(member => {
+            const regDate = new Date(member.signupdate); // 회원 등록일
+            const month = regDate.getMonth(); // 월을 0부터 11까지 반환
+            monthlyUserCounts[month] += 1;  // 해당 월의 사용자 수 증가
+          });
+
+          // 그래프 데이터 업데이트
+          this.createUserComparisonChart(monthlyUserCounts);
+
         } else {
           console.error('API 응답이 배열이 아닙니다. 응답:', response.data);
         }
@@ -142,29 +159,187 @@ export default {
         console.error("회원 정보를 불러오는 중 오류 발생:", error);
       }
     },
-      // 전체 결제 금액을 불러오는 메서드
-      async fetchTotalPayment() {
-        try {
-          const token = localStorage.getItem('jwt');
-          const paymentResponse = await axios.get('/api/payments', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
 
-          // 배열의 모든 amount 값을 더해서 totalPayment에 저장
-          if (paymentResponse.data.length > 0) {
-            this.totalPayment = paymentResponse.data.reduce((sum, payment) => sum + payment.amount, 0);  // amount 값 합산
-            console.log('불러온 총 금액:', this.totalPayment);
-          } else {
-            this.totalPayment = 0;  // 데이터가 없으면 0으로 설정
-            console.log('결제 데이터가 없습니다.');
+    // 사용자수 비교 그래프 생성
+    createUserComparisonChart(data) {
+      const ctx = document.getElementById('userComparisonChart').getContext('2d');
+
+      // 그라데이션 배경 추가
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, 'rgba(75, 192, 192, 0.5)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],  // 월별 라벨
+          datasets: [{
+            label: '월별 가입자 수',
+            data: data, // 월별 사용자 수 데이터
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: gradient, // 그라데이션 배경
+            borderWidth: 2,  // 라인 두께
+            pointBackgroundColor: 'rgba(75, 192, 192, 1)', // 포인트 색상
+            pointBorderColor: '#fff',  // 포인트 외곽선 색상
+            pointHoverRadius: 7,  // 포인트 호버 크기
+            pointRadius: 5,  // 포인트 기본 크기
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(75, 192, 192, 1)',
+            tension: 0.4 // 라인 곡선 정도 (부드러운 라인)
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+            },
+            tooltip: {
+              enabled: true,
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              titleFont: {
+                family: "'Arial', sans-serif",
+                size: 16
+              },
+              bodyFont: {
+                family: "'Arial', sans-serif",
+                size: 14
+              },
+              borderWidth: 1,
+              borderColor: '#333',
+              padding: 10,
+              cornerRadius: 4,
+              caretPadding: 10
+            }
+          },
+          scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(200, 200, 200, 0.2)'
+                },
+                ticks: {
+                  stepSize: 1, // 1
+                  callback: function(value) {
+                    return value.toLocaleString() + ' 명';  // 금액 형식으로 y축 표시
+                  },
+                  color: '#333',  // y축 글자 색상
+                  font: {
+                    size: 12  // y축 폰트 크기
+                  }
+                },
+              x: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  color: '#333',  // x축 글자 색상
+                  font: {
+                    size: 12  // x축 폰트 크기
+                  }
+                }
+              }
+            }
           }
-        } catch (error) {
-          console.error("결제 금액 데이터를 불러오는 중 오류 발생:", error);
         }
-      },
+      });
+    },
+
+    // 전체 결제 금액을 불러오는 메서드
+    async fetchTotalPayment() {
+      try {
+        const token = localStorage.getItem('jwt');
+        const paymentResponse = await axios.get('/api/payments', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        // 월별 결제 금액 초기화 (1월부터 12월까지)
+        const monthlyPaymentSums = Array(12).fill(0);
+
+        // 각 결제의 날짜를 기반으로 월별 금액 합산
+        paymentResponse.data.forEach(payment => {
+          const paymentDate = new Date(payment.payDate); // 결제 날짜
+          const month = paymentDate.getMonth(); // 월을 0부터 11까지 반환
+          monthlyPaymentSums[month] += payment.amount; // 해당 월의 결제
   
+        });
+
+        
+
+
+
+
+        // 배열의 모든 amount 값을 더해서 totalPayment에 저장
+        if (paymentResponse.data.length > 0) {
+          this.totalPayment = paymentResponse.data.reduce((sum, payment) => sum + payment.amount, 0);  // amount 값 합산
+          console.log('불러온 총 금액:', this.totalPayment);
+          
+
+          // 그래프 업데이트
+          this.createPaymentComparisonChart(monthlyPaymentSums);
+
+        } else {
+          this.totalPayment = 0;  // 데이터가 없으면 0으로 설정
+          console.log('결제 데이터가 없습니다.');
+        }
+      } catch (error) {
+        console.error("결제 금액 데이터를 불러오는 중 오류 발생:", error);
+      }
+      
+    },
+
+// 월별 결제 금액 그래프 생성
+createPaymentComparisonChart(data) {
+      const ctx = document.getElementById('paymentComparisonChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+          datasets: [{
+            label: '월별 결제 금액',
+            data: data,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+            pointBorderColor: '#fff',
+            pointHoverRadius: 7,
+            pointRadius: 5,
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(54, 162, 235, 1)',
+            tension: 0.4  // 부드러운 곡선
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 100000,  // 예시: 1만 단위로 y축 눈금 설정
+                callback: function(value) {
+                  return value.toLocaleString() + ' 원';  // 금액 형식으로 y축 표시
+                }
+              }
+            },
+            x: {
+              ticks: {
+                color: '#333',
+                font: {
+                  size: 12
+                }
+              }
+            }
+          }
+        }
+      });
+    },
+
     // 오늘 방문자 수를 불러오는 메서드
     async fetchTodayVisitors() {
       try {
@@ -178,12 +353,13 @@ export default {
       } catch (error) {
         console.error("방문자 데이터를 불러오는 중 오류 발생:", error);
       }
-    },
+    }
   },
-  created() {
-    // 컴포넌트가 로드될 때 API 호출
+
+  // mounted 훅은 methods 외부에 있어야 함
+  mounted() {
     this.fetchMembers();
-    this.fetchTotalPayment();  // fetchAdditionalData 제거 후 fetchTotalPayment 호출
+    this.fetchTotalPayment();
     this.fetchTodayVisitors();
   }
 }
