@@ -5,6 +5,7 @@
  ---------------------
  2024.09.10 김호영 | admin 초기 설정
  2024.09.25 김호영 | 대시보드 디자인 구현
+ 2024.09.26 김호영 | 대시보드 그래프 구현 및 데이터 연동
  -->
 
 
@@ -31,13 +32,13 @@
           <div class="yellow-line"></div>
         </div>
 
-        <div class="top-box">
+        <!-- <div class="top-box">
           <h6>
             <span class="left-text">오늘 방문자 수 :</span> 
-            <span class="visitor-count">{{ todayVisitorCount }} 명</span> <!-- 방문자 수 출력 -->
+            <span class="visitor-count">{{ todayVisitorCount }} 명</span> 
           </h6>
           <div class="yellow-line"></div>
-        </div>
+        </div> -->
 
       </div>
     </div>
@@ -45,18 +46,18 @@
     <!-- 중간 상자 영역 -->
     <div class="middle-section">
       <div class="middle-boxes">
-
+      
         <div class="middle-box">
-          <canvas id="userComparisonChart"></canvas>
+          <canvas id="userComparisonChart"></canvas> <!-- 월별 가입자 수 그래프-->
         </div>
 
         <div class="middle-box">
           <canvas id="paymentComparisonChart"></canvas> <!-- 월별 결제 금액 그래프 -->
         </div>
 
-        <div class="middle-box">
+        <!-- <div class="middle-box">
           방문자 수 비교 그래프
-        </div>
+        </div> -->
 
       </div>
     </div>
@@ -378,12 +379,12 @@ createPaymentComparisonChart(data) {
 
 .dashboard-cards {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   gap: 20px;
 }
 
 .top-box {
-  width: 30%;
+  width: 45%;
   border: 1px solid #f1f1f1;
   border-radius: 3px;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
@@ -402,7 +403,7 @@ createPaymentComparisonChart(data) {
 
 /* 왼쪽 텍스트 스타일 (기본 유지) */
 .left-text {
-  font-size: 11px;
+  font-size: 13px;
   color: #2e2e2e;
 }
 
@@ -432,12 +433,12 @@ createPaymentComparisonChart(data) {
 
 .middle-boxes {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   gap: 20px;
 }
 
 .middle-box {
-  width: 30%;
+  width: 45%;
   height: 200px;
   border: 1px solid #f1f1f1;
   border-radius: 3px;
