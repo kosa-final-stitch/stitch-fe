@@ -23,7 +23,10 @@
             <option value="후원">후원하기</option>
           </select>
 
-          <input type="text" placeholder="후원금액" v-model="donationAmount" class="donation-input" /> 원
+          <div class="donation-amount-container">
+            <input type="text" placeholder="후원금액" v-model="donationAmount" class="donation-input" />
+            <span class="currency-label">원</span>
+          </div>
 
           <p class="donation-message">
             모든 사람이 다양한 교육 정보를 빠르게 얻을 수 있는 세상을 만들기 위해, 모두가 함께하는 공간을 만들기 위해,
@@ -146,16 +149,16 @@ export default {
   background-color: #f28c00;
   color: white;
   text-decoration: none;
-  border-radius: 50px; /* 둥근 버튼 */
+  border-radius: 50px;
   border: none;
   font-size: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease;
 }
 
 .button:hover {
   background-color: #ffdf50;
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* 호버 시 그림자 강조 */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 .modal-overlay {
@@ -198,6 +201,17 @@ h1 {
   box-sizing: border-box;
 }
 
+.donation-amount-container {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 20px;
+}
+
+.currency-label {
+  margin-left: 10px; /* "원" 글자와 input 간격 조정 */
+  font-size: 16px;
+}
+
 .submit-button {
   background-color: #f28c00;
   color: white;
@@ -219,9 +233,14 @@ h1 {
   margin-top: 10px;
 }
 
+button:hover {
+  background-color: #ffdf50;
+}
+
 .donation-message {
   font-size: 14px;
   margin: 20px 0;
   line-height: 1.5;
+  text-align: left; /* 글자 왼쪽 정렬 */
 }
 </style>
