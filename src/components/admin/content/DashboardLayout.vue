@@ -25,8 +25,8 @@
 
         <div class="top-box">
           <h6>
-            <span class="left-text">이번 달 후원 금액 :</span> 
-            <span class="donation-amount">{{ thisMonthDonation }} 원</span> <!-- 후원 금액 출력 -->
+            <span class="left-text">전체 결제 금액 :</span> 
+            <span class="payment-amount">{{ formattedPaymentAmount }} 원</span> <!-- 결제 금액 출력 -->
           </h6>
           <div class="yellow-line"></div>
         </div>
@@ -51,7 +51,7 @@
         </div>
 
         <div class="middle-box">
-          후원 비교 그래프
+          결제 비교 그래프
         </div>
 
         <div class="middle-box">
@@ -101,7 +101,7 @@ export default {
   data() {
     return {
       members: [],  // DB에서 불러올 회원 정보가 저장될 배열
-      thisMonthDonation: 0,  // 이번 달 후원 금액
+      totalPayment: 0,  // 전체 결제 금액
       todayVisitorCount: 0,  // 오늘 방문자 수
     };
   },
@@ -109,6 +109,10 @@ export default {
     // 전체 사용자 수 계산
     totalMembersCount() {
       return this.members.length;
+    },
+    // 쉼표를 추가한 결제 금액 계산
+    formattedPaymentAmount() {
+      return this.totalPayment ? this.totalPayment.toLocaleString() : '0';  // totalPayment 값이 존재할 경우에만 toLocaleString() 적용
     },
   },
   methods: {
@@ -138,33 +142,49 @@ export default {
         console.error("회원 정보를 불러오는 중 오류 발생:", error);
       }
     },
-    // 이번 달 후원 금액 및 오늘 방문자 수를 불러오는 메서드
-    async fetchAdditionalData() {
+      // 전체 결제 금액을 불러오는 메서드
+      async fetchTotalPayment() {
+        try {
+          const token = localStorage.getItem('jwt');
+          const paymentResponse = await axios.get('/api/payments', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          // 배열의 모든 amount 값을 더해서 totalPayment에 저장
+          if (paymentResponse.data.length > 0) {
+            this.totalPayment = paymentResponse.data.reduce((sum, payment) => sum + payment.amount, 0);  // amount 값 합산
+            console.log('불러온 총 금액:', this.totalPayment);
+          } else {
+            this.totalPayment = 0;  // 데이터가 없으면 0으로 설정
+            console.log('결제 데이터가 없습니다.');
+          }
+        } catch (error) {
+          console.error("결제 금액 데이터를 불러오는 중 오류 발생:", error);
+        }
+      },
+  
+    // 오늘 방문자 수를 불러오는 메서드
+    async fetchTodayVisitors() {
       try {
         const token = localStorage.getItem('jwt');
-        const donationResponse = await axios.get('/api/donations/this-month', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        this.thisMonthDonation = donationResponse.data.total;  // 이번 달 후원 금액 설정
-
         const visitorResponse = await axios.get('/api/visitors/today', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
         this.todayVisitorCount = visitorResponse.data.total;  // 오늘 방문자 수 설정
-
       } catch (error) {
-        console.error("추가 데이터 불러오기 중 오류 발생:", error);
+        console.error("방문자 데이터를 불러오는 중 오류 발생:", error);
       }
     },
   },
   created() {
     // 컴포넌트가 로드될 때 API 호출
     this.fetchMembers();
-    this.fetchAdditionalData();
+    this.fetchTotalPayment();  // fetchAdditionalData 제거 후 fetchTotalPayment 호출
+    this.fetchTodayVisitors();
   }
 }
 </script>
@@ -211,7 +231,7 @@ export default {
 }
 
 /* 오른쪽 숫자 크기만 키우기 */
-.member-count, .donation-amount, .visitor-count {
+.member-count, .payment-amount, .visitor-count {
   font-size: 20px; /* 숫자 크기 키우기 */
   font-weight: bold;
   color: #333;
