@@ -36,7 +36,7 @@
           <p class="footer-subtext">
             ㆍ Front-end: Vue 3.x
             <br>ㆍ Backend: SpringBoot 3.x
-            <br>ㆍ DBMS: SQL
+            <br>ㆍ DBMS: ORACLE 21c
             <br>ㆍ Persistence: Mybatis
             <br>ㆍ API 가져온 주소 : <a href="https://www.work24.go.kr/cm/e/a/0110/selectOpenApiSvcInfo.do?apiSvcId=&upprApiSvcId=&fullApiSvcId=000000000000000000000000000004%5E000000000000000000000000000005" class="link">고용 24</a> : <br>고용 24 국비 교육 및 학원 정보 제공
           </p>
