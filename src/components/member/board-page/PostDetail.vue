@@ -1,6 +1,5 @@
 <!--작성자 : 박주희 -->
 <template>
-  <MemberHeader></MemberHeader>
   <div class="board-container">
     <!-- 뒤로가기 버튼 -->
     <router-link to="/board/free-community" class="back-button">

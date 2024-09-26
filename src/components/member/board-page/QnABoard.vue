@@ -1,7 +1,6 @@
 <!--작성자 : 박주희 -->
 
 <template>
-  <MemberHeader></MemberHeader>
   <div class="board-container">
     <h1 class="board-title">QNA 게시판</h1>
     <h5 class="board-description">자유롭게 여러분의 의견을 입력하세요.</h5>
