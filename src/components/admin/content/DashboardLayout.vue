@@ -71,6 +71,7 @@
           <div class="underline"></div>
           <div class="bottom-box">
             <ul class="notice-list">
+              <li v-if="latestNotices.length === 0" class="no-posts-message">게시글이 없습니다.</li>
               <li 
                 v-for="notice in latestNotices" 
                 :key="notice.id" 
@@ -92,6 +93,7 @@
           <div class="underline"></div>
           <div class="bottom-box">
             <ul class="direct-list">
+              <li v-if="latestNotices.length === 0" class="no-posts-message">게시글이 없습니다.</li>
               <li 
                 v-for="direct in latestDirects" 
                 :key="direct.inquiryId" 
@@ -113,6 +115,7 @@
           <div class="underline"></div>
           <div class="bottom-box">
             <ul class="report-list">
+              <li v-if="hasReportError" class="error-message">게시물이 없습니다.</li>
               <li 
                 v-for="report in latestReports" 
                 :key="report.report_id" 
@@ -149,7 +152,8 @@ export default {
       todayVisitorCount: 0,  // 오늘 방문자 수
       latestNotices: [], // 공지사항을 저장할 배열
       latestDirects: [], // 1:1 문의를 저장할 배열
-      latestReports: [] // 신고 문의를 저장할 배열
+      latestReports: [], // 신고 문의를 저장할 배열
+      hasReportError: false // 에러 발생 여부를 확인하는 변수 추가
     };
   },
   computed: {
@@ -440,9 +444,12 @@ export default {
 
         if (Array.isArray(response.data)) {
           this.latestReports = response.data.slice(0, 3); // 최신 3개의 신고만 저장
+          this.hasReportError = false; // 에러가 없음을 표시
         }
       } catch (error) {
         console.error("신고 문의 데이터를 불러오는 중 오류 발생:", error);
+        this.latestReports = []; // 에러가 나도 빈 배열로 설정
+        this.hasReportError = true; // 에러가 발생했음을 표시
       }
     },
 
@@ -709,5 +716,20 @@ div.bottom-box .notice-date {
     font-size: 7px; /* 작성일 폰트 크기 더 줄임 */
     margin-top: 5px; /* 여백 조금 더 줄임 */
   }
+}
+
+.no-posts-message {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.error-message {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  margin: 10px 0;
+
 }
 </style>

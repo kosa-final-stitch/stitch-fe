@@ -131,10 +131,11 @@ export default {
   border: 1.5px solid #ddd;
   border-radius: 10px;
   padding: 5px 10px;
-  width: 50%;
+  width: 100%;
   height: 30px;
-  max-width: 1000px;
+  max-width: 999px;
   position: relative;
+
 }
 
 .search-input {
