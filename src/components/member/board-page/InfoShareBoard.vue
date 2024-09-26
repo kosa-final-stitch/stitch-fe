@@ -81,13 +81,11 @@
 
 <script>
 import axios from 'axios';
-import MemberHeader from '../member-header/MemberHeader.vue';
 // import PostDetail from './PostDetail.vue';  // 자식 컴포넌트를 import
 
 export default {
   name: "BoardMain",
   components: {
-    MemberHeader,
   },
   data() {
     return {

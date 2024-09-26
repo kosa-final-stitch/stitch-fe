@@ -151,14 +151,12 @@
 
 <script>
 import axios from 'axios';
-import MemberHeader from '../member-header/MemberHeader.vue';
 import { useMemberStore } from '/src/store/member-store'; // Pinia 상태관리에서 memberStore 가져오기
 import ReportModal from "@/components/member/board-page/ReportModal.vue";
 
 export default {
   name: "PostDetail",
   components: {
-    MemberHeader,
     ReportModal,
   },
   props: {
