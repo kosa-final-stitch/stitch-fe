@@ -33,16 +33,16 @@ export default {
   min-height: 100vh;
 }
 
-/* 헤더 영역 */
-.header {
-  /* 헤더 고정 여부에 따라 처리 */
-  position: relative; /* 스크롤과 함께 올라가도록 기본값 설정 */
+/* 헤더 영역 */   /* 헤더 고정 여부에 따라 처리 */ /* 스크롤과 함께 올라가도록 기본값 설정 */
+/* .header {
+
+  position: relative; 
   width: 100%;
   z-index: 10;
-}
+} */
 
 /* 헤더를 고정하고 싶다면 아래 주석 해제 */
-/* 
+
 .header {
   position: fixed;
   top: 0;
@@ -50,11 +50,12 @@ export default {
   width: 100%;
   z-index: 10;
 }
-*/
+
 
 /* 콘텐츠 영역 */
 .content {
   flex: 1;
-  padding: 20px;
+  margin-top:85px;
+  padding:20px;
 }
 </style>
