@@ -56,5 +56,6 @@ export default {
 .content {
   flex: 1;
   margin-top:85px;
+  padding:20px;
 }
 </style>
