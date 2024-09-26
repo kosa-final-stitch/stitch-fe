@@ -14,82 +14,84 @@
  2024.09.21 김호영 | 관리자 페이지 이동 버튼 추가
  2024.09.22 박요한 | 문의하기 모달 추가. + 로그인 상태만 열림.
  2024.09.23 김호영 | 관리자 로그인시 관리자 페이지 이동 상태 추가.
+ 2024.09.26 김호영 | 헤더 디자인
  -->
-<template>
+ <template>
   <header class="member-header">
-    <nav class="nav-menu">
-      <div class="left-side">
-        <ul class="nav-items">
-          <!-- 마이페이지 버튼: 로그인 상태일 때만 표시 -->
-          <li v-if="isAuthenticated">
-            <router-link to="/mypage">마이페이지</router-link>
-          </li>
-
-          <!-- 관리자 페이지 버튼: 관리자 권한이 있을 때만 표시 -->
-          <li v-if="isAdmin">
-            <router-link to="/admin">관리자 페이지</router-link>
-          </li>
-
-          <!-- 로그인 버튼: 비로그인 상태일 때만 표시 -->
-          <li v-else-if="!isAuthenticated">
-            <router-link to="/login">로그인</router-link>
-          </li>
-
-          <!-- 로그아웃 버튼: 로그인 상태일 때만 표시 -->
-          <li v-if="isAuthenticated">
-            <a @click="confirmLogout" class="logout-link">로그아웃</a>
-          </li>
-
-          <!-- 회원가입 버튼: 비로그인 상태일 때만 표시 -->
-          <li v-else>
-            <router-link to="/signup">회원가입</router-link>
-          </li>
-        </ul>
+    <div class="header-container">
+      <!-- 왼쪽에 로고가 들어가는 부분 -->
+      <div class="logo-container">
+        <img @click="goHome" src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
       </div>
 
-      <div class="right-side">
-        <ul class="nav-items">
-          <li class="nav-item" @mouseover="showDropdown" @mouseout="hideDropdown">
-            <div class="nav-menu">
-              <div>문의하기</div>
-              <div>교육과정 정보</div>
-              <div>게시판</div>
-            </div>
-            <div :class="{ 'dropdown-container': true, show: isDropdownVisible }">
-              <div class="dropdown-section">
-                <h3>문의하기</h3>
-                <ul>
-                  <li><a @click="handleInquiryClick">1:1 문의 하러가기</a></li>
-                </ul>
+      <!-- 네비게이션 메뉴와 검색창 -->
+      <nav class="nav-menu">
+        <div class="left-side">
+          <ul class="nav-items">
+            <li class="nav-item" @mouseover="showDropdown" @mouseout="hideDropdown">
+              <div class="nav-menu" style="font-weight: 600; color: #3D4046">
+                <div>문의하기</div>
+                <div>교육과정 정보</div>
+                <div>게시판</div>
               </div>
-              <div class="dropdown-section">
-                <h3>교육과정 정보</h3>
-                <ul>
-                  <li><router-link to="/academies/academy">학원 정보</router-link></li>
-                  <li><router-link to="/academies/courses">교육과정 정보</router-link></li>
-                </ul>
+              <div :class="{ 'dropdown-container': true, show: isDropdownVisible }">
+                <div class="dropdown-section">
+                  <h3>문의하기</h3>
+                  <ul>
+                    <li><a @click="handleInquiryClick">1:1 문의 하러가기</a></li>
+                  </ul>
+                </div>
+                <div class="dropdown-section">
+                  <h3>교육과정 정보</h3>
+                  <ul>
+                    <li><router-link to="/academies/academy">학원 정보</router-link></li>
+                    <li><router-link to="/academies/courses">교육과정 정보</router-link></li>
+                  </ul>
+                </div>
+                <div class="dropdown-section">
+                  <h3>게시판</h3>
+                  <ul>
+                    <li><router-link to="/board/info-share">정보 공유</router-link></li>
+                    <li><router-link to="/board/free-community">자유 게시판</router-link></li>
+                    <li><router-link to="/board/qna">Q&A</router-link></li>
+                  </ul>
+                </div>
               </div>
-              <div class="dropdown-section">
-                <h3>게시판</h3>
-                <ul>
-                  <li><router-link to="/board/info-share">정보 공유</router-link></li>
-                  <li><router-link to="/board/free-community">자유 게시판</router-link></li>
-                  <li><router-link to="/board/qna">Q&A</router-link></li>
-                </ul>
-              </div>
-            </div>
-          </li>
-        </ul>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      
+      <!-- Search bar와 간격을 위해 container 적용 -->
+      <div class="search-bar-container">
+        <search-bar />
       </div>
-    </nav>
 
-    <div class="logo-container">
-      <img @click="goHome" src="@/assets/full-logo.jpg" alt="Stitch 로고" class="logo" />
+      <!-- 오른쪽 로그인 및 회원가입 메뉴 -->
+      <div class="right-container">
+        <div class="auth-section">
+          <ul class="nav-items">
+            <li v-if="isAuthenticated">
+              <router-link to="/mypage">마이페이지</router-link>
+            </li>
+            <li v-if="isAdmin">
+              <router-link to="/admin">관리자 페이지</router-link>
+            </li>
+            <li v-else-if="!isAuthenticated">
+              <router-link to="/login">로그인</router-link>
+            </li>
+            <li v-if="isAuthenticated">
+              <a @click="confirmLogout" class="logout-link">로그아웃</a>
+            </li>
+            <li v-else>
+              <router-link to="/signup">회원가입</router-link>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
 
-    <search-bar />
-
-    <!-- v-if로 모달을 제어 -->
+    <!-- 문의하기 모달 -->
     <inquiry-modal v-if="inquiryModalVisible" @close="inquiryModalVisible = false" />
   </header>
 </template>
@@ -189,45 +191,105 @@ export default {
 .member-header {
   width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 15px 0;
   background-color: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;
   left: 0;
+  padding: 15px 0;
 }
-.logout-link {
+
+.header-container {
+  display: flex;
+  justify-content: center; /* 전체 컨테이너를 중앙 정렬 */
+  align-items: center;
+  width: 100%;
+  max-width: 1200px; /* 화면에서 최대 너비 설정 */
+  padding: 0 20px;
+  margin: 0 auto; /* 가로축 중앙 정렬 */
+}
+
+.logo-container {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
   cursor: pointer;
 }
 
-.nav-menu {
-  width: 95%;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0px;
-  margin-right: 50px;
+.logo {
+  max-width: 110px;
 }
 
-.left-side,
-.right-side {
+.right-container {
   display: flex;
-  flex-wrap: nowrap;
+  flex-direction: column; /* 세로로 배치 */
+  align-items: flex-end; /* 오른쪽 정렬 */
+}
+
+.auth-section {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .nav-items {
   list-style: none;
   display: flex;
-  gap: 30px;
+  gap: 15px;
   font-size: 15px;
   margin: 0;
-  flex-wrap: nowrap;
 }
 
 .nav-item {
-  list-style: none;
   cursor: pointer;
+  margin-right: 0; /* 오른쪽 여백 제거 */
+  padding: 0 20px; /* 좌우 패딩 추가로 일정 간격 유지 */
+}
+
+.nav-items li a {
+  text-decoration: none;
+  color: rgb(61, 61, 61);
+}
+
+.logout-link {
+  cursor: pointer;
+}
+
+
+.nav-menu {
+  display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    align-items: center;
+    min-width: 250px;
+    padding: 0 10px;
+    margin: 0;
+}
+
+
+.nav-items {
+  flex-direction: row; /* 가로로 배치 */
+  list-style: none;
+  gap: 30px; /* 항목들 사이의 간격 조정 */
+  padding: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px; /* 좌우 패딩을 줄여서 항목 간 간격 축소 */
+  font-size: 15px; /* 글자 크기를 조금 줄여서 크기 조정 */
+  cursor: pointer;
+}
+
+.left-side,
+.right-side {
+  display: flex;
+  justify-content: center; /* 가운데 정렬 */
+  align-items: center; /* 세로 가운데 정렬 */
+  padding: 0; /* 내부 패딩을 제거 */
+  margin: 0; /* 외부 여백 제거 */
 }
 
 .nav-items li a,
@@ -243,15 +305,14 @@ export default {
 .nav-item li a:hover {
   color: #f8a060;
 }
-
 /* 드롭다운 애니메이션 */
 .dropdown-container {
   position: absolute;
-  top: 38px;
+  top: 85px;
   left: 0;
   right: 0;
   background-color: white;
-  box-shadow: 0 12px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 11px -3px rgba(0, 0, 0, 0.1);
 
   display: flex;
   justify-content: space-around;
@@ -259,6 +320,7 @@ export default {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.5s ease; /* 부드러운 애니메이션 */
+  padding: 0px 400px 10px 100px;
 }
 
 .dropdown-container.show {
@@ -267,14 +329,14 @@ export default {
 
 .dropdown-section {
   flex-grow: 1;
-  margin: 20px 80px 20px 0px;
+  margin: 10px 50px 10px 5px; /* 좌우 및 상하 마진을 줄임 */
   text-align: right; /* 텍스트 오른쪽 정렬 */
 }
 
 .dropdown-section h3 {
-  font-size: 16px;
+  font-size: 15px; /* 제목 폰트 크기를 약간 줄임 */
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 8px; /* 제목 아래 마진을 줄임 */
 }
 
 .dropdown-section ul {
@@ -284,56 +346,66 @@ export default {
 }
 
 .dropdown-section li {
-  margin-bottom: 10px;
+  margin-bottom: 8px; /* 리스트 항목 간의 마진을 줄임 */
 }
 
 .dropdown-section li a {
   color: rgb(61, 61, 61);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px; /* 링크 텍스트 크기를 줄임 */
 }
 
 .dropdown-section li a:hover {
-  color: #f8a060;
+  color: #dfdfdf;
 }
 
-/* 배경 블러 효과 */
-.blurred {
-  backdrop-filter: blur(5px); /* 블러 효과 */
-  transition: backdrop-filter 0.3s ease; /* 부드러운 전환 */
-}
-
-.logo-container {
-  margin-bottom: 15px;
-  cursor: pointer;
-}
-
-.logo {
-  max-width: 130px;
-}
-
-/* 반응형 처리를 위한 추가 */
+/* 반응형 처리 */
 @media (max-width: 800px) {
   .nav-items {
-    gap: 15px; /* 화면이 좁아질 때 항목 간 간격도 줄이기 */
-  }
-  .nav-items li a {
-    font-size: 14px; /* 화면이 작아질 때 글씨 크기를 줄이기 */
-  }
-  .nav-menu {
-    font-size: 14px;
-  }
-}
-@media (max-width: 400px) {
-  .nav-items {
-    gap: 15px; /* 더 좁아지면 항목 간 간격도 더 줄이기 */
-  }
-  .nav-items li a {
-    font-size: 8px; /* 더 좁아지면 글씨 크기를 더 줄이기 */
+    gap: 10px;
   }
 
-  .nav-menu {
-    font-size: 8px;
+  .header-container {
+    flex-direction: column;
   }
+
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-bottom {
+    justify-content: flex-start;
+  }
+
+  .dropdown-container {
+  position: absolute;
+  top: 170px;
+  left: 0;
+  right: 0;
+  background-color: white;
+  box-shadow: 0 4px 11px -3px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  justify-content: space-around;
+  z-index: 999;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease; /* 부드러운 애니메이션 */
+  padding: 0px 400px 10px 100px;
+}
+
+
+}
+
+.search-bar-container {
+  flex: 1;
+  margin: 0px 50px 0 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.search-bar {
+  width: 100%; /* 검색창 너비를 100%로 설정하여 container 내에서 최대한 차지 */
 }
 </style>
