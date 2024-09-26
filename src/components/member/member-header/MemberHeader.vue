@@ -14,9 +14,10 @@
  2024.09.21 김호영 | 관리자 페이지 이동 버튼 추가
  2024.09.22 박요한 | 문의하기 모달 추가. + 로그인 상태만 열림.
  2024.09.23 김호영 | 관리자 로그인시 관리자 페이지 이동 상태 추가.
- 2024.09.26 김호영 | 헤더 디자인
+ 2024.09.24 박요한 | fetchUserInfo 로그인된 경우만 실행.
+ 2024.09.26 김호영 | 헤더 디자인 수정
  -->
- <template>
+<template>
   <header class="member-header">
     <div class="header-container">
       <!-- 왼쪽에 로고가 들어가는 부분 -->
@@ -29,7 +30,7 @@
         <div class="left-side">
           <ul class="nav-items">
             <li class="nav-item" @mouseover="showDropdown" @mouseout="hideDropdown">
-              <div class="nav-menu" style="font-weight: 600; color: #3D4046">
+              <div class="nav-menu" style="font-weight: 600; color: #3d4046">
                 <div>문의하기</div>
                 <div>교육과정 정보</div>
                 <div>게시판</div>
@@ -61,7 +62,7 @@
           </ul>
         </div>
       </nav>
-      
+
       <!-- Search bar와 간격을 위해 container 적용 -->
       <div class="search-bar-container">
         <search-bar />
@@ -118,12 +119,12 @@ export default {
       console.log("Pinia에서 가져온 인증 상태:", store.isAuthenticated); // 관리자 상태 로그 출력
       return store.isAuthenticated; // 인증 상태 반환
     },
-  // 관리자 권한 여부 확인
-  isAdmin() {
-    const store = useMemberStore();
-    return store.authority && store.authority.some(auth => auth.authority === 'ROLE_ADMIN');
+    // 관리자 권한 여부 확인
+    isAdmin() {
+      const store = useMemberStore();
+      return store.authority && store.authority.some((auth) => auth.authority === "ROLE_ADMIN");
+    },
   },
-},
   methods: {
     // 사용자 정보를 백엔드에서 가져오는 함수
     async fetchUserInfo() {
@@ -182,7 +183,9 @@ export default {
     },
   },
   created() {
-    this.fetchUserInfo(); // 컴포넌트가 생성될 때 사용자 정보를 가져옴
+    if (this.isAuthenticated) {
+      this.fetchUserInfo(); // 로그인된 경우에만 사용자 정보를 가져옴
+    }
   },
 };
 </script>
@@ -255,17 +258,15 @@ export default {
   cursor: pointer;
 }
 
-
 .nav-menu {
   display: flex;
-    justify-content: space-around;
-    flex-direction: row;
-    align-items: center;
-    min-width: 250px;
-    padding: 0 10px;
-    margin: 0;
+  justify-content: space-around;
+  flex-direction: row;
+  align-items: center;
+  min-width: 250px;
+  padding: 0 10px;
+  margin: 0;
 }
-
 
 .nav-items {
   flex-direction: row; /* 가로로 배치 */
@@ -379,23 +380,21 @@ export default {
   }
 
   .dropdown-container {
-  position: absolute;
-  top: 170px;
-  left: 0;
-  right: 0;
-  background-color: white;
-  box-shadow: 0 4px 11px -3px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 170px;
+    left: 0;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 4px 11px -3px rgba(0, 0, 0, 0.1);
 
-  display: flex;
-  justify-content: space-around;
-  z-index: 999;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.5s ease; /* 부드러운 애니메이션 */
-  padding: 0px 400px 10px 100px;
-}
-
-
+    display: flex;
+    justify-content: space-around;
+    z-index: 999;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease; /* 부드러운 애니메이션 */
+    padding: 0px 400px 10px 100px;
+  }
 }
 
 .search-bar-container {

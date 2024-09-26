@@ -5,11 +5,16 @@
  ---------------------
  2024.09.13 박요한 | 컴포넌트 생성.
  2024.09.18 박요한 | 구체화.
+ 2024.09.25 박요한 | 더보기 버튼 위치 조정.
  -->
 
 <template>
   <div class="popular-reviews">
-    <h2>인기 리뷰</h2>
+    <div class="header-row">
+      <h2>인기 리뷰</h2>
+      <!-- 더보기 버튼 -->
+      <MoreButton to="/academies/academy" />
+    </div>
     <div class="review-container">
       <div
         v-for="(review, index) in reviews"
@@ -34,8 +39,6 @@
         </div>
       </div>
     </div>
-
-    <more-button to="/mypage/activities/review" />
   </div>
 </template>
 
@@ -84,6 +87,18 @@ export default {
 <style scoped>
 .popular-reviews {
   margin: 0 auto;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1%;
+}
+
+.header-row h2 {
+  margin: 0;
 }
 
 .review-container {
