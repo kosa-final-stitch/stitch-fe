@@ -357,7 +357,7 @@ export default {
 }
 
 .dropdown-section li a:hover {
-  color: #dfdfdf;
+  color: #f8a060;
 }
 
 /* 반응형 처리 */
