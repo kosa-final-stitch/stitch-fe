@@ -1,7 +1,6 @@
 <!--작성자 : 박주희 -->
 
 <template>
-  <MemberHeader></MemberHeader>
   <div class="board-container">
     <router-link to="/board/free-community" class="back-button">
       <span>&lt; 뒤로가기</span>
@@ -52,13 +51,11 @@
 
 <script>
 import axios from 'axios';
-import MemberHeader from '../member-header/MemberHeader.vue';
 import { useMemberStore } from '/src/store/member-store'; // Pinia 상태관리에서 memberStore 가져오기
 
 export default {
   name: "BoardMain",
   components: {
-    MemberHeader,
   },
   data() {
     return {
