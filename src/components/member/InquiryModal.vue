@@ -13,7 +13,7 @@
 
     <!-- 모달 본문 -->
     <div class="inquiry-modal-container">
-      <h2>문의 하기</h2>
+      <h2>문의하기</h2>
 
       <label for="category">문의 유형</label>
       <select v-model="selectedCategory" id="category">
