@@ -227,7 +227,7 @@ export default {
   border: none;
   background-color: transparent;
   cursor: pointer;
-  padding: 10px 30px;
+  padding: 10px 25px;
   margin: 0;
   font-size: 1rem;
   color: #333;
