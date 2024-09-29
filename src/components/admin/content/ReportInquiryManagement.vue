@@ -5,6 +5,7 @@
  ---------------------
  2024.09.10 김호영 | admin 초기 설정
  2024.09.19 김호영 | 신고 문의 페이지 기능 및 디자인 구현
+ 2024.09.29 김호영 | 신고 정보 백엔드에서 갖고오기
  -->
 
  <template>
@@ -50,12 +51,12 @@
         <tr v-if="filteredReports.length === 0">
           <td colspan="8">신고문의가 없습니다.</td>
         </tr>
-        <tr v-for="(report, index) in paginatedReports" :key="report.report_id">
+        <tr v-for="(report, index) in paginatedReports" :key="report.reportId">
           <td>{{ (currentPage - 1) * reportsPerPage + index + 1 }}</td>
-          <td>{{ report.member_id }}</td>
+          <td>{{ report.nickname }}</td>
           <td>{{ getCategory(report) }}</td> <!-- 카테고리 결정 -->
-          <td>{{ report.board_id }}</td>
-          <td>{{ report.comment_id || '-' }}</td>
+          <td>{{ report.boardId }}</td>
+          <td>{{ report.commentId || '-' }}</td>
           <td>{{ report.reason }}</td>
           <td>{{ formatDate(report.regdate) }}</td>
           <td>{{ report.ansdate ? formatDate(report.ansdate) : '-' }}</td>
@@ -81,43 +82,45 @@
     <div v-if="isReportAnswerModalOpen" class="report-answer-modal-overlay">
       <div class="report-answer-modal-content">
         <h3>신고 문의 확인</h3>
-          <div class="report-answer-info">
-            <strong>신고 관리</strong>
-            <div class="info-item">
-              <label for="title">신고 사유</label>
-              <input id="title" type="text" v-model="selectedReport.reason" class="info-input" readonly />
-            </div>
-            <div class="info-item">
-              <label for="member_id">신고자:</label>
-              <input id="member_id" type="text" v-model="selectedReport.member_id" class="info-input" readonly />
-            </div>
-            <div class="info-item">
-              <label for="content">신고 내용:</label>
-              <textarea id="content" v-model="selectedReport.content" class="info-textarea" rows="5" readonly></textarea>
-            </div>
+        <div class="report-answer-info">
+          <strong>신고 관리</strong>
+          <div class="info-item">
+            <label for="reason">신고 사유</label>
+            <input id="reason" type="text" v-model="selectedReport.reason" class="info-input" readonly />
           </div>
+          <div class="info-item">
+            <label for="nickname">신고자:</label>
+            <input id="nickname" type="text" v-model="selectedReport.nickname" class="info-input" readonly />
+          </div>
+          <div class="info-item">
+            <label for="content">신고 내용:</label>
+            <textarea id="content" v-model="selectedReport.content" class="info-textarea" rows="5" readonly></textarea>
+          </div>
+        </div>
+
         <form @submit.prevent="submitReportAnswer">
           <div class="report-answer-info">
             <strong>해당 게시글/댓글 내용</strong>
             <div class="info-item">
-              <label for="title">작성 유형</label>
-              <input id="title" type="text" v-model="selectedReport.post_or_comment" class="info-input" readonly />
+              <label for="postOrComment">작성 유형</label>
+              <!-- postOrComment가 POST일 때 게시글, COMMENT일 때 댓글로 표시 -->
+              <input id="postOrComment" type="text" :value="getPostOrCommentType(selectedReport.postOrComment)" class="info-input" readonly />
             </div>
             <div class="info-item">
               <label for="number">게시글/댓글 번호</label>
-              <input id="number" type="text" :value="selectedReport.post_or_comment === '게시글' ? selectedReport.board_id : selectedReport.comment_id" class="info-input" readonly />
+              <input id="number" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.boardId : selectedReport.commentId" class="info-input" readonly />
             </div>
             <div class="info-item">
-              <label for="member_id">작성자:</label>
-              <input id="member_id" type="text" v-model="selectedReport.writer_id" class="info-input" readonly />
+              <label for="writerId">작성자:</label>
+              <input id="writerId" type="text" v-model="selectedReport.writerId" class="info-input" readonly />
             </div>
             <div class="info-item">
-              <label for="member_id">제목:</label>
-              <input id="title" type="text" :value="selectedReport.post_or_comment === '게시글' ? selectedReport.title : '-'" class="info-input" readonly />
+              <label for="title">제목:</label>
+              <input id="title" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.title : '-'" class="info-input" readonly />
             </div>
             <div class="info-item">
-              <label for="content">내용:</label>
-              <textarea id="post-content" v-model="selectedReport.postContent" class="info-textarea" rows="5" readonly></textarea>
+              <label for="postContent">내용:</label>
+              <textarea id="postContent" v-model="selectedReport.postContent" class="info-textarea" rows="5" readonly></textarea>
             </div>
           </div>
           <div class="modal-buttons">
@@ -141,6 +144,8 @@
 </template>
 
 <script>
+import axios from 'axios'; 
+
 export default {
   data() {
     return {
@@ -156,35 +161,7 @@ export default {
     };
   },
   mounted() {
-    // 임의의 신고 데이터를 넣어줌
-    this.reportsData = [
-      {
-        report_id: 1,
-        member_id: 115,
-        post_or_comment: '게시글',
-        board_table: 'board',
-        board_id: 101,
-        comment_id: null,
-        reason: '부적절한 콘텐츠',
-        content: '이 게시글은 부적절한 내용을 포함하고 있습니다.',
-        regdate: '2024-06-28',
-        ansdate: '2024-07-05',
-        status: 'unanswered',
-      },
-      {
-        report_id: 2,
-        member_id: 120,
-        post_or_comment: '댓글',
-        board_table: 'comment',
-        board_id: 102,
-        comment_id: 205,
-        reason: '모욕적인 표현',
-        content: '이 댓글은 매우 모욕적입니다.',
-        regdate: '2024-07-01',
-        ansdate: null,
-        status: 'unanswered',
-      }
-    ];
+    this.fetchReports();
   },
   computed: {
     filteredReports() {
@@ -196,9 +173,9 @@ export default {
         const matchesQuery = 
           report.content.includes(this.searchQuery) ||
           report.reason.includes(this.searchQuery) ||
-          String(report.member_id).includes(this.searchQuery) || 
-          (report.post_or_comment === '게시글' && report.board_table.includes(this.searchQuery)) ||
-          (report.post_or_comment === '댓글' && report.comment_id && String(report.comment_id).includes(this.searchQuery));
+          String(report.memberId).includes(this.searchQuery) || 
+          (report.postOrComment === 'POST' && report.boardTable.includes(this.searchQuery)) ||
+          (report.postOrComment === 'COMMENT' && report.commentId && String(report.commentId).includes(this.searchQuery));
         return matchesCategory && matchesQuery;
       });
     },
@@ -211,6 +188,30 @@ export default {
     },
   },
   methods: {
+    async fetchReports() {
+      try {
+        const token = localStorage.getItem('token'); // JWT 토큰이 로컬 스토리지에 저장되어 있다고 가정
+        const response = await axios.get('/api/member/report', {
+          headers: {
+            Authorization: `Bearer ${token}` // 토큰을 Authorization 헤더에 포함
+          }
+        });
+        console.log('Fetched Reports:', response.data); // 데이터를 로그로 확인
+        this.reportsData = response.data; // 가져온 데이터를 reportsData에 저장
+      } catch (error) {
+        console.error('신고 데이터를 가져오는 중 오류 발생:', error);
+        // 에러 처리 로직 추가 가능
+      }
+    },
+    getPostOrCommentType(postOrComment) {
+      if (postOrComment === 'POST') {
+        return '게시글';
+      } else if (postOrComment === 'COMMENT') {
+        return '댓글';
+      } else {
+        return '-'; // 값이 없거나 오류가 있을 경우
+      }
+    },
     formatDate(date) {
       const d = new Date(date);
       return d.toISOString().replace('T', ' ').substring(0, 10);
@@ -224,18 +225,18 @@ export default {
       this.selectedReport = {
         ...report,
         writer_id: this.getWriterId(report), // 게시글/댓글 작성자
-        title: report.post_or_comment === '게시글' ? report.board_title : '-', // 게시글 제목 or "-"
+        title: report.postOrComment === 'POST' ? report.boardTitle : '-', // 게시글 제목 or "-"
         postContent: this.getPostContent(report), // 게시글 또는 댓글 내용
       };
       this.isReportAnswerModalOpen = true;
     },
     getWriterId(report) {
       // 게시글/댓글 작성자 정보 가져오기
-      return report.post_or_comment === '게시글' ? report.board_writer_id : report.comment_writer_id;
+      return report.postOrComment === 'POST' ? report.boardWriterId : report.commentWriterId;
     },
     getPostContent(report) {
       // 게시글/댓글 내용 가져오기
-      return report.post_or_comment === '게시글' ? report.board_content : report.comment_content;
+      return report.postOrComment === 'POST' ? report.boardContent : report.commentContent;
     },
     closeReportAnswerModal() {
       this.isReportAnswerModalOpen = false;
@@ -250,7 +251,7 @@ export default {
       this.selectedReport.answer = this.answerContent;
 
       // reportsData에서 해당 report를 찾아서 업데이트
-      const reportIndex = this.reportsData.findIndex(report => report.report_id === this.selectedReport.report_id);
+      const reportIndex = this.reportsData.findIndex(report => report.reportId === this.selectedReport.reportId);
       if (reportIndex !== -1) {
         this.reportsData.splice(reportIndex, 1, { ...this.selectedReport });
       }
@@ -269,9 +270,9 @@ export default {
 
     // 카테고리 처리 로직
     getCategory(report) {
-      if (report.post_or_comment === '게시글') {
-        return report.board_table;
-      } else if (report.post_or_comment === '댓글') {
+      if (report.postOrComment === 'POST') {
+        return '게시글';
+      } else if (report.postOrComment === 'COMMENT') {
         return '댓글';
       } else {
         return '-';
