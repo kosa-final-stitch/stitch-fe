@@ -1,3 +1,6 @@
+<!-- 
+2024.9.29 박요한 | watch 추가 - 검색 라우터 오류 수정
+-->
 <template>
   <div class="course-detail">
     <div class="course-header">
@@ -134,6 +137,14 @@ export default {
       currentPage: 1, // 현재 페이지
       reviewsPerPage: 5, // 페이지 당 표시할 리뷰 수
     };
+  },
+  watch: {
+    "$route.params.courseId": {
+      immediate: true, // 처음 로드될 때도 실행
+      handler(newCourseId) {
+        this.fetchCourseDetail(newCourseId); // 새로운 courseId로 데이터를 가져옴
+      },
+    },
   },
   mounted() {
     this.fetchCourseDetail();

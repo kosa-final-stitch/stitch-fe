@@ -1,3 +1,6 @@
+<!-- 
+2024.9.29 박요한 | watch 추가 - 검색 라우터 오류 수정 (+ 별 색상 추가)
+-->
 <template>
   <div class="academy-info">
     <!-- 학원 정보 상단 -->
@@ -132,6 +135,16 @@ export default {
       completedCourses: [], // 완료된 과정
       upcomingCourses: [], // 진행 예정 과정
     };
+  },
+  watch: {
+    academyId(newId, oldId) {
+      if (newId !== oldId) {
+        // academyId가 변경되었을 때 데이터를 다시 불러오기
+        this.fetchAcademyData();
+        this.fetchCourses();
+        this.fetchAcademyRating();
+      }
+    },
   },
   mounted() {
     this.fetchAcademyData(); // 학원 정보 가져오기
@@ -375,6 +388,7 @@ export default {
 
 /* stars: 별점 */
 .stars {
+  color: #ffcc00;
   font-size: 24px;
   margin-bottom: 10px;
   display: block;
