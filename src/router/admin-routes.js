@@ -5,7 +5,8 @@
  ---------------------
  2024.08.30 박요한 | 라우터 설계
  2024.09.10 김호영 | 라우터 통합,수정,개선
- 2024.09.11 김호영 | admin, memeber App 라우터 통합 결정중.. post,review 라우트 이름 변경 
+ 2024.09.11 김호영 | admin, memeber App 라우터 통합 결정중.. post,review 라우터 이름 변경 
+ 2024.09.29 김호영 | 수강인증 라우터 추가
  */
 
  //import AdminApp from '../components/admin/AdminApp.vue';
@@ -18,6 +19,7 @@
  import DirectInquiryManagement from '../components/admin/content/DirectInquiryManagement.vue';
  import AnnouncementManagement from '../components/admin/content/AnnouncementManagement.vue';
  import PayManagement from '../components/admin/content/PayManagement.vue';
+ import CourseCertification from '@/components/admin/content/CourseCertification.vue';
 // import ContentArea from '@/components/admin/content/ContentArea.vue';
 //import AdminContentWrapper from '@/components/admin/AdminContentWrapper.vue';
 
@@ -46,6 +48,11 @@
             path: 'user-info',
             name: 'UserInfoManagement',
             component: MemberInfoManagement,
+          },
+          {
+            path: 'course-certification',
+            name: 'CourseCertification',
+            component: CourseCertification,
           },
           {
             path: 'post-management',

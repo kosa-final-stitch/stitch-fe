@@ -1,8 +1,20 @@
+<!--
+ 담당자: 김호영
+ 시작 일자: 2024.09.29
+ 설명 : admin 수강인증 확인 페이지 기능 구현 및 디자인 개발
+ ---------------------
+
+ 2024.09.29 김호영 | 수강인증 확인 기능 구현.
+ -->
+
 <template>
   <!-- 메인 컨테이너 -->
   <div class="post-management">
     <h1>수료 인증 현황</h1>
-    <p>수료 현황 내역입니다.</p>
+    <div class="header-container">
+      <!-- 수료과목 신청하기 버튼 -->
+      <button class="apply-button" @click="openModal">수료과목 신청하기</button>
+    </div>
     <table>
       <!-- 테이블 헤더 -->
       <thead>
@@ -12,7 +24,7 @@
           <th>수료과정명</th>
           <th>수료학원</th>
           <th>개강일</th>
-          <th>종료일</th>
+          <th>수료일</th>
           <th>수료여부</th>
         </tr>
       </thead>
@@ -36,12 +48,19 @@
         </tr>
       </tbody>
     </table>
+
+        <!-- 모달 컴포넌트 -->
+        <CertificateRequest v-if="isModalOpen" :isVisible="isModalOpen" @close="closeModal" />
   </div>
 </template>
 
 <script>
+import CertificateRequest from './CertificateRequest.vue';
+
 export default {
-  // 컴포넌트 데이터
+  components: {
+    CertificateRequest,
+  },
   data() {
     return {
       certificate: [
@@ -53,7 +72,17 @@ export default {
           complete: "수료",
         },
       ],
+      isModalOpen: false, //모달 상태 변수
     };
+  },
+  methods: {
+    openModal() {
+      console.log('Modal Open Called'); // 로그 확인
+      this.isModalOpen = true;
+    },
+    closeModal() {
+      this.isModalOpen = false;
+    },
   },
 };
 </script>
@@ -89,5 +118,28 @@ th {
 /* 체크박스 스타일 */
 input[type="checkbox"] {
   margin: 0; /* 체크박스 외부 여백 제거 */
+}
+
+/* 상단 문구와 버튼을 위한 컨테이너 */
+.header-container {
+  display: flex; /* 플렉스 박스 사용 */
+  justify-content: space-between; /* 양쪽 끝으로 정렬 */
+  align-items: center; /* 수직 가운데 정렬 */
+  margin-top: 10px;
+}
+
+/* 수료과목 신청하기 버튼 스타일 */
+.apply-button {
+  padding: 10px 20px; /* 안쪽 여백 */
+  background-color: #ffa15e; /* 버튼 배경색 */
+  color: white; /* 버튼 글자색 */
+  border: none; /* 테두리 없음 */
+  border-radius: 5px; /* 둥근 테두리 */
+  cursor: pointer; /* 마우스 커서 */
+  margin-left: auto; /* 왼쪽 여백 자동으로 설정해서 우측 정렬 */
+}
+
+.apply-button:hover {
+  background-color: #f28c00; /* 호버 시 색상 */
 }
 </style>
