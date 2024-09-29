@@ -7,16 +7,17 @@
  2024.09.29 김호영 | 수강인증 확인 페이지 구현.
  -->
 
-<template>
-  <!-- 상단 검색창 -->
-  <div class="search-bar">
+ <template>
+  <div class="certificate-info-page">
+    <!-- 상단 검색창 -->
+    <div class="search-bar">
       <div class="search-wrapper search-container">
         <!-- 카테고리 선택 -->
         <div class="category-container">
           <select v-model="selectedCategory" class="search-category">
             <option value="all">전체</option>
-            <option value="answered">수료 완료</option>
-            <option value="unanswered">미처리</option>
+            <option value="completed">수료 완료</option>
+            <option value="in-progress">처리중</option>
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" class="angle-dropdown-icon" />
@@ -29,17 +30,232 @@
         </div>
       </div>
     </div>
+
+    <!-- 수료 신청 목록 테이블 -->
+    <table class="certificate-list-table">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>수료신청 ID</th>
+          <th>신청자 ID</th>
+          <th>교육 과정 ID</th>
+          <th>교육 과정명</th>
+          <th>교육 학원명</th>
+          <th>수료일</th>
+          <th>수료 여부</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-if="filteredCertificates.length === 0">
+          <td colspan="9">수료 신청 내역이 없습니다.</td>
+        </tr>
+        <tr v-for="(certificate, index) in paginatedCertificates" :key="certificate.certificateId">
+          <td>{{ (currentPage - 1) * certificatesPerPage + index + 1 }}</td>
+          <td>{{ certificate.certificateId }}</td>
+          <td>{{ certificate.nickname }}</td>
+          <td>{{ certificate.courseId }}</td>
+          <td>{{ certificate.courseName }}</td>
+          <td>{{ certificate.academyName }}</td>
+          <td>{{ formatDate(certificate.completionDate) }}</td>
+          <td>{{ certificate.status }}</td>
+          <td>
+          <button v-if="certificate.status !== 'completed'" class="certificate-write-btn" @click="openCertificateAnswerModal(certificate)">
+              확인하기
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 페이지네이션 추가 -->
+    <div class="pagination">
+      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">이전</button>
+      <span v-for="page in totalPages" :key="page">
+        <button @click="goToPage(page)" :class="{ active: currentPage === page }">{{ page }}</button>
+      </span>
+      <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">다음</button>
+    </div>
+
+    <!-- 수료 확인 모달 -->
+    <div v-if="isCertificateAnswerModalOpen" class="certificate-answer-modal-overlay">
+      <div class="certificate-answer-modal-content">
+        <h3>수료 확인</h3>
+        <div class="certificate-answer-info">
+          <strong>수료 관리</strong>
+
+          <!-- 교육 과정명 -->
+          <div class="info-item">
+            <label for="courseName">교육 과정명</label>
+            <input id="courseName" type="text" v-model="selectedCertificate.courseName" class="info-input" readonly />
+          </div>
+
+          <!-- 학원명 -->
+          <div class="info-item">
+            <label for="academyName">학원명</label>
+            <input id="academyName" type="text" v-model="selectedCertificate.academyName" class="info-input" readonly />
+          </div>
+
+          <!-- 수료일 -->
+          <div class="info-item">
+            <label for="completionDate">수료일</label>
+            <input id="completionDate" type="text" v-model="selectedCertificate.completionDate" class="info-input" readonly />
+          </div>
+
+          <!-- 신청자 ID -->
+          <div class="info-item">
+            <label for="nickname">신청자</label>
+            <input id="nickname" type="text" v-model="selectedCertificate.nickname" class="info-input" readonly />
+          </div>
+
+          <!-- 신청자 ID -->
+          <div class="info-item">
+            <label for="memberId">신청자 ID</label>
+            <input id="memberId" type="text" v-model="selectedCertificate.memberId" class="info-input" readonly />
+          </div>
+
+          <!-- 수료증 사진 -->
+          <div class="info-item">
+            <label for="fileUrl">수료증 사진</label>
+            <div class="certificate-image-container">
+              <img :src="selectedCertificate.fileUrl" alt="수료증 사진" class="certificate-image" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 수료 상태 변경 -->
+        <form @submit.prevent="submitCertificateAnswer">
+          <div class="certificate-answer-info">
+            <strong>수료 상태 변경</strong>
+            <div class="info-item">
+              <label for="status">수료 여부</label>
+              <input id="status" type="text" v-model="selectedCertificate.status" class="info-input" />
+            </div>
+          </div>
+          <div class="modal-buttons">
+            <button type="submit" class="btn-primary">수료 확인</button>
+            <button type="button" class="btn-secondary" @click="closeCertificateAnswerModal">취소</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 조치 완료 모달 -->
+  <div v-if="isChangeSuccessModalOpen" class="modal-success-overlay">
+    <div class="modal-success-content">
+      <div class="modal-icon-container">
+        <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
+      </div>
+      <p>수료처리가 완료되었습니다</p>
+    </div>
+  </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
+  data() {
+    return {
+      searchQuery: '',
+      selectedCategory: 'all',
+      currentPage: 1,
+      certificatesPerPage: 10,
+      certificatesData: [], // 데이터를 저장할 배열
+      isCertificateAnswerModalOpen: false, // 수료 모달 열림 여부
+      selectedCertificate: null, // 선택된 수료 인증
+      isChangeSuccessModalOpen: false, // 변경 완료 모달 상태 추가
+    };
+  },
+  mounted() {
+    this.fetchCertificates();
+  },
+  computed: {
+    filteredCertificates() {
+      return this.certificatesData.filter(certificate => {
+        const matchesCategory =
+          this.selectedCategory === 'all' ||
+          (this.selectedCategory === 'completed' && certificate.status === '수료 완료') ||
+          (this.selectedCategory === 'in-progress' && certificate.status === '처리중');
+        const matchesQuery = 
+          certificate.courseName.includes(this.searchQuery) ||
+          certificate.academyName.includes(this.searchQuery) ||
+          String(certificate.memberId).includes(this.searchQuery) ||
+          String(certificate.courseId).includes(this.searchQuery);
+        return matchesCategory && matchesQuery;
+      });
+    },
+    paginatedCertificates() {
+      const start = (this.currentPage - 1) * this.certificatesPerPage;
+      return this.filteredCertificates.slice(start, start + this.certificatesPerPage);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredCertificates.length / this.certificatesPerPage);
+    },
+  },
+  methods: {
+    async fetchCertificates() {
+      try {
+        const token = localStorage.getItem('token'); // JWT 토큰이 로컬 스토리지에 저장되어 있다고 가정
+        const response = await axios.get('/api/certificate/all', {
+          headers: {
+            Authorization: `Bearer ${token}` // 토큰을 Authorization 헤더에 포함
+          }
+        });
+        this.certificatesData = response.data; // 가져온 데이터를 certificatesData에 저장
+      } catch (error) {
+        console.error('수료 데이터를 가져오는 중 오류 발생:', error);
+      }
+    },
+    formatDate(date) {
+      const d = new Date(date);
+      return d.toISOString().replace('T', ' ').substring(0, 10);
+    },
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    },
+    openCertificateAnswerModal(certificate) {
+      this.selectedCertificate = {
+        ...certificate,
+      };
+      this.isCertificateAnswerModalOpen = true;
+    },
+    closeCertificateAnswerModal() {
+      this.isCertificateAnswerModalOpen = false;
+    },
+    submitCertificateAnswer() {
+      if (!this.selectedCertificate) return;
 
-}
+      // 상태를 변경해서 UI에서 확인 완료로 표시되도록 변경
+      this.selectedCertificate.status = '수료 완료';
+
+      // certificatesData에서 해당 certificate를 찾아서 업데이트
+      const certificateIndex = this.certificatesData.findIndex(certificate => certificate.certificateId === this.selectedCertificate.certificateId);
+      if (certificateIndex !== -1) {
+        this.certificatesData.splice(certificateIndex, 1, { ...this.selectedCertificate });
+      }
+
+      // UI 업데이트 후 모달 닫기
+      this.closeCertificateAnswerModal();
+
+      // 조치 완료 후 변경 완료 모달을 표시
+      this.isChangeSuccessModalOpen = true;
+
+      // 일정 시간 후 변경 완료 모달을 자동으로 닫기
+      setTimeout(() => {
+        this.isChangeSuccessModalOpen = false;
+      }, 1500);
+    }
+  },
+};
 </script>
-
-<style scoped>
+  
+  <style scoped>
 /* 신고 확인 모달 스타일 */
-.report-answer-modal-overlay {
+.certificate-answer-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -52,7 +268,7 @@ export default {
   z-index: 1001;
 }
 
-.report-answer-modal-content {
+.certificate-answer-modal-content {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
@@ -61,7 +277,7 @@ export default {
   text-align: center; /* 텍스트 중앙 정렬 */
 }
 
-.report-answer-info .info-item {
+.certificate-answer-info .info-item {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -77,13 +293,13 @@ export default {
   box-sizing: border-box; /* 필드가 컨테이너에 딱 맞게 조정되도록 설정 */
 }
 
-.report-answer-modal-content h3 {
+.certificate-answer-modal-content h3 {
   font-size: 1.5rem;
   margin-bottom: 50px;
   text-align: center; /* 제목 중앙 정렬 */
 }
 
-.report-write-btn {
+.certificate-write-btn {
   background-color: #f8a060;
   color: white;
   padding: 8px 15px;
@@ -93,16 +309,16 @@ export default {
   font-size: 12px;
 }
 
-.report-write-btn:hover {
+.certificate-write-btn:hover {
   background-color: #fb822c;
 }
 
-.report-answer-modal-content .modal-buttons {
+.certificate-answer-modal-content .modal-buttons {
   display: flex;
   justify-content: space-between;
 }
 
-.report-answer-modal-content .btn-secondary {
+.certificate-answer-modal-content .btn-secondary {
   background-color: #ccc;
   color: white;
   padding: 10px 20px;
@@ -111,7 +327,7 @@ export default {
   cursor: pointer;
 }
 
-.report-answer-info strong {
+.certificate-answer-info strong {
   display: block;
   text-align: left; /* 글씨를 왼쪽에 붙여줌 */
   margin-bottom: 20px; /* 밑에 마진을 적용 */
@@ -310,7 +526,7 @@ export default {
 
 
 /* 전체 레이아웃 스타일 */
-.report-info-page {
+.certificate-info-page {
   padding: 5px;
   position: relative; /* 페이지네이션을 하단에 고정시키기 위한 설정 */
   min-height: 100%; /* 컨테이너가 content-area와 동일한 높이를 가지도록 설정 */
@@ -442,7 +658,7 @@ export default {
 
 
 /* 게시글 목록 테이블 스타일 ---------------------------------------------------------*/
-.report-list-table {
+.certificate-list-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 50px;
@@ -450,7 +666,7 @@ export default {
 
 
 /* 테이블 헤더 스타일 */
-.report-list-table th {
+.certificate-list-table th {
   font-weight: bold;
   font-size: 12px; 
   padding: 0px 10px 15px 20px; /* 상, 좌, 우, 하 padding 설정 */
@@ -459,7 +675,7 @@ export default {
 }
 
 /* 테이블 데이터 스타일 */
-.report-list-table td {
+.certificate-list-table td {
   font-size: 12px; /* td에 원하는 크기 설정 */
   padding: 18px 10px 15px 20px; /* 상, 좌, 우, 하 padding 설정 */
   text-align: center;
@@ -471,17 +687,31 @@ export default {
   font-weight:300;
 }
 
+/* 수료증 사진 스타일 */
+.certificate-image-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.certificate-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 5px;
+}
 
 
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
   /* 테이블 헤더 스타일 */
-  .report-list-table th {
+  .certificate-list-table th {
     font-size: 10px; 
     padding: 0px 10px 12px 15px; /* 상, 좌, 우, 하 padding 설정 */
   }
   /* 테이블 데이터 스타일 */
-  .report-list-table td {
+  .certificate-list-table td {
     font-size: 10px; /* td에 원하는 크기 설정 */
   }
 }
@@ -489,24 +719,24 @@ export default {
 
 @media (max-width: 768px) {
   /* 테이블 헤더 스타일 */
-  .report-list-table th {
+  .certificate-list-table th {
     font-size: 8px; 
     padding: 0px 8px 12px 15px; /* 상, 좌, 우, 하 padding 설정 */
   }
   /* 테이블 데이터 스타일 */
-  .report-list-table td {
+  .certificate-list-table td {
     font-size: 8px; /* td에 원하는 크기 설정 */
   }
 }
 
 @media (max-width: 480px) {
   /* 테이블 헤더 스타일 */
-  .report-list-table th {
+  .certificate-list-table th {
     font-size: 6px; 
     padding: 0px 6px 10px 12px; /* 상, 좌, 우, 하 padding 설정 */
   }
   /* 테이블 데이터 스타일 */
-  .report-list-table td {
+  .certificate-list-table td {
     font-size: 6px; /* td에 원하는 크기 설정 */
   }
   

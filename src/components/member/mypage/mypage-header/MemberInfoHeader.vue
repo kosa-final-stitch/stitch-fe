@@ -94,7 +94,7 @@ export default {
 <style scoped>
 .member-info-header {
   width: 100%;
-  padding: 80px;
+  padding: 20px;   /* 호영 80 -> 20 으로 수정 */
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 10px;

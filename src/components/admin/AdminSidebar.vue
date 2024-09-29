@@ -20,7 +20,7 @@
       <div class="menu">
         <button class="menu-item" :class="{ active: isActive('admin/dashboard') }" @click="navigateTo('admin/dashboard')">대시보드</button>
       <button class="menu-item" :class="{ active: isActive('admin/user-info') }" @click="navigateTo('admin/user-info')">사용자 정보</button>
-      <button class="menu-item" :class="{ active: isActive('admin/course-certification')}" @click="navigateTo('admin/course-certification')">수강목록 인증</button>
+      <button class="menu-item" :class="{ active: isActive('admin/course-certificate')}" @click="navigateTo('admin/course-certificate')">수강목록 인증 관리</button>
       <button class="menu-item" :class="{ active: isActive('admin/post-management') }" @click="navigateTo('admin/post-management')">게시판 글 관리</button>
       <button class="menu-item" :class="{ active: isActive('admin/review-management') }" @click="navigateTo('admin/review-management')">수강평 관리</button>
       <button class="menu-item" :class="{ active: isActive('admin/report-inquiry') }" @click="navigateTo('admin/report-inquiry')">신고 문의 관리</button>

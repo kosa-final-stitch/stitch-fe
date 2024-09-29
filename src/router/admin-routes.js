@@ -19,7 +19,7 @@
  import DirectInquiryManagement from '../components/admin/content/DirectInquiryManagement.vue';
  import AnnouncementManagement from '../components/admin/content/AnnouncementManagement.vue';
  import PayManagement from '../components/admin/content/PayManagement.vue';
- import CourseCertification from '@/components/admin/content/CourseCertification.vue';
+ import CourseCertificate from '@/components/admin/content/CourseCertificate.vue';
 // import ContentArea from '@/components/admin/content/ContentArea.vue';
 //import AdminContentWrapper from '@/components/admin/AdminContentWrapper.vue';
 
@@ -50,9 +50,9 @@
             component: MemberInfoManagement,
           },
           {
-            path: 'course-certification',
-            name: 'CourseCertification',
-            component: CourseCertification,
+            path: 'course-certificate',
+            name: 'CourseCertificate',
+            component: CourseCertificate,
           },
           {
             path: 'post-management',
