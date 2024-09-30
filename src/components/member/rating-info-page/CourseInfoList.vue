@@ -1,3 +1,6 @@
+<!-- 
+ 2024.9.30. 박요한 | 리팩토링: 전체 강의 목록 + 페이지네이션, 정렬 + 진행 구분
+-->
 <template>
   <div class="course-info">
     <!-- 과정별 탭 -->
@@ -10,7 +13,7 @@
     <!-- 현재 진행 중인 과정 -->
     <div v-if="selectedTab === 'current'" class="course-section">
       <div
-        v-for="course in paginatedCourses(currentCourses)"
+        v-for="course in currentCourses"
         :key="course.course_id"
         class="course-card"
         @click="goToCourseDetail(course.course_id, course.academy_id)"
@@ -18,7 +21,7 @@
         <div class="course-details">
           <h4>{{ course.course_name }}</h4>
           <p>
-            모집일정: {{ formatDate(course.start_date) }} ~
+            일정: {{ formatDate(course.start_date) }} ~
             {{ formatDate(course.end_date) }}
           </p>
           <p>강사: {{ course.lector || "정보 없음" }}</p>
@@ -30,7 +33,7 @@
     <!-- 진행 완료 과정 -->
     <div v-if="selectedTab === 'completed'" class="course-section">
       <div
-        v-for="course in paginatedCourses(completedCourses)"
+        v-for="course in completedCourses"
         :key="course.course_id"
         class="course-card"
         @click="goToCourseDetail(course.course_id, course.academy_id)"
@@ -38,7 +41,7 @@
         <div class="course-details">
           <h4>{{ course.course_name }}</h4>
           <p>
-            모집일정: {{ formatDate(course.start_date) }} ~
+            일정: {{ formatDate(course.start_date) }} ~
             {{ formatDate(course.end_date) }}
           </p>
           <p>강사: {{ course.lector || "정보 없음" }}</p>
@@ -50,7 +53,7 @@
     <!-- 진행 예정 과정 -->
     <div v-if="selectedTab === 'upcoming'" class="course-section">
       <div
-        v-for="course in paginatedCourses(upcomingCourses)"
+        v-for="course in upcomingCourses"
         :key="course.course_id"
         class="course-card"
         @click="goToCourseDetail(course.course_id, course.academy_id)"
@@ -58,7 +61,7 @@
         <div class="course-details">
           <h4>{{ course.course_name }}</h4>
           <p>
-            모집일정: {{ formatDate(course.start_date) }} ~
+            일정: {{ formatDate(course.start_date) }} ~
             {{ formatDate(course.end_date) }}
           </p>
           <p>강사: {{ course.lector || "정보 없음" }}</p>
@@ -88,19 +91,8 @@ export default {
       currentCourses: [], // 현재 진행 중인 과정
       completedCourses: [], // 완료된 과정
       upcomingCourses: [], // 진행 예정 과정
+      totalPages: 0, // 총 페이지 수를 초기값 0으로 설정
     };
-  },
-  computed: {
-    // 총 페이지 수 계산
-    totalPages() {
-      const courses =
-        this.selectedTab === "current"
-          ? this.currentCourses
-          : this.selectedTab === "completed"
-            ? this.completedCourses
-            : this.upcomingCourses;
-      return Math.ceil(courses.length / this.itemsPerPage);
-    },
   },
   mounted() {
     this.fetchCourses(); // 강좌 정보 가져오기
@@ -108,70 +100,60 @@ export default {
   methods: {
     // 강좌 정보 가져오는 메서드
     fetchCourses() {
+      const selectedStatus = this.selectedTab;
+
       axios
-        .get(`http://localhost:8080/api/academies/courses`)
+        .get(`/api/courses`, {
+          params: {
+            status: selectedStatus,
+            pageNumber: this.currentPage,
+            pageSize: this.itemsPerPage,
+          },
+        })
         .then((response) => {
-          const today = new Date();
-          const upcomingCourses = [];
-          const currentCourses = [];
-          const completedCourses = [];
-
-          response.data.forEach((course) => {
-            const startDate = new Date(course.start_date);
-            const endDate = new Date(course.end_date);
-
-            if (endDate < today) {
-              completedCourses.push(course);
-            } else if (startDate <= today && endDate >= today) {
-              currentCourses.push(course);
-            } else if (startDate > today) {
-              upcomingCourses.push(course);
-            }
-          });
-
-          this.completedCourses = completedCourses.sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
-
-          this.currentCourses = currentCourses.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
-
-          this.upcomingCourses = upcomingCourses.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+          if (this.selectedTab === "upcoming") {
+            this.upcomingCourses = response.data.courses;
+          } else if (this.selectedTab === "current") {
+            this.currentCourses = response.data.courses;
+          } else if (this.selectedTab === "completed") {
+            this.completedCourses = response.data.courses;
+          }
+          // 백엔드에서 받은 totalPages 사용
+          this.totalPages = response.data.totalPages;
         })
         .catch((error) => {
           console.error("강좌 정보를 불러오는 중 오류가 발생했습니다.", error);
         });
     },
-    // 페이지네이션을 위한 강의 리스트 계산
-    paginatedCourses(courses) {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = this.currentPage * this.itemsPerPage;
-      return courses.slice(start, end);
-    },
     // 이전 페이지로 이동
     previousPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
+        this.fetchCourses(); // 페이지가 변경될 때 데이터를 다시 가져옴
       }
     },
     // 다음 페이지로 이동
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
+        this.fetchCourses(); // 페이지가 변경될 때 데이터를 다시 가져옴
       }
     },
     // 강의 상세 페이지로 이동
     goToCourseDetail(courseId, academyId) {
-      console.log("강의상세페이지로이동", courseId, academyId); // 클릭 로그 확인
       this.$router.push({
         path: `/academies/academy/${academyId}/courses/${courseId}`,
       });
     },
-    // 탭 선택 시 현재 페이지를 1로 초기화
+    // 탭 선택 시 현재 페이지를 1로 초기화하고, 새로운 탭에 맞는 데이터를 가져옴
     selectTab(tab) {
       this.selectedTab = tab;
       this.currentPage = 1;
+      this.fetchCourses(); // 탭 변경 시 데이터를 새로 가져옴
     },
     // 날짜 형식 변환
     formatDate(date) {
-      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+      const options = { year: "2-digit", month: "2-digit", day: "2-digit" }; // 24.12.31.
       return new Date(date).toLocaleDateString("ko-KR", options);
     },
   },
