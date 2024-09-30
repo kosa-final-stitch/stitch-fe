@@ -1,4 +1,10 @@
-<!--작성자 : 박주희 -->
+<!--
+  작성자 : 박주희 
+
+  2024-10-01 김호영 : 공지사항 상단 배치 기능 구현 
+  
+  -->
+
 <template>
   <div class="board-container">
     <h1 class="board-title">자유 게시판</h1>
@@ -34,7 +40,7 @@
           <tr v-for="(item, index) in paginatedData" :key="index" :class="{'notice-row': item.isPinned}">
             <td>{{ index + 1 }}</td>
             <td @click="goToPostDetail(item.boardId)" class="clickable">{{ item.title }}</td>
-            <td>{{ item.nickname }}</td>
+            <td>{{ item.adminName ||item.nickname || '알 수 없음' }}</td>
             <td>{{ formatDate(item.regdate) }}</td>
           </tr>
           <!-- 빈 항목을 채우기 위한 추가 빈 줄 -->
@@ -47,6 +53,8 @@
         </tbody>
       </table>
     </div>
+
+
     <div class="search-bar">
       <div class="search-wrapper">
         <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요..." @keyup.enter="searchPosts" />
@@ -85,6 +93,10 @@ export default {
     };
   },
   computed: {
+    //공지사항만 따로 분리,
+    pinnedNotices() {
+      return this.items.filter(item => item.isPinned);
+    },
     filteredItems() {
       const selectedCategory = this.categories[this.activeTab];
       let filtered = [];
@@ -97,17 +109,13 @@ export default {
       if (this.searchKeyword) {
         filtered = filtered.filter((item) => item.title.includes(this.searchKeyword));
       }
-      // 공지사항 필터링 및 상단에 배치
-      const pinnedNotices = filtered.filter(item => item.isPinned); // 공지사항 필터링
-      const regularPosts = filtered.filter(item => !item.isPinned); // 일반 게시글 필터링
-
       // 정렬 기준에 따라 정렬
       if (this.activeSort === "popular") {
         filtered.sort((a, b) => b.views - a.views); // 조회수 내림차순으로 정렬
       } else if (this.activeSort === "recent") {
         filtered.sort((a, b) => new Date(b.regdate) - new Date(a.regdate)); // 최신순 정렬
       }
-      return [...pinnedNotices, ...regularPosts];
+      return filtered;
     },
     paginatedData() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -139,39 +147,42 @@ export default {
     },
 
     // 게시글 목록을 불러오는 메서드 정의
-    fetchPosts() {
-      axios
-        .get("/api/board/community/all")
-        .then((response) => {
-          // 데이터가 제대로 들어오는지 확인
-          console.log("Fetched items before map:", response.data);
-          this.items = response.data.map(item => {
-            console.log("Original item:", item); // 데이터 확인
-            // 공지사항 여부를 나타내는 isPinned 필드가 없으면 false로 기본값 설정
-            item.isPinned = item.isPinned === 1;
-            console.log("Processed item:", item); // 변환 후 데이터 확인
-            return item;
-          });
+    async fetchPosts() {
+    try {
+      // 공지사항 먼저 불러오기
+      const noticeResponse = await axios.get("/api/notices");
+      console.log("공지사항 데이터:", noticeResponse.data); // 여기에 작성자 정보가 포함되어 있는지 확인
+      const notices = noticeResponse.data.map(notice => {
+        return {
+          ...notice,
+          isPinned: true // 공지사항을 고정할 수 있도록 설정
+        };
+      });
+      
 
-          // 공지사항을 상단에 배치하기 위해 정렬
-          this.items.sort((a, b) => {
-            // 공지사항을 isPinned 기준으로 먼저 정렬, 그 다음 최신순 정렬
-            if (b.isPinned - a.isPinned !== 0) {
-              return b.isPinned - a.isPinned;
-            }
-            // 같은 공지사항 여부일 때, 최신순으로 정렬
-            return new Date(b.regdate) - new Date(a.regdate);
-          });
+      // 게시글 불러오기
+      const postResponse = await axios.get("/api/board/community/all");
+      const posts = postResponse.data.map(post => {
+        return {
+          ...post,
+          isPinned: false // 일반 게시글은 고정하지 않음
+        };
+      });
 
-          console.log("Fetched items:", this.items); // 데이터 확인
-          if (this.items.length > 0) {
-            console.log("First item boardId:", this.items[0].boardId); // 첫 번째 항목의 boardId 확인
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching posts:", error);
-        });
-    },
+      // 공지사항과 게시글을 합침
+      this.items = [...notices, ...posts];
+
+      // 공지사항을 상단에 배치하기 위해 정렬
+      this.items.sort((a, b) => {
+        if (b.isPinned - a.isPinned !== 0) {
+          return b.isPinned - a.isPinned;
+        }
+        return new Date(b.regdate) - new Date(a.regdate); // 최신순 정렬
+      });
+    } catch (error) {
+      console.error("Error fetching posts or notices:", error);
+    }
+  },
     searchPosts() {
       if (!this.searchKeyword) {
         this.filteredItems = this.items; // 검색어가 없으면 전체 목록을 보여줌
@@ -190,6 +201,9 @@ export default {
         return;
       }
       this.$router.push({ name: "PostDetail", params: { boardId } }); // 라우터를 통해 페이지 이동
+    },
+    goToNoticeDetail(noticeId) {
+      this.$router.push({ name: "NoticeDetail", params: { noticeId } });
     },
     setActiveSort(sortType) {
       this.activeSort = sortType;

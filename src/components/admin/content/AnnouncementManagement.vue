@@ -217,8 +217,19 @@ export default {
       }
     },
     formatDate(date) {
-      const d = new Date(date);
-      return d.toISOString().replace('T', ' ').substring(0, 10);
+      if (!date) return "날짜 없음"; // date가 없을 경우 처리
+
+      try {
+        const d = new Date(date);
+        
+        // 로컬 타임존에 맞춰 날짜를 반환
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+        const day = String(d.getDate()).padStart(2, '0'); // 날짜
+        return `${year}-${month}-${day}`; // YYYY-MM-DD 형식으로 반환
+      } catch (error) {
+        return "유효하지 않은 날짜"; // 변환 중 오류가 발생하면 기본값 반환
+      }
     },
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
