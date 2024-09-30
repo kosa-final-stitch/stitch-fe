@@ -272,6 +272,7 @@ export default {
       content: this.newNotice.content,
       regdate: today, // 등록일자
       member_id: this.adminId, // 현재 로그인한 관리자 ID
+      isPinned: true, // 공지사항 여부
     };
 
     try {
