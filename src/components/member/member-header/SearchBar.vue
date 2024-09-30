@@ -4,6 +4,7 @@
  설명 : 헤더의 검색창 － 학원, 교육과정 검색
  ---------------------
  2024.09.19 박요한 | 컴포넌트 생성.
+ 2024.09.27 박요한 | selectResult 라우터 절대경로로 수정.
  -->
 
 <template>
@@ -105,8 +106,8 @@ export default {
     selectResult(item) {
       const routePath =
         item.type === "academy"
-          ? `academies/academy/${item.academyId}`
-          : `academies/academy/${item.academyId}/courses/${item.courseId}`;
+          ? `/academies/academy/${item.academyId}`
+          : `/academies/academy/${item.academyId}/courses/${item.courseId}`;
       this.$router.push(routePath);
       this.clearSearch();
     },
@@ -135,7 +136,6 @@ export default {
   height: 30px;
   max-width: 999px;
   position: relative;
-
 }
 
 .search-input {
