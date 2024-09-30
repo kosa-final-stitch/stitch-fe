@@ -12,16 +12,11 @@
         <div class="header-top">
           <div class="category">{{ post.category }}</div>
           <div class="post-actions">
-<!--            &lt;!&ndash; 본인 글일 때만 수정/삭제 버튼 렌더링 &ndash;&gt;-->
-<!--            <button class="edit-button" v-if="post.memberId === currentUser.memberId" @click="toggleEditMode">수정</button>-->
-<!--            <button class="delete-button" v-if="post.memberId === currentUser.memberId" @click="confirmDelete">삭제</button>-->
-<!--            &lt;!&ndash; 본인 글이 아닐 때만 신고 버튼 렌더링 &ndash;&gt;-->
-<!--            <button class="report-button" v-if="post.memberId !== currentUser.memberId" @click="openReportModal(post)">신고</button>-->
             <!-- 본인 글일 때만 수정/삭제 버튼 렌더링 -->
-            <button class="edit-button" @click="toggleEditMode">수정</button>
-            <button class="delete-button" @click="confirmDelete">삭제</button>
+            <button class="edit-button" v-if="post.memberId === currentUser.memberId" @click="toggleEditMode">수정</button>
+            <button class="delete-button" v-if="post.memberId === currentUser.memberId" @click="confirmDelete">삭제</button>
             <!-- 본인 글이 아닐 때만 신고 버튼 렌더링 -->
-            <button class="report-button"  @click="openReportModal(post)">신고</button>
+            <button class="report-button" v-if="post.memberId !== currentUser.memberId" @click="openReportModalForPost(post.boardId)">신고</button>
           </div>
         </div>
         <div v-if="editMode">
@@ -71,16 +66,10 @@
           <span class="comment-author">{{ comment.nickname }}</span>
           <span class="comment-date">{{ formatDateTime(comment.regdate) }}</span>
           <span class="comment-actions">
-<!--          &lt;!&ndash; 수정/삭제 버튼은 본인 댓글일 때만 표시 &ndash;&gt;-->
-<!--          <button class="edit-button" v-if="comment.authorId === currentUser.memberId" @click="toggleEditComment(comment)">수정</button>-->
-<!--          <button class="delete-button" v-if="comment.authorId === currentUser.memberId" @click="confirmDeleteComment(comment.commentId)">삭제</button>-->
-<!--            &lt;!&ndash; 신고 버튼은 본인 댓글이 아닐 때만 표시 &ndash;&gt;-->
-<!--          <button class="report-button" v-if="comment.authorId !== currentUser.memberId" @click="openReportModal(comment)">신고</button>-->
-            <!-- 본인 글일 때만 수정/삭제 버튼 렌더링 -->
-            <button class="edit-button"  @click="toggleEditComment(comment)">수정</button>
-            <button class="delete-button" @click="confirmDeleteComment(comment.commentId)">삭제</button>
+            <button class="edit-button" v-if="comment.memberId === currentUser.memberId" @click="toggleEditComment(comment)">수정</button>
+            <button class="delete-button" v-if="comment.memberId === currentUser.memberId" @click="confirmDeleteComment(comment.commentId)">삭제</button>
             <!-- 본인 글이 아닐 때만 신고 버튼 렌더링 -->
-            <button class="report-button" @click="openReportModal(post)">신고</button>
+            <button class="report-button" v-if="comment.memberId !== currentUser.memberId" @click="openReportModalForComment(comment.commentId)">신고</button>
           </span>
         </div>
         <div class="comment-content">
@@ -142,9 +131,9 @@
     <!-- 신고 모달 컴포넌트 -->
     <ReportModal
         :show="showReportModal"
-        :postId="reportTargetId"
+        :boardId="selectedPostId"
+        :commentId="selectedCommentId"
         @close="closeReportModal"
-        @submit="handleReportSubmit"
     />
   </div>
 </template>
@@ -178,8 +167,8 @@ export default {
       showDeleteModal: false, // 삭제 확인 모달 상태
       deleteSuccess: false, // 삭제 성공 메시지
       showReportModal: false, // 신고 모달 상태
-      reportTargetId: null, // 신고 대상 ID (게시글 ID 또는 댓글 ID)
-      report: { type: '', content: '' }, // 신고 데이터
+      selectedPostId: null, // 선택된 게시글 ID
+      selectedCommentId: null, // 선택된 댓글 ID
       editMode: false, // 수정 모드 상태
       showCommentDeleteModal: false, // 댓글 삭제 모달 상태
       commentToDelete: null, // 삭제할 댓글 ID
@@ -188,7 +177,7 @@ export default {
   computed: {
     currentUser() {
       const memberStore = useMemberStore();
-      return memberStore.currentUser || { memberId: null }; // 현재 로그인한 사용자 정보
+      return memberStore.member || { memberId: null }; // 현재 로그인한 사용자 정보
     }
   },
   watch: {
@@ -203,6 +192,9 @@ export default {
   mounted() {
     const boardId = this.$route.params.boardId; // 게시글 ID 가져오기
     this.fetchComments(boardId); // 페이지 로드 시 댓글 데이터를 가져옴
+
+    console.log("현재 사용자 정보:", this.currentUser);
+    console.log("게시글 정보:", this.post);
   },
   methods: {
     fetchPost(boardId) {
@@ -216,7 +208,7 @@ export default {
             console.log("Response data: ", response.data); // 전체 응답 데이터를 확인
             this.post = response.data;
             this.editedPost = { ...response.data }; // 수정할 게시글 데이터도 초기화
-            console.log("Post authorId:", this.post.memberId); // post.authorId 값 확인
+            console.log("Post 작성자:", this.post.memberId); // post.authorId 값 확인
             console.log("Current user id:", this.currentUser.memberId); // currentUser.id 값 확인
           })
           .catch(error => {
@@ -267,6 +259,7 @@ export default {
       }
       this.editMode = !this.editMode;
     },
+
     // 게시글 저장 메서드
     savePost() {
       axios.put(`/api/board/post/update/${this.boardId}`, this.editedPost)
@@ -314,30 +307,22 @@ export default {
           });
     },
     // 신고 모달 열기
-    openReportModal(target = null) {
-      console.log('Report modal opened for target:', target); // 콘솔 로그로 확인
-      this.showReportModal = true;
-      this.reportTargetId = target ? target.commentId : this.boardId; // 댓글 신고 시에는 commentId, 게시글 신고 시에는 boardId
+    openReportModalForPost(boardId) {
+      console.log('게시글 ID:', boardId);
+      this.selectedPostId = boardId;
+      this.selectedCommentId = null; // 댓글 ID는 null로 설정
+      this.showReportModal = true; // 신고 모달 열기
     },
-    // 신고 모달 닫기
+    openReportModalForComment(commentId) {
+      console.log('댓글 ID:', commentId);
+      this.selectedCommentId = commentId;
+      this.selectedPostId = null; // 게시글 ID는 null로 설정
+      this.showReportModal = true; // 신고 모달 열기
+    },
     closeReportModal() {
-      this.showReportModal = false;
+      this.showReportModal = false; // 신고 모달 닫기
     },
-    // 신고 처리 메서드
-    handleReportSubmit(reportData) {
-      axios.post(`/api/report`, {
-        postId: this.reportTargetId,
-        reportType: reportData.reportType,
-        reportContent: reportData.reportContent
-      })
-          .then(() => {
-            alert('신고가 접수되었습니다.');
-            this.closeReportModal(); // 모달 닫기
-          })
-          .catch(error => {
-            console.error('Error submitting report:', error);
-          });
-    },
+
     // 댓글 작성 메서드
     addComment() {
       const memberStore = useMemberStore(); // Pinia 스토어 가져오기
