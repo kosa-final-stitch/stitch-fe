@@ -31,7 +31,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in paginatedData" :key="index">
+          <tr v-for="(item, index) in paginatedData" :key="index" :class="{'notice-row': item.isPinned}">
             <td>{{ index + 1 }}</td>
             <td @click="goToPostDetail(item.boardId)" class="clickable">{{ item.title }}</td>
             <td>{{ item.nickname }}</td>
@@ -97,13 +97,17 @@ export default {
       if (this.searchKeyword) {
         filtered = filtered.filter((item) => item.title.includes(this.searchKeyword));
       }
+      // 공지사항 필터링 및 상단에 배치
+      const pinnedNotices = filtered.filter(item => item.isPinned); // 공지사항 필터링
+      const regularPosts = filtered.filter(item => !item.isPinned); // 일반 게시글 필터링
+
       // 정렬 기준에 따라 정렬
       if (this.activeSort === "popular") {
         filtered.sort((a, b) => b.views - a.views); // 조회수 내림차순으로 정렬
       } else if (this.activeSort === "recent") {
         filtered.sort((a, b) => new Date(b.regdate) - new Date(a.regdate)); // 최신순 정렬
       }
-      return filtered;
+      return [...pinnedNotices, ...regularPosts];
     },
     paginatedData() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -139,7 +143,26 @@ export default {
       axios
         .get("/api/board/community/all")
         .then((response) => {
-          this.items = response.data; // 받아온 데이터를 items 배열에 저장
+          // 데이터가 제대로 들어오는지 확인
+          console.log("Fetched items before map:", response.data);
+          this.items = response.data.map(item => {
+            console.log("Original item:", item); // 데이터 확인
+            // 공지사항 여부를 나타내는 isPinned 필드가 없으면 false로 기본값 설정
+            item.isPinned = item.isPinned === 1;
+            console.log("Processed item:", item); // 변환 후 데이터 확인
+            return item;
+          });
+
+          // 공지사항을 상단에 배치하기 위해 정렬
+          this.items.sort((a, b) => {
+            // 공지사항을 isPinned 기준으로 먼저 정렬, 그 다음 최신순 정렬
+            if (b.isPinned - a.isPinned !== 0) {
+              return b.isPinned - a.isPinned;
+            }
+            // 같은 공지사항 여부일 때, 최신순으로 정렬
+            return new Date(b.regdate) - new Date(a.regdate);
+          });
+
           console.log("Fetched items:", this.items); // 데이터 확인
           if (this.items.length > 0) {
             console.log("First item boardId:", this.items[0].boardId); // 첫 번째 항목의 boardId 확인
@@ -390,15 +413,16 @@ export default {
   color: white;
 }
 
-.pagination .dots {
-  cursor: default;
-  pointer-events: none;
-  color: #ccc;
-}
 
 .clickable {
   cursor: pointer;
   color: #007bff;
   text-decoration: underline;
+}
+
+/* 공지사항 행 스타일 */
+.notice-row {
+  background-color: #f8f8f8; /* 공지사항 배경색 */
+  font-weight: bold;
 }
 </style>
