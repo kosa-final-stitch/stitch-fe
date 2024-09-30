@@ -6,6 +6,7 @@
  2024.09.10 김호영 | template 초기 설정 및 디자인, 라우터 연결
  2024.09.12 김호영 | 초기 sidebar 완.
  2024.09.23 김호영 | 로그아웃 버튼 -> 사용자 페이지 이동으로 변경.
+ 2024.09.29 김호영 | 수강목록 인증 추가.
 
  -->
 
@@ -19,6 +20,7 @@
       <div class="menu">
         <button class="menu-item" :class="{ active: isActive('admin/dashboard') }" @click="navigateTo('admin/dashboard')">대시보드</button>
       <button class="menu-item" :class="{ active: isActive('admin/user-info') }" @click="navigateTo('admin/user-info')">사용자 정보</button>
+      <button class="menu-item" :class="{ active: isActive('admin/course-certificate')}" @click="navigateTo('admin/course-certificate')">수강목록 인증 관리</button>
       <button class="menu-item" :class="{ active: isActive('admin/post-management') }" @click="navigateTo('admin/post-management')">게시판 글 관리</button>
       <button class="menu-item" :class="{ active: isActive('admin/review-management') }" @click="navigateTo('admin/review-management')">수강평 관리</button>
       <button class="menu-item" :class="{ active: isActive('admin/report-inquiry') }" @click="navigateTo('admin/report-inquiry')">신고 문의 관리</button>
@@ -134,6 +136,7 @@ export default {
 
 .main-home-container {
   margin-bottom: 20px; /* 바닥에서 약간 띄움 */
+  
 }
 
 .main-home-btn {
@@ -174,6 +177,7 @@ export default {
 
   .main-home-btn {
     font-size: 11px;
+    margin-top: 10px;
   }
 }
 
