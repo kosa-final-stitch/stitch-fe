@@ -5,7 +5,7 @@
  ---------------------
  2024.09.10 김호영 | admin 초기 설정
  2024.09.19 김호영 | 신고 문의 페이지 기능 및 디자인 구현
- 2024.09.29 김호영 | 신고 정보 백엔드에서 갖고오기
+ 2024.09.29 김호영 | 신고 정보 백엔드에서 데이터 갖고오기
  -->
 
  <template>
@@ -41,9 +41,9 @@
           <th>카테고리</th>
           <th>게시글 번호</th>
           <th>댓글 번호</th>
+          <th>신고 유형</th>
           <th>신고 사유</th>
           <th>신고 일자</th>
-          <th>처리 일자</th>
           <th></th>
         </tr>
       </thead>
@@ -57,9 +57,9 @@
           <td>{{ getCategory(report) }}</td> <!-- 카테고리 결정 -->
           <td>{{ report.boardId }}</td>
           <td>{{ report.commentId || '-' }}</td>
+          <td>{{  report.type || '-' }}</td>
           <td>{{ report.reason }}</td>
           <td>{{ formatDate(report.regdate) }}</td>
-          <td>{{ report.ansdate ? formatDate(report.ansdate) : '-' }}</td>
           <td>
             <button v-if="report.status !== 'answered'" class="report-write-btn" @click="openReportAnswerModal(report)">
               확인하기
@@ -89,6 +89,10 @@
             <input id="reason" type="text" v-model="selectedReport.reason" class="info-input" readonly />
           </div>
           <div class="info-item">
+            <label for="reason">신고 유형</label>
+            <input id="reason" type="text" v-model="selectedReport.type" class="info-input" readonly />
+          </div>
+          <div class="info-item">
             <label for="nickname">신고자:</label>
             <input id="nickname" type="text" v-model="selectedReport.nickname" class="info-input" readonly />
           </div>
@@ -97,7 +101,6 @@
             <textarea id="content" v-model="selectedReport.content" class="info-textarea" rows="5" readonly></textarea>
           </div>
         </div>
-
         <form @submit.prevent="submitReportAnswer">
           <div class="report-answer-info">
             <strong>해당 게시글/댓글 내용</strong>
@@ -112,19 +115,19 @@
             </div>
             <div class="info-item">
               <label for="writerId">작성자:</label>
-              <input id="writerId" type="text" v-model="selectedReport.writerId" class="info-input" readonly />
+              <input id="writerId" type="text" :value="selectedReport.writerId || '-'" class="info-input" readonly />
             </div>
             <div class="info-item">
               <label for="title">제목:</label>
-              <input id="title" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.title : '-'" class="info-input" readonly />
+              <input id="title" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.title || '-' : '-'" class="info-input" readonly />
             </div>
             <div class="info-item">
               <label for="postContent">내용:</label>
-              <textarea id="postContent" v-model="selectedReport.postContent" class="info-textarea" rows="5" readonly></textarea>
+              <textarea id="postContent" :value="selectedReport.postContent || '-'" class="info-textarea" rows="5" readonly></textarea>
             </div>
           </div>
           <div class="modal-buttons">
-            <button type="submit" class="btn-primary">조치 완료</button>
+            <button type="submit" class="btn-primary">확인 완료</button>
             <button type="button" class="btn-secondary" @click="closeReportAnswerModal">취소</button>
           </div>
         </form>
@@ -132,13 +135,13 @@
     </div>
   </div>
 
-      <!-- 조치 완료 모달 -->
+      <!-- 확인 완료 모달 -->
       <div v-if="isChangeSuccessModalOpen" class="modal-success-overlay">
       <div class="modal-success-content">
         <div class="modal-icon-container">
           <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
         </div>
-        <p>조치가 완료되었습니다</p>
+        <p>확인이 완료되었습니다</p>
       </div>
     </div>
 </template>
@@ -221,40 +224,74 @@ export default {
         this.currentPage = page;
       }
     },
-    openReportAnswerModal(report) {
-      this.selectedReport = {
-        ...report,
-        writer_id: this.getWriterId(report), // 게시글/댓글 작성자
-        title: report.postOrComment === 'POST' ? report.boardTitle : '-', // 게시글 제목 or "-"
-        postContent: this.getPostContent(report), // 게시글 또는 댓글 내용
-      };
-      this.isReportAnswerModalOpen = true;
+    async openReportAnswerModal(report) {
+      try {
+        // 서버에서 작성자, 게시글/댓글 정보 가져오기
+        const writerId = await this.getWriterId(report);
+        const postContent = await this.getPostContent(report);
+
+        this.selectedReport = {
+          ...report,
+          writerId: writerId || '-', // 작성자 정보 없으면 '-'
+          title: report.postOrComment === 'POST' ? report.boardTitle || '-' : '-', // 게시글 제목
+          postContent: postContent || '-', // 게시글 또는 댓글 내용
+        };
+        this.isReportAnswerModalOpen = true;
+      } catch (error) {
+        console.error('게시글/댓글 정보 로드 실패:', error);
+      }
     },
-    getWriterId(report) {
-      // 게시글/댓글 작성자 정보 가져오기
-      return report.postOrComment === 'POST' ? report.boardWriterId : report.commentWriterId;
+    async getWriterId(report) {
+      try {
+        const response = await axios.get(`/api/member/report/${report.reportId}/writer`);
+        return response.data.writerId;
+      } catch (error) {
+        console.error('작성자 정보 로드 실패:', error);
+        return '-';
+      }
     },
-    getPostContent(report) {
-      // 게시글/댓글 내용 가져오기
-      return report.postOrComment === 'POST' ? report.boardContent : report.commentContent;
+
+    async getPostContent(report) {
+      try {
+        const response = await axios.get(`/api/member/report/${report.reportId}/content`);
+        return response.data.content;
+      } catch (error) {
+        console.error('게시글/댓글 내용 로드 실패:', error);
+        return '-';
+      }
     },
     closeReportAnswerModal() {
       this.isReportAnswerModalOpen = false;
       this.answerContent = '';
     },
-    submitReportAnswer() {
+    async submitReportAnswer() {
       if (!this.selectedReport) return;
 
-      // 상태를 변경해서 UI에서 확인 완료로 표시되도록 변경
-      this.selectedReport.ansdate = new Date().toISOString().split('T')[0];
-      this.selectedReport.status = 'answered';
-      this.selectedReport.answer = this.answerContent;
+      try {
+        // 서버로 상태 업데이트 전송
+        const token = localStorage.getItem('token');
+        const response = await axios.post(`/api/member/report/${this.selectedReport.reportId}/answer`, {
+          status: 'answered',
+          answer: this.answerContent
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-      // reportsData에서 해당 report를 찾아서 업데이트
-      const reportIndex = this.reportsData.findIndex(report => report.reportId === this.selectedReport.reportId);
-      if (reportIndex !== -1) {
-        this.reportsData.splice(reportIndex, 1, { ...this.selectedReport });
-      }
+        console.log('Response:', response.data); // 서버 응답 확인
+
+        // 상태를 변경해서 UI에서 확인 완료로 표시되도록 변경
+        this.selectedReport.ansdate = new Date().toISOString().split('T')[0];
+        this.selectedReport.status = 'answered';
+        this.selectedReport.answer = this.answerContent;
+
+        // reportsData에서 해당 report를 찾아서 업데이트
+        const reportIndex = this.reportsData.findIndex(report => report.reportId === this.selectedReport.reportId);
+        if (reportIndex !== -1) {
+          this.reportsData.splice(reportIndex, 1, { ...this.selectedReport });
+        }
 
       // UI 업데이트 후 모달 닫기
       this.closeReportAnswerModal();
@@ -266,8 +303,11 @@ export default {
       setTimeout(() => {
         this.isChangeSuccessModalOpen = false;
       }, 1500);
-    },
-
+    } catch (error) {
+        console.error('신고 처리 실패:', error);
+    }
+  },
+  
     // 카테고리 처리 로직
     getCategory(report) {
       if (report.postOrComment === 'POST') {
@@ -278,6 +318,7 @@ export default {
         return '-';
       }
     }
+  
   },
 };
 </script>
