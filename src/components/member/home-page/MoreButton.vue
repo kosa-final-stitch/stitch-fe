@@ -26,14 +26,18 @@ export default {
 .more-button {
   display: inline-block;
   margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #f28c00; /* 학원 목록: #f28c00; 로고: #ff7701; 게시판: #F28C28; 색 통일하기? */
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
+  padding: 0; /* 패딩을 제거하여 텍스트만 남김 */
+  background: none; /* 배경색 제거 */
+  color: #f28c00; /* 텍스트 색상 */
+  border: none; /* 테두리 제거 */
+  font-size: 16px; /* 적절한 크기 */
+  cursor: pointer; /* 마우스 커서를 포인터로 변경 */
+  text-decoration: underline; /* 텍스트에 밑줄 추가 */
+  transition: color 0.3s ease; /* 색상 전환 효과 */
 }
 
 .more-button:hover {
-  background-color: #ffdf50;
+  color: #ffdf50; /* hover 시 색상 변경 */
+  text-decoration: none; /* hover 시 밑줄 제거 */
 }
 </style>

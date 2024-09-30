@@ -5,11 +5,16 @@
  ---------------------
  2024.09.13 박요한 | 컴포넌트 생성.
  2024.09.15 박요한 | 구체화.
+ 2024.09.25 박요한 | 더보기 버튼 위치 조정.
  -->
 
 <template>
   <div class="high-rated-academies">
-    <h2>평점 높은 학원</h2>
+    <div class="header-row">
+      <h2>평점 높은 학원</h2>
+      <!-- 더보기 버튼 -->
+      <MoreButton to="/academies/academy" />
+    </div>
     <div class="academy-container">
       <div
         v-for="(academy, index) in academies"
@@ -25,9 +30,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 더보기 버튼 -->
-    <MoreButton to="/academies/academy" />
   </div>
 </template>
 
@@ -79,6 +81,18 @@ export default {
 <style scoped>
 .high-rated-academies {
   margin: 0 auto;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1%;
+}
+
+.header-row h2 {
+  margin: 0;
 }
 
 .academy-container {

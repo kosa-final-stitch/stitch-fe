@@ -6,6 +6,7 @@
  2024.09.10 김호영 | admin 초기 설정
  2024.09.18 김호영 | 1:1문의 페이지 초기 디자인 및 구현
  2024.09.19 김호영 | 1:1 문의 페이지 완.
+ 2024.09.24 김호영 | 문의사항 백엔드 연동. 
  -->
  <template>
   <div class="direct-info-page">
@@ -36,11 +37,14 @@
       <thead>
         <tr>
           <th>No.</th>
-          <th>제목</th>
-          <th>내용</th>
-          <th>작성일자</th>
-          <th>답변일자</th>
-          <th>상태</th>
+          <th>질문자</th>
+          <th>문의 유형</th>
+          <th>문의 제목</th>
+          <th>문의 내용</th>
+          <th>문의 등록일</th>
+          <th>답변 등록일</th>
+          <th>답변자 이름</th>
+          <th>문의 상태</th>
           <th></th>
         </tr>
       </thead>
@@ -48,13 +52,16 @@
         <tr v-if="filteredDirects.length === 0">
           <td colspan="7">문의사항이 없습니다.</td>
         </tr>
-        <tr v-for="(direct, index) in paginatedDirects" :key="direct.direct_id">
+        <tr v-for="(direct, index) in paginatedDirects" :key="direct.inquiryId">
           <td>{{ (currentPage - 1) * directsPerPage + index + 1 }}</td>
-          <td>{{ direct.title }}</td>
-          <td>{{ direct.content.slice(0, 15) }}...</td>
-          <td>{{ formatDate(direct.regdate) }}</td>
-          <td>{{ direct.ansdate ? formatDate(direct.ansdate) : '-' }}</td>
-          <td>{{ direct.status === 'answered' ? '답변완료' : '미답변' }}</td>
+          <td>{{ direct.memberName }}</td> <!-- 질문자 이름 -->
+          <td>{{ direct.category }}</td> <!-- 문의 유형 -->
+          <td>{{ direct.title }}</td> <!-- 문의 제목 -->
+          <td>{{ direct.content.slice(0, 15) }}...</td> <!-- 문의 내용 -->
+          <td>{{ formatDate(direct.regDate) }}</td> <!-- 문의 등록일 -->
+          <td>{{ direct.ansDate ? formatDate(direct.ansDate) : '-' }}</td> <!-- 답변 등록일 -->
+          <td>{{ direct.adminName ? direct.adminName : '-' }}</td> <!-- 답변자 이름 -->
+          <td>{{ direct.status === 'answered' ? '답변완료' : '미답변' }}</td> <!-- 문의 상태 -->
           <td>
             <!-- 답변 작성하기 버튼 -->
             <button v-if="direct.status !== 'answered'" class="direct-write-btn" @click="openDirectAnswerModal(direct)">
@@ -84,8 +91,8 @@
               <input id="title" type="text" v-model="selectedDirect.title" class="info-input" readonly />
             </div>
             <div class="info-item">
-              <label for="member_id">작성자:</label>
-              <input id="member_id" type="text" v-model="selectedDirect.member_id" class="info-input" readonly />
+              <label for="member_id">질문자:</label>
+              <input id="member_id" type="text" v-model="selectedDirect.memberName" class="info-input" readonly />
             </div>
             <div class="info-item">
               <label for="content">내용:</label>
@@ -120,6 +127,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   data() {
     return {
@@ -133,29 +141,9 @@ export default {
       answerContent: '', // 답변 내용
       isChangeSuccessModalOpen: false,
     };
-
   },
   mounted() {
-    this.directmentsData = [
-      {
-        direct_id: 1,
-        member_id: 115,
-        title: '문의 제목 1',
-        content: '문의 내용 1',
-        regdate: '2024-06-28',
-        ansdate: '2024-07-05',
-        status: 'answered',
-      },
-      {
-        direct_id: 3,
-        member_id: 187,
-        title: '문의 제목 2',
-        content: '문의 내용 2',
-        regdate: '2024-07-04',
-        ansdate: null,
-        status: 'unanswered',
-      }
-    ];
+    this.fetchInquiries(); // 페이지 로드 시 문의사항 데이터 가져오기
   },
   computed: {
     filteredDirects() {
@@ -186,7 +174,22 @@ export default {
         this.currentPage = page;
       }
     },
+    async fetchInquiries() {
+      try {
+        const token = localStorage.getItem('jwt'); // JWT 토큰 확인
+        const response = await axios.get("/api/member/inquiry", {
+          headers: {
+            Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
+          },
+        });
+        console.log("불러온 문의사항 데이터:", response.data); // 데이터 구조 확인
+        this.directmentsData = response.data;
+      } catch (error) {
+        console.error('문의사항 데이터를 불러오는 중 오류 발생:', error);
+      }
+    },
     openDirectAnswerModal(direct) {
+      console.log(direct); // direct 객체의 내용을 출력하여 inquiryId가 있는지 확인
       this.selectedDirect = direct;
       this.isDirectAnswerModalOpen = true;
     },
@@ -194,35 +197,46 @@ export default {
       this.isDirectAnswerModalOpen = false;
       this.answerContent = '';
     },
-
-    submitDirectAnswer() {
+    // 답변 async 추가
+    async submitDirectAnswer() {
       if (!this.selectedDirect) return;
-
-      // 답변 저장 로직 (백엔드 연동 부분이 없으므로 프론트엔드에서 임시 저장)
-      this.selectedDirect.ansdate = new Date().toISOString().split('T')[0];
-      this.selectedDirect.status = 'answered';
-      this.selectedDirect.answer = this.answerContent;
-
-      // directmentsData에서 해당 문의를 찾아서 업데이트
-      const directIndex = this.directmentsData.findIndex(direct => direct.direct_id === this.selectedDirect.direct_id);
-      if (directIndex !== -1) {
-        // 데이터 갱신
-        this.directmentsData.splice(directIndex, 1, { ...this.selectedDirect });
+      try {
+        const token = localStorage.getItem('jwt');
+      // 관리자 답변 API 호출
+      await axios.post(`/api/member/inquiry/${this.selectedDirect.inquiryId}/answer`, 
+      {
+        answer: this.answerContent, // 답변 내용
+        status: 'answered'
+      },
+      {
+      headers: {
+        Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
+      },
+    });
+        // 답변 저장 로직 (백엔드 연동 부분이 없으므로 프론트엔드에서 임시 저장)
+        this.selectedDirect.ansdate = new Date().toISOString().split('T')[0];
+        this.selectedDirect.status = 'answered';
+        this.selectedDirect.answer = this.answerContent;
+        // directmentsData에서 해당 문의를 찾아서 업데이트
+        const directIndex = this.directmentsData.findIndex(
+          (direct) => direct.direct_id === this.selectedDirect.direct_id);
+        if (directIndex !== -1) {
+          // 데이터 갱신
+          this.directmentsData.splice(directIndex, 1, { ...this.selectedDirect });
+        }
+        // 모달 닫기 및 초기화
+        this.closeDirectAnswerModal();
+        // 조치 완료 후 변경 완료 모달을 표시
+        this.isChangeSuccessModalOpen = true;
+        // 일정 시간 후 변경 완료 모달을 자동으로 닫기
+        setTimeout(() => {
+          this.isChangeSuccessModalOpen = false;
+          console.log("성공 모달 닫힘");
+        }, 1000); 
+      } catch (error) {
+        console.error('답변 작성 중 오류 발생:', error);
       }
-
-      // 모달 닫기 및 초기화
-      this.closeDirectAnswerModal();
-
-      // 조치 완료 후 변경 완료 모달을 표시
-      this.isChangeSuccessModalOpen = true;
-
-      // 일정 시간 후 변경 완료 모달을 자동으로 닫기
-      setTimeout(() => {
-        this.isChangeSuccessModalOpen = false;
-        console.log("성공 모달 닫힘");
-      }, 1000); 
     },
-
   },
 };
 </script>

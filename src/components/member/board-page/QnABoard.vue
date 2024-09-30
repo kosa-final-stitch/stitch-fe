@@ -1,7 +1,6 @@
 <!--작성자 : 박주희 -->
 
 <template>
-  <MemberHeader></MemberHeader>
   <div class="board-container">
     <h1 class="board-title">QNA 게시판</h1>
     <h5 class="board-description">자유롭게 여러분의 의견을 입력하세요.</h5>
@@ -82,13 +81,11 @@
 
 <script>
 import axios from 'axios';
-import MemberHeader from '../member-header/MemberHeader.vue';
 // import PostDetail from './PostDetail.vue';  // 자식 컴포넌트를 import
 
 export default {
   name: "BoardMain",
   components: {
-    MemberHeader,
   },
   data() {
     return {

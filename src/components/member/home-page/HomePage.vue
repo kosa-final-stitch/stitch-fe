@@ -6,6 +6,7 @@
  2024.09.06 김호영 | 헤더 template 추가.
  2024.09.13 박요한 | 헤더 삭제.
  2024.09.13 박요한 | 홈 레이아웃 생성.
+ 2024.09.25 박요한 | margin 조정.
  -->
 
 <template>
@@ -52,6 +53,7 @@ export default {
 }
 
 section {
-  margin-bottom: 80px;
+  margin-top: 30px;
+  margin-bottom: 120px;
 }
 </style>

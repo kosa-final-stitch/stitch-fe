@@ -6,6 +6,7 @@
  2024.09.10 김호영 | admin 초기 설정
  2024.09.13 김호영 | 초기 게시글 관리 디자인 및 기능 구현
  2024.09.19 김호영 | 날짜 출력형식 수정
+ 2024.09.25 김호영 | 게시글 백엔드 작업 및 게시판 버튼 추가 후 검색 카테고리 기능 수정.
  -->
 
  <template>
@@ -20,9 +21,9 @@
             @blur="isDropdownOpen = false"
             @change="isDropdownOpen = false">
             <option value="all">전체</option>
-            <option value="infoShareBoard">정보 공유</option>
-            <option value="free-community">자유</option>
-            <option value="qnABoard">Q&A</option> <!-- 이거 명명 규칙 조금 어색하긴 한데 음 .. 모르겠다-->
+            <option value="nickname">작성자</option>
+            <option value="type">게시글 유형</option>
+            <option value="title">제목</option> 
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" 
@@ -39,6 +40,13 @@
         </div>
       </div>
     </div>
+
+  <!-- 추가된 게시판 버튼들 -->
+  <div class="board-buttons" style="display: flex; justify-content: flex-start; margin-bottom: 20px;">
+    <button @click="loadInfoShareBoard" class="board-button" :class="{ active: selectedCategory === 'infoShareBoard' }">정보 공유</button>
+    <button @click="loadFreeCommunity" class="board-button" :class="{ active: selectedCategory === 'free-community' }">자유게시판</button>
+    <button @click="loadQnABoard" class="board-button" :class="{ active: selectedCategory === 'qnABoard' }">Q&A</button>
+  </div>
 
     <!-- 게시글 목록 테이블 -->
     <table class="post-list-table">
@@ -58,13 +66,12 @@
       <tbody>
         <tr v-for="(post, index) in paginatedPosts" :key="post.id">
           <td>{{  (currentPage -1) * postsPerPage + index + 1 }}</td>
-          <td>{{ post.id || '-' }}</td>
+          <td>{{ post.boardId || '-' }}</td>
           <td>{{ post.type || '-' }}</td>
-          <td>{{ post.author || '-' }}</td>  <!-- 일단 author로 해 놓음 여기에 작성자 넣어놓으면 됨-->
+          <td>{{ post.nickname || '-' }}</td>  
           <td>{{ formatDate(post.regdate) || '-' }}</td>
           <td>{{ formatDate(post.editdate) || '-' }}</td>
           <td>{{ post.title || '-' }}</td>
-          <!--<td>{{ post.status || '-' }}</td>-->
           <td>
             <div class="dropdown-container" @click.stop="toggleDropdown(index)">
               <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
@@ -135,7 +142,7 @@ export default {
   data() {
     return {
       searchQuery: '',
-      selectedCategory: 'all',
+      selectedCategory: 'allBoard',
       currentPage: 1,
       postsPerPage: 12,
       isDropdownOpen: false,
@@ -165,8 +172,7 @@ export default {
           return (
             (post.title || '-').includes(this.searchQuery) ||
             (post.content || '-').includes(this.searchQuery) ||
-            (post.author || '-').includes(this.searchQuery) //||
-           // (post.status || '-').includes(this.searchQuery)
+            (post.nickname || '-').includes(this.searchQuery)
           );
         } else if (this.selectedCategory === 'infoShareBoard' && post.type === 'info') {
           return true;
@@ -235,28 +241,72 @@ export default {
       this.isDeleteModalOpen = false;
       this.postToDelete = null;
     },
+    // 정보 공유 게시판 정보 불러오기
+    loadInfoShareBoard() {
+      this.selectedCategory = 'infoShareBoard';
+      // 여기서 정보 공유 게시판 데이터를 불러오는 API 호출을 추가하면 됨
+      console.log("정보 공유 게시판 데이터를 불러옵니다.");
+    },
+    // 자유게시판 정보 불러오기
+    loadFreeCommunity() {
+    this.selectedCategory = 'free-community';
+
+    // 자유게시판 데이터를 불러오는 API 호출
+    fetch('/api/board/community/all')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch posts');
+        }
+        return response.json();
+      })
+      .then(data => {
+        this.communityData = data;
+        console.log('자유 게시판 데이터를 성공적으로 불러왔습니다:', data);
+      })
+      .catch(error => {
+        console.error('자유 게시판 데이터를 불러오는 데 실패했습니다:', error);
+      });
+      // 자유게시판 데이터를 불러오는 API 호출 추가
+      console.log("자유 게시판 데이터를 불러옵니다.");
+    },
+    // Q&A 게시판 정보 불러오기
+    loadQnABoard() {
+      this.selectedCategory = 'qnABoard';
+      // Q&A 게시판 데이터를 불러오는 API 호출 추가
+      console.log("Q&A 게시판 데이터를 불러옵니다.");
+    },
   },
-  mounted() {
-  // 게시판 데이터를 불러오는 로직 (임시 데이터로 테스트)
-  this.communityData = [
-    { id: 1, author: 'User A', title: '자유 게시판 글 1', regdate: '2024-09-01', editdate: '2024-09-02', status: '처리 완료' },
-    { id: 2, author: 'User B', title: '자유 게시판 글 2', regdate: '2024-09-05', editdate: '2024-09-06', status: '처리 중' }
-  ];
-
-  this.infoData = [
-    { id: 3, author: 'User C', title: '정보 공유 게시판 글 1', regdate: '2024-09-01', editdate: '2024-09-02', status: '처리 완료' },
-    { id: 4, author: 'User D', title: '정보 공유 게시판 글 2', regdate: '2024-09-03', editdate: '2024-09-04', status: '처리 중' }
-  ];
-
-  this.inquiryData = [
-    { id: 5, author: 'User E', title: 'Q&A 게시판 글 1', regdate: '2024-09-01', editdate: '2024-09-02', status: '미처리' },
-    { id: 6, author: 'User F', title: 'Q&A 게시판 글 2', regdate: '2024-09-05', editdate: '2024-09-06', status: '처리 중' }
-  ];
-},
 };
 </script>
 
 <style scoped>
+
+
+/* 게시판 카테고리 */
+.board-button {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 12px;
+  margin-right: 15px;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s;
+}
+
+.board-button:hover {
+  color: #ff7f00; /* 호버 시 주황색 */
+}
+
+.board-button.active {
+  color: #ff7f00; /* 활성화된 버튼 (클릭된 상태) 주황색 */
+}
+
+.board-button:focus {
+  outline: none;
+}
+
+
 /* 드롭다운 스타일 */
 .dropdown-container {
   position: relative;

@@ -7,6 +7,8 @@
  2024.09.12 김호영 | 사용자 정보 페이지 디자인 구현
  2024.09.13 김호영 | 디자인 완 (코드 정리 미완).
  2024.09.19 김호영 | 날짜 형식 수정.
+ 2024.09.22 김호영 | 사용자 정보 백엔드와 연동.
+ 2024.09.23 김호영 | 사용자 삭제 기능 백엔드와 연동 (삭제 모달 안닫힘 ).
  -->
 
  <template>
@@ -36,11 +38,9 @@
             class="angle-dropdown-icon" 
           />
         </div>
-      
-
 
         <!-- 검색 icon + 검색창 -->
-         <div class="search-input-container">
+        <div class="search-input-container">
           <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="search-icon" />
           <input type="text" v-model="searchQuery" placeholder="Search" class="search-input" />
         </div>
@@ -59,8 +59,8 @@
           <th>성별</th>
           <th>생년월일</th>
           <th>전화번호</th>
-          <th>최종 수정일자</th>
-          <th>등록일자</th>
+          <th>가입 일자</th>
+          <th>최종 수정 일자</th>
           <th></th>
         </tr>
       </thead>
@@ -101,7 +101,7 @@
       </tbody>
     </table>
 
-    <!-- 삭제 확인 모달 -->
+        <!-- 삭제 확인 모달 -->
     <div v-if="isDeleteModalOpen" class="modal-overlay">
       <div class="modal-content">
         <h3>정말 삭제하시겠습니까?</h3>
@@ -114,7 +114,7 @@
     </div>
 
     <!-- 삭제 완료 모달 -->
-    <div v-if="isDeleteSuccessModalOpen" class="modal-success-overlay">
+    <div v-show="isDeleteSuccessModalOpen" class="modal-success-overlay">
       <div class="modal-success-content">
         <div class="modal-icon-container">
           <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
@@ -122,8 +122,6 @@
         <p>삭제가 완료되었습니다</p>
       </div>
     </div>
-
-
 
     <!-- 페이지네이션 -->
     <div class="pagination">
@@ -137,6 +135,7 @@
 </template>
 
 <script>
+import axios from 'axios';  // axios 추가
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'; // Font Awesome 아이콘 불러오기
 
 export default {
@@ -151,177 +150,7 @@ export default {
       membersPerPage: 12,
       isDropdownOpen: false,
       openDropdownIndex: null,
-      isDeleteModalOpen: false, // 삭제 확인 모달 상태
-      isDeleteSuccessModalOpen: false, // 삭제 성공 모달 상태
-      memberToDelete: null, // 삭제할 사용자 정보
-      members: [
-        {
-          email: 'testtest@test.com',
-          name: '김호영',
-          nickname: '닉네임은최대몇까지',
-          address: '서울특별시',
-          gender: '남',
-          birth: '2024-10-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10 16:52:24',
-          editdate: '2024-09-11 16:52:24',
-        },
-        {
-          email: 'test1@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0252',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2020-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '이호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        },
-        {
-          email: 'test@test.com',
-          name: '20호영',
-          nickname: '별명',
-          address: '제주도',
-          gender: '여',
-          birth: '2024-09-12',
-          phone: '010-9330-0253',
-          signupdate: '2024-09-10',
-          editdate: '2024-09-11',
-        }
-        // 다른 유저들 추가
-      ],
+      members: [],  // DB에서 불러올 회원 정보가 저장될 배열
     };
   },
   computed: {
@@ -331,15 +160,15 @@ export default {
         if (this.selectedCategory === 'all') {
           // 모든 필드를 검색할 경우
           return (
-            member.email.includes(this.searchQuery) ||
-            member.name.includes(this.searchQuery) ||
-            member.nickname.includes(this.searchQuery) ||
-            member.address.includes(this.searchQuery) ||
-            member.gender.includes(this.searchQuery) ||
-            member.birth.includes(this.searchQuery) ||
-            member.phone.includes(this.searchQuery) ||
-            member.signupdate.includes(this.searchQuery) ||
-            member.editdate.includes(this.searchQuery)
+            (member.email && member.email.includes(this.searchQuery)) ||
+            (member.name && member.name.includes(this.searchQuery)) ||
+            (member.nickname && member.nickname.includes(this.searchQuery)) ||
+            (member.address && member.address.includes(this.searchQuery)) ||
+            (member.gender && member.gender.includes(this.searchQuery)) ||
+            (member.birth && member.birth.includes(this.searchQuery)) ||
+            (member.phone && member.phone.includes(this.searchQuery)) ||
+            (member.signupdate && member.signupdate.includes(this.searchQuery)) ||
+            (member.editdate && member.editdate.includes(this.searchQuery))
           );
         } else {
           // 특정 카테고리 검색
@@ -359,7 +188,20 @@ export default {
     },
   },
   methods: {
-
+    // API를 통해 모든 회원 정보 불러오기
+    async fetchMembers() {
+      try {
+        const token = localStorage.getItem('jwt');  // 저장된 JWT 토큰 가져오기
+        const response = await axios.get('/api/members', {
+          headers: {
+            Authorization: `Bearer ${token}`  // 토큰을 Authorization 헤더에 포함
+          }
+        });
+        this.members = response.data;
+      } catch (error) {
+        console.error("회원 정보를 불러오는 중 오류 발생:", error);
+      }
+    },
     formatDate(date) {
       const d = new Date(date);
       return d.toISOString().replace('T', ' ').substring(0, 10);
@@ -372,52 +214,71 @@ export default {
     closeDropdown() {
     },
     handleItemClick(member, action) {
-    this.closeDropdown();
-    
-    if (action === 'delete') {
-      this.confirmDeleteMember(member); // 삭제할 사용자 설정 후 모달 오픈
-    }
-  },
-  
-  confirmDeleteMember(member) {
+      this.closeDropdown();
+      
+      if (action === 'delete') {
+        this.confirmDeleteMember(member); // 삭제할 사용자 설정 후 모달 오픈
+      }
+    },
+    confirmDeleteMember(member) {
     this.memberToDelete = member; // 삭제할 사용자 저장
     console.log('삭제하려는 사용자:', this.memberToDelete); // 로그로 삭제할 사용자 확인
     this.isDeleteModalOpen = true; // 모달 열기
   },
-
-  deleteMember() {
-    if (!this.memberToDelete) {
-      console.error('삭제할 사용자가 설정되지 않았습니다.');
-      return;
-    }
-    console.log('삭제할 사용자:', this.memberToDelete); // 삭제하려는 사용자 정보 로그
-    this.members = this.members.filter(u => u.email !== this.memberToDelete.email); // 사용자 삭제
-    this.isDeleteModalOpen = false; // 삭제 확인 모달 닫기
-    this.isDeleteSuccessModalOpen = true;
-    this.memberToDelete = null; // 초기화
-
-    // 일정시간 이후 자동으로 모달 close
-    setTimeout(() => {
-    this.isDeleteSuccessModalOpen = false;
-  }, 1500); // 2초 후에 모달 닫힘
-  },
-
-  
-
   cancelDelete() {
-    this.isDeleteModalOpen = false; // 모달 닫기
-    this.memberToDelete = null; // 초기화 
-  },
-  closeSuccessModal() {
-    this.isDeleteSuccessModalOpen = false;
-  },
-    // 페이지 이동 메서드
-    goToPage(page) {
-      if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page;
+        console.log('취소 버튼 클릭됨');
+        console.log('isDeleteModalOpen:', this.isDeleteModalOpen);
+        this.isDeleteModalOpen = false; // 모달 닫기
+        console.log('isDeleteModalOpen:', this.isDeleteModalOpen);
+        this.memberToDelete = null; // 초기화 
+        this.$nextTick(() => {
+        console.log('모달 상태 및 멤버 초기화 완료');
+        });
+      },
+
+  async deleteMember() {
+      if (!this.memberToDelete) {
+        console.error('삭제할 사용자가 설정되지 않았습니다.');
+        return;
       }
-    },
+
+      try {
+      // 실제 DB에서 사용자 삭제 요청
+      const token = localStorage.getItem('jwt'); // 저장된 JWT 토큰 가져오기
+      await axios.delete(`/api/members/${this.memberToDelete.email}`, {
+        headers: {
+          Authorization: `Bearer ${token}` // 토큰을 Authorization 헤더에 포함
+        }
+      });
+
+      console.log('삭제할 사용자:', this.memberToDelete); // 삭제하려는 사용자 정보 로그
+      this.members = this.members.filter(u => u.email !== this.memberToDelete.email); // 사용자 삭제
+      this.isDeleteModalOpen = false; // 삭제 확인 모달 닫기
+      this.isDeleteSuccessModalOpen = true;
+ 
+      // 일정시간 이후 자동으로 모달 close
+      setTimeout(() => {
+        this.isDeleteSuccessModalOpen = false;
+        this.memberToDelete = null; // 초기화
+      }, 1500);   
+    } catch (error) {
+      console.error("사용자 삭제 중 오류 발생: ", error);
+    }
   },
+      closeSuccessModal() {
+        this.isDeleteSuccessModalOpen = false;
+      },
+      // 페이지 이동 메서드
+      goToPage(page) {
+        if (page >= 1 && page <= this.totalPages) {
+          this.currentPage = page;
+        }
+      },
+    },
+    created() {
+      // 컴포넌트가 로드될 때 API 호출
+      this.fetchMembers();
+    }
 };
 </script>
 
@@ -487,7 +348,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1001; /* 위에 배치 */
+  z-index: 1003; /* 위에 배치 */
 }
 
 /* 모달 콘텐츠 스타일 */

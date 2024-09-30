@@ -1,3 +1,5 @@
+// 24.9.24. 박요한 | proxy target 환경변수로 전환.
+
 const { defineConfig } = require("@vue/cli-service");
 const webpack = require("webpack"); // webpack 추가
 
@@ -9,6 +11,7 @@ module.exports = defineConfig({
       "/api": {
         // target: "http://localhost:8080", // Spring Boot가 동작하는 서버
         target: process.env.VUE_APP_API_URL,
+
         ws: false, // 웹소켓 비활성화
         changeOrigin: true,
       },

@@ -1,3 +1,6 @@
+<!--  
+  2024.09.24 박요한 | 학원마다 평균 별점 가져오기 해결
+-->
 <template>
   <div class="academy-list">
     <!-- 학원 리스트 -->
@@ -62,18 +65,21 @@ export default {
         .then((response) => {
           this.academyList = response.data;
           console.log("학원정보리스트실행.", response.data);
+          this.academyList.forEach((academy) => this.fetchAcademyRating(academy.academy_id)); // 각 학원의 별점도 가져오기
         })
         .catch((error) => {
           console.error("학원 리스트를 불러오는 중 오류가 발생했습니다.", error);
         });
     },
     // 학원 평균 별점 가져오는 메서드
-    fetchAcademyRating() {
+    fetchAcademyRating(academyId) {
       axios
-        .get(`http://localhost:8080/api/academies/academy/${this.academyId}/rating`)
+        .get(`http://localhost:8080/api/academies/academy/${academyId}/rating`)
         .then((response) => {
-          this.academy.rating = response.data; // 서버에서 받아온 평균 별점 저장
-          console.log("학원 평균 별점:", response.data);
+          const academy = this.academyList.find((a) => a.academy_id === academyId);
+          if (academy) {
+            academy.rating = response.data; // 평균 별점을 해당 학원에 저장
+          }
         })
         .catch((error) => {
           console.error("학원 평균 별점을 불러오는 중 오류가 발생했습니다.", error);

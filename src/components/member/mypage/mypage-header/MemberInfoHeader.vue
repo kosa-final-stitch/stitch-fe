@@ -1,3 +1,6 @@
+<!-- 
+  2024.9.26. 박요한 | aios api 경로 수정 (localhost 삭제)
+-->
 <template>
   <div class="member-info-header">
     <h2>마이페이지</h2>
@@ -69,7 +72,7 @@ export default {
   },
   mounted() {
     axios
-      .get("http://localhost:8080/api/member/info")
+      .get("/api/member/info")
       .then((response) => {
         console.log("멤버헤드 서버 응답: ", response);
         this.member = response.data;
@@ -94,7 +97,7 @@ export default {
 <style scoped>
 .member-info-header {
   width: 100%;
-  padding: 80px;
+  padding: 20px;   /* 호영 80 -> 20 으로 수정 */
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 10px;

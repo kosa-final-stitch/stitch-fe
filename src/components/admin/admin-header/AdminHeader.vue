@@ -5,12 +5,15 @@
  ---------------------
  2024.09.10 김호영 | 헤더 초기 설정
  2024.09.11 김호영 | 초기 헤더 완료.
+ 2024.09.20 김호영 | 관리자 정보 백앤드 연동.
  -->
 
  <template>
   <div class="header-container">
     <div class="page-title">{{ currentPage }}</div> <!-- 선택된 페이지 이름 -->
-    <span class="admin-name">{{ adminName }}</span> <!-- 로그인된 관리자 이름 -->
+      <span class="admin-name">
+        <span class="admin-name-highlight">{{ adminName }} </span> 님 환영합니다. <!-- 로그인된 관리자 이메일 -->
+      </span> 
   </div>
 </template>
 
@@ -26,7 +29,7 @@
     computed: {
       adminName() {
         const store = useMemberStore();
-        return store.adminName || 'admin_name'; // 로그인된 관리자의 이름 출력
+        return store.member?.name || 'admin_name'; // 로그인된 관리자의 이름 출력
       },
     },
     watch: {
@@ -67,7 +70,7 @@
   z-index: 900;
   border-bottom: 1.3px solid #000000;
   /* box-shadow: -2px 6px 10px -4px rgba(0, 0, 0, 0.1); */
-  height: 60px;
+  height: 50px;
   
 }
 
@@ -80,8 +83,13 @@
 }
 
 .admin-name {
-  font-weight: bold;
   margin-right: 15px;
+  color: rgb(58, 58, 58);
+}
+
+.admin-name-highlight {
+  color: #fe852e; 
+  font-weight: bold;
 }
 
 /* 반응형 디자인 */

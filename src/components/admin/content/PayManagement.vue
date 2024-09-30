@@ -19,10 +19,10 @@
             @blur="isDropdownOpen = false"
             @change="isDropdownOpen = false">
             <option value="all">전체</option>
-            <option value="complete">처리 완료</option>
+            <option value="completed">처리 완료</option>
             <option value="pending">미처리</option>
             <option value="card">카드</option>
-            <option value="cash">계좌이체</option>
+            <option value="account">계좌이체</option>
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" 
@@ -46,23 +46,23 @@
         <tr>
           <th>No.</th>
           <th>결제일</th>
-          <th>사용자 이메일</th>
-          <th>이름</th>
+          <th>사용자ID</th>
+          <th>사용자명</th>
           <th>결제 항목</th>
           <th>결제 금액</th>
-          <th>결제 유형</th>
+          <th>결제 수단</th>
           <th>상태</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(pay, index) in paginatedPays" :key="pay.payment_id">
+        <tr v-for="(pay, index) in paginatedPays" :key="pay.paymentId">
           <td>{{  (currentPage -1) * paysPerPage + index + 1 }}</td>
-          <td>{{ formatDate(pay.paydate) }}</td>
-          <td>{{ pay.email || '-' }}</td>
-          <td>{{ pay.name || '-' }}</td> 
-          <td>donation</td>
-          <td>{{ pay.amount }}</td>
+          <td>{{ formatDate(pay.payDate) }}</td>
+          <td>{{ pay.memberId || '-' }}</td>
+          <td>{{ pay.memberName || '-' }}</td> 
+          <td>{{ pay.category }}</td> <!-- 결제 항목 -->
+          <td>{{ formatAmount(pay.amount) }} 원</td> <!-- 결제 금액 -->
           <td>{{ pay.method === 'card' ? '카드' : '계좌이체' }}</td>
           <td>{{ pay.status === 'pending' ? '미처리' : '처리 완료' }}</td>
           <td>
@@ -94,7 +94,7 @@
     <div v-if="isChangeModalOpen" class="modal-overlay">
       <div class="modal-content">
         <h3>상태를 "처리 완료"로 변경하시겠습니까?</h3>
-        <p>선택하신 사용자 정보 : {{ payToChange?.email }}</p>
+        <p>선택하신 사용자 이름 : {{ payToChange?.memberName }}</p>
         <div class="modal-buttons">
           <button @click="changePay">확인</button>
           <button @click="cancelChange">취소</button>
@@ -173,9 +173,23 @@ export default {
     },
   },
   methods: {
+
+    // 결제 금액 형식 메서드
+    formatAmount(value) {
+      if (!value) return '0'; // 값이 없으면 0 반환
+      return value.toLocaleString(); // 세 자리마다 쉼표 추가
+    },
     // 날짜 형식 메서드
     formatDate(date) {
+      if (!date) {
+        return '-'; // 날짜 값이 없을 경우 기본값으로 '-' 반환
+      }
+
       const d = new Date(date);
+      if (isNaN(d.getTime())) {
+        return '-'; // 유효하지 않은 날짜일 경우 기본값으로 '-' 반환
+      }
+      
       return d.toISOString().replace('T', ' ').substring(0, 10);
     },
     // 페이지 이동 메서드
@@ -256,29 +270,15 @@ export default {
     },
   },
   mounted() {
-  // 게시판 데이터를 불러오는 로직 (임시 데이터로 테스트)
-  this.paymentsData = [
-    {
-      payment_id: 1,
-      member_id: 101,
-      email: 'user1@example.com',
-      name: 'User One',
-      amount: 10000,
-      method: 'card',
-      status: 'pending',
-      paydate: '2024-09-01',
-      },
-      {
-      payment_id: 2,
-      member_id: 102,
-      email: 'user2@example.com',
-      name: 'User two',
-      amount: 20000,
-      method: 'cash',
-      status: 'completed',
-      paydate: '2024-09-02',
-      },
-  ]
+  // 서버로부터 결제 데이터를 불러오는 로직
+  axios.get('/api/payments')
+  .then(response => {
+    console.log('결제 데이터:', response.data); // 데이터 확인
+    this.paymentsData = response.data;
+  })
+  .catch(error => {
+    console.error('결제 데이터를 불러오는 중 오류 발생:', error);
+  });
 },
 };
 </script>
