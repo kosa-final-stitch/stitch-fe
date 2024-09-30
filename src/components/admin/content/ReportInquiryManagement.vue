@@ -17,8 +17,8 @@
         <div class="category-container">
           <select v-model="selectedCategory" class="search-category">
             <option value="all">전체</option>
-            <option value="answered">처리 완료</option>
-            <option value="unanswered">미처리</option>
+            <option value="comment">댓글</option>
+            <option value="post">게시글</option>
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" class="angle-dropdown-icon" />
@@ -180,15 +180,18 @@ export default {
       return this.reportsData.filter(report => {
         const matchesCategory =
           this.selectedCategory === 'all' ||
-          (this.selectedCategory === 'answered' && report.status === 'answered') ||
-          (this.selectedCategory === 'unanswered' && report.status === 'unanswered');
+          (this.selectedCategory === 'post' && report.postOrComment === 'POST') ||
+          (this.selectedCategory === 'comment' && report.postOrComment === 'COMMENT');
         const matchesQuery = 
-          report.content.includes(this.searchQuery) ||
-          report.reason.includes(this.searchQuery) ||
-          String(report.memberId).includes(this.searchQuery) || 
-          (report.postOrComment === 'POST' && report.boardTable.includes(this.searchQuery)) ||
-          (report.postOrComment === 'COMMENT' && report.commentId && String(report.commentId).includes(this.searchQuery));
-        return matchesCategory && matchesQuery;
+          (report.content || '').includes(this.searchQuery) ||             // 신고 내용
+          String(report.reason || '').includes(this.searchQuery) ||        // 신고 사유
+          String(report.nickname || '').includes(this.searchQuery) ||      // 신고자
+          String(this.getCategory(report)).includes(this.searchQuery) ||   // 카테고리
+          String(report.boardId || '').includes(this.searchQuery) ||       // 게시글 번호
+          String(report.commentId || '').includes(this.searchQuery) ||     // 댓글 번호
+          String(report.type || '').includes(this.searchQuery) ||          // 신고 유형
+          String(report.regdate || '').includes(this.searchQuery);         // 신고 일자
+          return matchesCategory && matchesQuery;
       });
     },
     paginatedReports() {
