@@ -14,7 +14,7 @@
         <p>전화번호: {{ academy.phone }}</p>
         <p>
           웹사이트:
-          <a :href="academy.site_address" target="_blank">{{ academy.site_address }}</a>
+          <a :href="academy.site_address" target="_blank">학원 정보 바로가기</a>
         </p>
       </div>
       <div class="radar-chart">
@@ -64,7 +64,7 @@
             <span v-for="n in 5" :key="n">
               {{ n <= Math.round(course.rating) ? "★" : "☆" }}
             </span>
-            {{ course.rating }}
+            <!-- {{ course.rating }} -->
           </p>
         </div>
         <div class="course-details">
@@ -150,17 +150,18 @@ export default {
     this.fetchAcademyData(); // 학원 정보 가져오기
     this.fetchCourses(); // 강좌 정보 가져오기
     this.fetchAcademyRating(); // 학원 평균 별점 가져오기
+    this.fetchAllCourseReviews(); // 모든 과정의 리뷰 데이터를 가져와 차트 생성
   },
 
   methods: {
     // 학원 정보 가져오는 메서드
     fetchAcademyData() {
       axios
-        .get(`http://localhost:8080/api/academies/academy/${this.academyId}`) // props로 받은 id 사용
+        .get(`/api/academies/academy/${this.academyId}`) // props로 받은 id 사용
         .then((response) => {
           this.academy = response.data; // 서버에서 받아온 학원 정보 저장
           console.log("학원 정보: ", response.data);
-          this.fetchReviewData(); // 리뷰 데이터를 불러와 차트 생성
+          // this.fetchReviewData(); // 리뷰 데이터를 불러와 차트 생성
         })
         .catch((error) => {
           console.error("학원 정보를 불러오는 중 오류가 발생했습니다.", error);
@@ -169,7 +170,7 @@ export default {
     // 학원 평균 별점 가져오는 메서드
     fetchAcademyRating() {
       axios
-        .get(`http://localhost:8080/api/academies/academy/${this.academyId}/rating`)
+        .get(`/api/academies/academy/${this.academyId}/rating`)
         .then((response) => {
           this.academy.rating = response.data; // 서버에서 받아온 평균 별점 저장
           console.log("학원 평균 별점: ", response.data);
@@ -179,89 +180,10 @@ export default {
         });
     },
 
-    // 리뷰 데이터 가져오는 메서드 추가
-    fetchReviewData() {
-      axios
-        .get(`http://localhost:8080/api/academies/reviews/${this.academyId}`)
-        .then((response) => {
-          const reviewData = response.data;
-          console.log("리뷰 데이터: ", reviewData);
-          this.generateChart(reviewData); // 리뷰 데이터를 차트에 전달
-        })
-        .catch((error) => {
-          console.error("리뷰 데이터를 불러오는 중 오류가 발생했습니다.", error);
-        });
-    },
-
-    // 차트 생성 함수
-    generateChart(reviewData) {
-      if (this.chart) {
-        this.chart.destroy(); // 기존 차트가 있으면 삭제
-      }
-
-      const totalReviews = reviewData.length;
-      const totalRatings = {
-        education: 0,
-        instructor: 0,
-        facility: 0,
-        atmosphere: 0,
-        management: 0,
-        later: 0,
-      };
-
-      // 각 항목에 대한 총점을 계산
-      reviewData.forEach((review) => {
-        totalRatings.education += review.educationRating || 0;
-        totalRatings.instructor += review.instructorRating || 0;
-        totalRatings.facility += review.facilityRating || 0;
-        totalRatings.atmosphere += review.atmosphereRating || 0;
-        totalRatings.management += review.managementRating || 0;
-        totalRatings.later += review.laterRating || 0;
-      });
-
-      // 각 항목에 대한 평균 평점 계산
-      const averageRatings = {
-        education: (totalRatings.education / totalReviews).toFixed(1),
-        instructor: (totalRatings.instructor / totalReviews).toFixed(1),
-        facility: (totalRatings.facility / totalReviews).toFixed(1),
-        atmosphere: (totalRatings.atmosphere / totalReviews).toFixed(1),
-        management: (totalRatings.management / totalReviews).toFixed(1),
-        later: (totalRatings.later / totalReviews).toFixed(1),
-      };
-
-      const ctx = document.getElementById("radarChart").getContext("2d");
-      this.chart = new Chart(ctx, {
-        type: "radar",
-        data: {
-          labels: ["교육", "강사", "시설", "분위기", "행정", "사후관리"],
-          datasets: [
-            {
-              label: "평균 평점",
-              data: Object.values(averageRatings),
-              backgroundColor: "rgba(255, 99, 132, 0.2)",
-              borderColor: "rgba(255, 99, 132, 1)",
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          scales: {
-            r: {
-              beginAtZero: true,
-              max: 5,
-              ticks: {
-                stepSize: 1,
-              },
-            },
-          },
-        },
-      });
-    },
-
     // 강좌 정보 가져오는 메서드
     fetchCourses() {
       axios
-        .get(`http://localhost:8080/api/academies/courses/${this.academyId}`) // props로 받은 id 사용
+        .get(`/api/academies/courses/${this.academyId}`) // props로 받은 id 사용
         .then((response) => {
           console.log("아카데미 인포 강좌 목록 응답: ", response.data);
           const today = new Date(); // 오늘 날짜
@@ -303,6 +225,87 @@ export default {
         });
     },
 
+    // 학원 모든 과정 리뷰 데이터를 가져오는 메서드
+    fetchAllCourseReviews() {
+      axios
+        .get(`/api/academies/reviews/all/${this.academyId}`)
+        .then((response) => {
+          const reviewData = response.data;
+          console.log("모든 과정 리뷰 데이터: ", reviewData);
+          this.generateChart(reviewData); // 리뷰 데이터를 차트에 전달
+        })
+        .catch((error) => {
+          console.error("모든 과정 리뷰 데이터를 불러오는 중 오류가 발생했습니다.", error);
+        });
+    },
+
+    // 학원 모든리뷰의 차트 생성 함수
+    generateChart(reviewData) {
+      if (this.chart) {
+        this.chart.destroy(); // 기존 차트가 있으면 삭제
+      }
+
+      // 각 항목에 대한 총점과 리뷰 개수 계산
+      const totalRatings = {
+        education: 0,
+        instructor: 0,
+        facility: 0,
+        atmosphere: 0,
+        management: 0,
+        later: 0,
+      };
+      const totalReviews = reviewData.length;
+
+      // 각 리뷰 항목별로 총점 계산
+      reviewData.forEach((review) => {
+        totalRatings.education += review.educationRating || 0;
+        totalRatings.instructor += review.instructorRating || 0;
+        totalRatings.facility += review.facilityRating || 0;
+        totalRatings.atmosphere += review.atmosphereRating || 0;
+        totalRatings.management += review.managementRating || 0;
+        totalRatings.later += review.laterRating || 0;
+      });
+
+      // 차트에 사용할 데이터 설정 (필요에 따라 평균값이 아닌 개별 값으로도 가능)
+      const averageRatings = {
+        education: (totalRatings.education / totalReviews).toFixed(1),
+        instructor: (totalRatings.instructor / totalReviews).toFixed(1),
+        facility: (totalRatings.facility / totalReviews).toFixed(1),
+        atmosphere: (totalRatings.atmosphere / totalReviews).toFixed(1),
+        management: (totalRatings.management / totalReviews).toFixed(1),
+        later: (totalRatings.later / totalReviews).toFixed(1),
+      };
+
+      // 차트 생성
+      const ctx = document.getElementById("radarChart").getContext("2d");
+      this.chart = new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: ["교육", "강사", "시설", "분위기", "행정", "사후관리"],
+          datasets: [
+            {
+              label: "평균 평점",
+              data: Object.values(averageRatings),
+              backgroundColor: "rgba(54, 162, 235, 0.2)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 5,
+              ticks: {
+                stepSize: 1,
+              },
+            },
+          },
+        },
+      });
+    },
+    ///////////////////
     // 날짜 형식 변환
     formatDate(date) {
       const options = { year: "numeric", month: "2-digit", day: "2-digit" };
@@ -401,5 +404,21 @@ export default {
 
 .details {
   margin-bottom: 10px;
+}
+
+.radar-chart {
+  width: 300px; /* 차트 크기를 줄이기 */
+  height: 300px; /* 차트 크기를 줄이기 */
+  text-align: center;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+canvas {
+  max-width: 100%; /* 부모 요소에 맞게 크기 조정 */
+  max-height: 100%; /* 부모 요소에 맞게 크기 조정 */
+  width: 100%; /* 부모 요소에 맞게 크기 조정 */
+  height: auto; /* 높이 자동 조절 */
 }
 </style>

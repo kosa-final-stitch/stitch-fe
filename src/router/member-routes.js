@@ -52,14 +52,14 @@ const MemberRoutes = [
         name: "FCommunityBoard",
       },
       {
-        path: 'board/qna',
+        path: "board/qna",
         component: QnABoard,
-        name: 'QnABoard'
+        name: "QnABoard",
       },
       {
-        path : "board/info-share",
-        component : InfoShareBoard,
-        name : 'InfoShareBoard'
+        path: "board/info-share",
+        component: InfoShareBoard,
+        name: "InfoShareBoard",
       },
       {
         path: "board/post/:boardId",
@@ -68,9 +68,9 @@ const MemberRoutes = [
         props: true,
       },
       {
-        path: 'board/post-form',
+        path: "board/post-form",
         component: PostForm,
-        name: 'PostForm'
+        name: "PostForm",
       },
       {
         path: "member/review-form/:academyId/:courseId",
@@ -123,9 +123,10 @@ const MemberRoutes = [
             name: "ReviewManagement",
           },
           {
-            path: "activities/reviewDetail",
-            component: ReviewDetail,
+            //리뷰작성디테일 불러오기
+            path: "/academy/:academyId/course/:courseId/review/:reviewId",
             name: "ReviewDetail",
+            component: ReviewDetail,
           },
           {
             path: "activities/donation",

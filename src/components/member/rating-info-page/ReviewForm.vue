@@ -36,7 +36,7 @@
 
     <!-- 버튼 영역 -->
     <div class="buttons">
-      <button class="cancel-btn">취소</button>
+      <button class="cancel-btn" @click="handleCancel">취소</button>
       <button class="submit-btn" @click="handleButtonClick">
         {{ buttonText }}
       </button>
@@ -46,6 +46,7 @@
 
 <script>
 import axios from "axios";
+import { useMemberStore } from "/src/store/member-store"; // Pinia 상태관리에서 memberStore 가져오기
 import {
   Chart,
   RadarController,
@@ -70,11 +71,25 @@ export default {
         { title: "행정", comment: "", rating: 1 },
         { title: "취업관련", comment: "", rating: 1 },
       ],
+      initialReviews: [
+        { title: "강의", comment: "", rating: 1 },
+        { title: "강사", comment: "", rating: 1 },
+        { title: "시설", comment: "", rating: 1 },
+        { title: "반 분위기", comment: "", rating: 1 },
+        { title: "행정", comment: "", rating: 1 },
+        { title: "취업관련", comment: "", rating: 1 },
+      ], // 초기 리뷰 값 저장
       chart: null,
       isChartGenerated: false,
       buttonText: "등록",
       memberId: null, // 회원 정보를 저장할 변수
     };
+  },
+  computed: {
+    currentUser() {
+      const memberStore = useMemberStore();
+      return memberStore.member || { memberId: null }; // 현재 로그인한 사용자 정보
+    },
   },
   mounted() {
     this.courseId = this.$route.params.courseId;
@@ -121,29 +136,64 @@ export default {
     },
     handleButtonClick() {
       if (!this.isChartGenerated) {
+        // 차트가 생성되지 않았다면 차트를 생성하고 버튼 텍스트를 저장으로 변경
         this.generateChart();
         this.buttonText = "저장";
         this.isChartGenerated = true;
       } else {
+        // 저장 버튼 클릭 시 데이터를 저장
         this.saveReviewData();
       }
     },
+    //     handleButtonClick() {
+    //   // 로그인 여부 확인
+    //   if (!this.memberId) {
+    //     console.log("로그인이 필요합니다.");  // 로그를 통해 확인
+    //     alert("로그인 후 리뷰 작성이 가능합니다. 학원 정보 페이지로 이동합니다.");
+
+    //     // 경고 후 학원 정보 페이지로 이동
+    //     setTimeout(() => {
+    //       this.$router.push({ name: "CourseInfoDetail", params: { courseId: this.courseId } });
+    //     }, 500);  // 0.5초 지연 후 페이지 이동
+    //   }
+    //   // 차트가 생성되지 않은 경우 차트를 생성
+    //   else if (!this.isChartGenerated) {
+    //     this.generateChart();
+    //     this.buttonText = "저장";
+    //     this.isChartGenerated = true;
+    //   }
+    //   // 차트가 이미 생성된 경우 리뷰 데이터를 저장
+    //   else {
+    //     this.saveReviewData();
+    //   }
+    // }
+
+    handleCancel() {
+      if (this.buttonText === "등록") {
+        // 등록 상태일 때는 초기화
+        this.reviews = JSON.parse(JSON.stringify(this.initialReviews));
+        this.isChartGenerated = false;
+        if (this.chart) {
+          this.chart.destroy(); // 차트가 있다면 제거
+        }
+      } else if (this.buttonText === "저장") {
+        // 저장 상태일 때는 저장 취소 처리
+        this.$router.push({ name: "CourseInfoDetail", params: { courseId: this.courseId } });
+      }
+    },
     fetchMemberInfo() {
-      axios
-        .get("http://localhost:8080/api/member/info")
-        .then((response) => {
-          this.userInfo = response.data;
-          this.memberId = this.userInfo.memberId; // memberId를 저장합니다.
-          console.log(JSON.stringify("리뷰에서 사용자정보" + JSON.stringify(this.userInfo)));
-          this.editableUserInfo = { ...this.userInfo };
-        })
-        .catch((error) => {
-          console.error("회원 정보를 불러오는 중 오류가 발생했습니다.", error);
-        });
+      const memberStore = useMemberStore(); // Pinia 상태 가져오기
+      if (memberStore.member && memberStore.member.memberId) {
+        this.memberId = memberStore.member.memberId; // memberId를 Pinia에서 가져와 설정
+        console.log("리뷰에서 사용자정보: ", this.memberId);
+      } else {
+        console.error("회원 정보를 가져오지 못했습니다. 로그인 필요.");
+        alert("로그인 후 리뷰 작성이 가능합니다.");
+      }
     },
     saveReviewData() {
-      if (!this.memberId || !this.courseId) {
-        console.log("회원아이디 : " + this.memberId + " 코스아이디 : " + this.courseId);
+      if (!this.currentUser.memberId || !this.courseId) {
+        console.log("리뷰폼 회원아이디 : " + this.currentUser.memberId + " 코스아이디 : " + this.courseId);
         console.error("회원 ID를 가져오지 못했습니다.");
         alert("로그인 후 리뷰 작성이 가능합니다. 로그인 후 이용해 주세요");
         return;
@@ -169,13 +219,13 @@ export default {
       ];
       console.log("전송할 리뷰 데이터:", reviewData);
       axios
-        .post("http://localhost:8080/api/member/reviews", reviewData)
+        .post(`/api/member/reviews`, reviewData)
         .then((response) => {
           alert("리뷰가 성공적으로 저장되었습니다.");
           console.log("리뷰서버 응답:", response.data); // 서버 응답 데이터를 처리
+
           // 저장 후 courseDetail 페이지로 이동
           this.$router.push({
-            //데이터 푸쉬로보냄
             name: "CourseInfoDetail",
             params: { courseId: this.courseId },
             query: { reviews: reviewData },
