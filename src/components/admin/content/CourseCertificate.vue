@@ -18,6 +18,7 @@
             <option value="all">전체</option>
             <option value="completed">수료 완료</option>
             <option value="in-progress">처리중</option>
+            <option value="rejected">수료 불가</option>
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" class="angle-dropdown-icon" />
@@ -99,7 +100,7 @@
           <!-- 수료일 -->
           <div class="info-item">
             <label for="completionDate">수료일</label>
-            <input id="completionDate" type="text" v-model="selectedCertificate.completionDate" class="info-input" readonly />
+            <input id="completionDate" type="text" :value="formatDate(selectedCertificate.completionDate)" class="info-input" readonly />
           </div>
 
           <!-- 신청자 ID -->
@@ -133,7 +134,13 @@
             </div>
           </div>
           <div class="modal-buttons">
+            <!-- 수료 완료 버튼 -->
             <button type="submit" class="btn-primary">수료 확인</button>
+            
+            <!-- 수료 불가 버튼 -->
+            <button type="button" class="btn-danger" @click="submitCertificateAnswer('rejected')">수료 불가</button>
+            
+            <!-- 취소 버튼 -->
             <button type="button" class="btn-secondary" @click="closeCertificateAnswerModal">취소</button>
           </div>
         </form>
@@ -177,7 +184,8 @@ export default {
         const matchesCategory =
           this.selectedCategory === 'all' ||
           (this.selectedCategory === 'completed' && certificate.status === '수료 완료') ||
-          (this.selectedCategory === 'in-progress' && certificate.status === '처리중');
+          (this.selectedCategory === 'in-progress' && certificate.status === '처리중') ||
+          (this.selectedCategory === 'rejected' && certificate.status === '수료 불가');
         const matchesQuery = 
           certificate.courseName.includes(this.searchQuery) ||
           certificate.academyName.includes(this.searchQuery) ||
@@ -226,11 +234,16 @@ export default {
     closeCertificateAnswerModal() {
       this.isCertificateAnswerModalOpen = false;
     },
-    submitCertificateAnswer() {
+  // 수료 상태 변경 처리 메서드
+    submitCertificateAnswer(status) {
       if (!this.selectedCertificate) return;
 
-      // 상태를 변경해서 UI에서 확인 완료로 표시되도록 변경
-      this.selectedCertificate.status = '수료 완료';
+      // 상태를 변경 (수료 완료 또는 수료 불가)
+      if (status === 'completed') {
+        this.selectedCertificate.status = '수료 완료';
+      } else if (status === 'rejected') {
+        this.selectedCertificate.status = '수료 불가';
+      }
 
       // certificatesData에서 해당 certificate를 찾아서 업데이트
       const certificateIndex = this.certificatesData.findIndex(certificate => certificate.certificateId === this.selectedCertificate.certificateId);
@@ -316,6 +329,7 @@ export default {
 .certificate-answer-modal-content .modal-buttons {
   display: flex;
   justify-content: space-between;
+
 }
 
 .certificate-answer-modal-content .btn-secondary {
@@ -325,6 +339,21 @@ export default {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  outline: none; /* 포커스 아웃라인 제거 */
+}
+
+/* 수료 불가 버튼 스타일 */
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
 }
 
 .certificate-answer-info strong {
@@ -460,28 +489,42 @@ export default {
 
 .modal-buttons {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between; /* 버튼 간격을 좌우로 동일하게 */
   margin-top: 40px;
+  gap: 15px; /* 버튼 간 간격을 벌려줌 */
+  
+
 }
 
 .modal-buttons button {
-  padding: 10px 20px;
-  border: none;
+  padding: 8px 15px; /* 버튼 크기를 줄임 (상하 8px, 좌우 15px) */
+  width: 120px; /* 버튼의 너비를 줄임 */
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
-  width: 160px;
 }
 
 .modal-buttons button:first-child {
-  background-color: #f56565;
+  background-color: #f39c5e;
   color: white;
+  outline: none; /* 포커스 아웃라인 제거 */
+  border: none; /* 버튼의 기본 테두리 제거 */
 }
 
+.modal-buttons button:first-child:focus,
+.modal-buttons button:first-child:active {
+  outline: none; /* 포커스 시 테두리 제거 */
+  box-shadow: none; /* 그림자도 제거 가능 */
+  border: none; /* 버튼 테두리 제거 */
+}
+
+
 .modal-buttons button:first-child:hover {
-  background-color: #ec2727;
+  background-color: #f08c44;
   color:white;
 }
+
+
 
 .modal-buttons button:last-child:hover {
   background-color: #b3b3b3; /* 호버 시 더 짙은 회색 */
