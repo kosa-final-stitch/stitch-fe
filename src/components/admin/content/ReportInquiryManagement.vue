@@ -101,52 +101,51 @@
             <textarea id="content" v-model="selectedReport.content" class="info-textarea" rows="5" readonly></textarea>
           </div>
         </div>
-        <form @submit.prevent="submitReportAnswer">
-          <div class="report-answer-info">
-            <strong>해당 게시글/댓글 내용</strong>
+          <form @submit.prevent="submitReportAnswer">
+            <div class="report-answer-info">
+              <strong>해당 게시글/댓글 내용</strong>
 
-             <!-- 작성 유형 (POST or COMMENT) -->
-            <div class="info-item">
-              <label for="postOrComment">작성 유형</label>
-              <input id="postOrComment" type="text" :value="getPostOrCommentType(selectedReport.postOrComment)" class="info-input" readonly />
+              <!-- 작성 유형 (POST or COMMENT) -->
+              <div class="info-item">
+                <label for="postOrComment">작성 유형</label>
+                <input id="postOrComment" type="text" :value="getPostOrCommentType(selectedReport.postOrComment)" class="info-input" readonly />
+              </div>
+
+              <!-- 게시글/댓글 번호 -->
+              <div class="info-item">
+                <label for="number">게시글/댓글 번호</label>
+                <input id="number" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.boardId : selectedReport.commentId || '-'" class="info-input" readonly />
+              </div>
+
+              <!-- 작성자 정보 -->
+              <div class="info-item">
+                <label for="writerId">작성자:</label>
+                <input id="writerId" type="text" :value="selectedReport.writerId || '-'" class="info-input" readonly />
+              </div>
+
+              <!-- 게시글일 경우 제목 표시 -->
+              <div class="info-item" v-if="selectedReport.title !== '-'">
+                <label for="title">제목:</label>
+                <input id="title" type="text" v-model="selectedReport.title" class="info-input" readonly />
+              </div>
+
+              <!-- 내용 (게시글 또는 댓글) -->
+              <div class="info-item">
+                <label for="postContent">내용:</label>
+                <textarea id="postContent" v-model="selectedReport.postContent" class="info-textarea" rows="5" readonly></textarea>
+              </div>
+              
             </div>
-
-            <!-- 게시글/댓글 번호 -->
-            <div class="info-item">
-              <label for="number">게시글/댓글 번호</label>
-              <input id="number" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.boardId : selectedReport.commentId" class="info-input" readonly />
-            </div>
-
-            <!-- 작성자 정보 -->
-            <div class="info-item">
-              <label for="writerId">작성자:</label>
-              <input id="writerId" type="text" :value="selectedReport.writerId || '-'" class="info-input" readonly />
-            </div>
-
-            <!-- 게시글일 경우 제목 표시 -->
-            <div class="info-item" v-if="selectedReport.postOrComment === 'POST'">
-              <label for="title">제목:</label>
-              <input id="title" type="text" :value="selectedReport.title || '-'" class="info-input" readonly />
-            </div>
-
-            <!-- 내용 (게시글 또는 댓글) -->
-            <div class="info-item">
-              <label for="postContent">내용:</label>
-              <textarea id="postContent" :value="selectedReport.postContent || '-'" class="info-textarea" rows="5" readonly></textarea>
-            </div>
-
+              <div class="modal-buttons">
+                <button type="button" class="btn-secondary" @click="closeReportAnswerModal">확인 완료</button>
+              </div>
+            </form>
           </div>
-          <div class="modal-buttons">
-            <button type="submit" class="btn-primary">확인 완료</button>
-            <button type="button" class="btn-secondary" @click="closeReportAnswerModal">취소</button>
-          </div>
-        </form>
+        </div>
       </div>
-    </div>
-  </div>
 
       <!-- 확인 완료 모달 -->
-      <div v-if="isChangeSuccessModalOpen" class="modal-success-overlay">
+    <div v-if="isChangeSuccessModalOpen" class="modal-success-overlay">
       <div class="modal-success-content">
         <div class="modal-icon-container">
           <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
@@ -238,12 +237,41 @@ export default {
       try {
         // 서버에서 작성자, 게시글/댓글 정보 가져오기
         const writerId = await this.getWriterId(report);
-        const postContent = await this.getPostContent(report);
+        console.log('Writer ID:', writerId);  // 확인
+
+        // 게시글 또는 댓글 내용을 가져옴
+        const postContentResponse = await this.getPostContent(report);
+        console.log('Post Content Response:', postContentResponse); // 전체 응답 확인
+
+
+        // 'postContentResponse' 객체에서 'content' 키를 가져온다.
+        // 1. 먼저 'content' 키(소문자)가 있는지 확인
+        // 2. 없으면 'CONTENT' 키(대문자)가 있는지 확인
+        // 3. 둘 다 없으면 기본값 '-' 반영
+        const postContent = postContentResponse.content || postContentResponse.CONTENT || '-';
+
+        // 'postTitle'은 게시글인 경우에만 사용
+        // 'report.postOrComment'가 'POST'인지 확인
+        const postTitle = report.postOrComment === 'POST'
+          ? (
+              // 1. 'title'(소문자)가 있는지 확인
+              postContentResponse.title ||
+              // 2. 없으면 'TITLE'(대문자)가 있는지 확인
+              postContentResponse.TITLE ||
+              // 3. 둘 다 없으면 기본값 '-'
+              '-'
+            )
+          // 댓글인 경우 제목은 '-'
+          : '-';
+
+
+        console.log('Post Content:', postContent);  // 확인
+        console.log('Post Title:', postTitle);      // 제목 확인
 
         this.selectedReport = {
           ...report,
           writerId: writerId || '-', // 작성자 정보 없으면 '-'
-          title: report.postOrComment === 'POST' ? report.boardTitle || '-' : '-', // 게시글 제목
+          title: postTitle, // 게시글 제목
           postContent: postContent || '-', // 게시글 또는 댓글 내용
         };
         this.isReportAnswerModalOpen = true;
@@ -254,7 +282,8 @@ export default {
     async getWriterId(report) {
       try {
         const response = await axios.get(`/api/member/report/${report.reportId}/writer`);
-        return response.data.writerId;
+        console.log('Writer Response:', response.data);  // 확인
+        return response.data;
       } catch (error) {
         console.error('작성자 정보 로드 실패:', error);
         return '-';
@@ -264,10 +293,13 @@ export default {
     async getPostContent(report) {
       try {
         const response = await axios.get(`/api/member/report/${report.reportId}/content`);
-        return response.data.content;
+        console.log('Content Response:', response.data);  // 응답 데이터 확인
+
+        // response.data가 Map<String, String> 형태라면
+        return response.data;
       } catch (error) {
         console.error('게시글/댓글 내용 로드 실패:', error);
-        return '-';
+        return '-';  // 에러 발생 시 대체값
       }
     },
     closeReportAnswerModal() {
@@ -395,11 +427,11 @@ export default {
 
 .report-answer-modal-content .modal-buttons {
   display: flex;
-  justify-content: space-between;
+
 }
 
 .report-answer-modal-content .btn-secondary {
-  background-color: #ccc;
+  background-color: #ffa15e;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -553,18 +585,9 @@ export default {
   width: 160px;
 }
 
-.modal-buttons button:first-child {
-  background-color: #f56565;
-  color: white;
-}
-
-.modal-buttons button:first-child:hover {
-  background-color: #ec2727;
-  color:white;
-}
 
 .modal-buttons button:last-child:hover {
-  background-color: #b3b3b3; /* 호버 시 더 짙은 회색 */
+  background-color: #fb822c; /* 호버 시 더 짙은 회색 */
 }
 
 
