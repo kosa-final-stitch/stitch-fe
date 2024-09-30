@@ -34,9 +34,9 @@ export default {
       type: Boolean,
       default: false,
     },
-    postId: {
+    boardId: {
       type: Number,
-      required: true,
+      required: false, // 게시글 신고가 아닌 경우 필요 없음
     },
     commentId: {
       type: Number,
@@ -56,20 +56,43 @@ export default {
     },
     submitReport() {
       const memberStore = useMemberStore(); // Pinia 스토어에서 memberStore 가져오기
-      const memberId = memberStore.memberId; // 로그인된 사용자 ID 가져오기
+      const memberId = memberStore.member.memberId; // 로그인된 사용자 ID 가져오기
+
+      console.log("Member ID:", memberId);
+      console.log('postId:', this.boardId); // postId 값이 제대로 전달되는지 확인
+      console.log('commentId:', this.commentId); // commentId 값도 확인
 
       if (this.reportType.trim() === '' || this.reportContent.trim() === '') {
         alert('신고 유형과 내용을 입력하세요.');
         return;
       }
+
+      // 게시글 신고와 댓글 신고 모두 없는 경우 처리
+      if (!this.boardId && !this.commentId) {
+        alert("게시글 또는 댓글 ID가 필요합니다.");
+        return;
+      }
+
+      // 신고 데이터를 준비합니다.
+      const reportData = {
+        memberId: memberId, // 작성자 ID
+        type: this.reportType, // 신고 유형
+        content: this.reportContent, // 신고 내용
+        boardId: this.isComment ? null : this.reportTargetId, // 댓글 신고면 boardId를 null로 설정
+        commentId: this.isComment ? this.reportTargetId : null // 게시글 신고면 commentId를 null로 설정
+      };
+
+      // boardId 또는 commentId가 있는 경우 해당 값을 추가합니다.
+      if (this.boardId) {
+        reportData.boardId = this.boardId; // 게시글 신고인 경우
+      }
+
+      if (this.commentId) {
+        reportData.commentId = this.commentId; // 댓글 신고인 경우
+      }
+
       // 서버로 신고 데이터 전송
-      axios.post('/api/member/report', {
-        memberId: memberId, // 사용자 ID는 memberStore에서 가져옴
-        postId: this.postId, // 게시글 ID
-        commentId: this.commentId || null, // 댓글 ID (댓글 신고가 아닐 경우 null)
-        reportType: this.reportType,
-        reportContent: this.reportContent,
-      })
+      axios.post('/api/member/report', reportData)
           .then(() => {
             alert("신고가 접수되었습니다.");
             this.closeModal();
