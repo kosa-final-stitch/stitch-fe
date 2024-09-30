@@ -135,7 +135,7 @@
           </div>
           <div class="modal-buttons">
             <!-- 수료 완료 버튼 -->
-            <button type="submit" class="btn-primary">수료 확인</button>
+            <button type="submit" class="btn-primary" @click="submitCertificateAnswer('completed')">수료 확인</button>
             
             <!-- 수료 불가 버튼 -->
             <button type="button" class="btn-danger" @click="submitCertificateAnswer('rejected')">수료 불가</button>
@@ -216,6 +216,8 @@ export default {
         console.error('수료 데이터를 가져오는 중 오류 발생:', error);
       }
     },
+
+
     formatDate(date) {
       const d = new Date(date);
       return d.toISOString().replace('T', ' ').substring(0, 10);
@@ -234,9 +236,12 @@ export default {
     closeCertificateAnswerModal() {
       this.isCertificateAnswerModalOpen = false;
     },
-  // 수료 상태 변경 처리 메서드
-    submitCertificateAnswer(status) {
-      if (!this.selectedCertificate) return;
+    // 수료 상태 변경 처리 메서드
+    async submitCertificateAnswer(status) {
+    if (!this.selectedCertificate) return;
+
+    // status가 제대로 설정되었는지 로그로 확인
+    console.log('Current Status:', status);
 
       // 상태를 변경 (수료 완료 또는 수료 불가)
       if (status === 'completed') {
@@ -244,6 +249,25 @@ export default {
       } else if (status === 'rejected') {
         this.selectedCertificate.status = '수료 불가';
       }
+
+    try {
+      // 서버로 수료 상태 업데이트 요청 전송
+      const token = localStorage.getItem('token');
+      // 로그로 certificateId와 status 확인
+      console.log('certificateId:', this.selectedCertificate.certificateId);
+      console.log('status:', this.selectedCertificate.status);
+
+      const response = await axios.post('/api/certificate/updateStatus', {
+        certificateId: this.selectedCertificate.certificateId,
+        status: this.selectedCertificate.status
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log(response.data); // 성공 메시지 출력
 
       // certificatesData에서 해당 certificate를 찾아서 업데이트
       const certificateIndex = this.certificatesData.findIndex(certificate => certificate.certificateId === this.selectedCertificate.certificateId);
@@ -261,7 +285,11 @@ export default {
       setTimeout(() => {
         this.isChangeSuccessModalOpen = false;
       }, 1500);
+
+    } catch (error) {
+      console.error('수료 상태 업데이트 실패:', error);
     }
+  }
   },
 };
 </script>
