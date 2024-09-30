@@ -104,27 +104,37 @@
         <form @submit.prevent="submitReportAnswer">
           <div class="report-answer-info">
             <strong>해당 게시글/댓글 내용</strong>
+
+             <!-- 작성 유형 (POST or COMMENT) -->
             <div class="info-item">
               <label for="postOrComment">작성 유형</label>
-              <!-- postOrComment가 POST일 때 게시글, COMMENT일 때 댓글로 표시 -->
               <input id="postOrComment" type="text" :value="getPostOrCommentType(selectedReport.postOrComment)" class="info-input" readonly />
             </div>
+
+            <!-- 게시글/댓글 번호 -->
             <div class="info-item">
               <label for="number">게시글/댓글 번호</label>
               <input id="number" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.boardId : selectedReport.commentId" class="info-input" readonly />
             </div>
+
+            <!-- 작성자 정보 -->
             <div class="info-item">
               <label for="writerId">작성자:</label>
               <input id="writerId" type="text" :value="selectedReport.writerId || '-'" class="info-input" readonly />
             </div>
-            <div class="info-item">
+
+            <!-- 게시글일 경우 제목 표시 -->
+            <div class="info-item" v-if="selectedReport.postOrComment === 'POST'">
               <label for="title">제목:</label>
-              <input id="title" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.title || '-' : '-'" class="info-input" readonly />
+              <input id="title" type="text" :value="selectedReport.title || '-'" class="info-input" readonly />
             </div>
+
+            <!-- 내용 (게시글 또는 댓글) -->
             <div class="info-item">
               <label for="postContent">내용:</label>
               <textarea id="postContent" :value="selectedReport.postContent || '-'" class="info-textarea" rows="5" readonly></textarea>
             </div>
+
           </div>
           <div class="modal-buttons">
             <button type="submit" class="btn-primary">확인 완료</button>
