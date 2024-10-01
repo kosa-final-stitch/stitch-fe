@@ -7,32 +7,38 @@
  2024.09.13 김호영 | 초기 게시글 관리 디자인 및 기능 구현
  2024.09.19 김호영 | 날짜 출력형식 수정
  2024.09.25 김호영 | 게시글 백엔드 작업 및 게시판 버튼 추가 후 검색 카테고리 기능 수정.
+ 2024.10.01 김호영 | 게시판 필터 및 검색, 대분류 카테고리 기능 수정 + 삭제기능 구현.
  -->
 
  <template>
   <div class="post-info-page">
+    <!-- 대분류 게시판 카테고리 버튼 -->
+    <div class="board-buttons" style="display: flex; justify-content: flex-start; margin-bottom: 20px;">
+      <button @click="boardCategory = 'infoShareBoard'; loadInfoShareBoard()" class="board-button" :class="{ active: boardCategory === 'infoShareBoard' }">정보 공유</button>
+      <button @click="boardCategory = 'free-community'; loadFreeCommunity()" class="board-button" :class="{ active: boardCategory === 'free-community' }">자유게시판</button>
+      <button @click="boardCategory = 'qnABoard'; loadQnABoard()" class="board-button" :class="{ active: boardCategory === 'qnABoard' }">Q&A</button>
+    </div>
     <!-- 상단 검색창 -->
     <div class="search-bar">
       <div class="search-wrapper search-container">
-        <!-- 카테고리 선택 -->
-        <div class="category-container">
-          <select v-model="selectedCategory" class="search-category"
-            @focus="isDropdownOpen = true"
-            @blur="isDropdownOpen = false"
-            @change="isDropdownOpen = false">
-            <option value="all">전체</option>
-            <option value="nickname">작성자</option>
-            <option value="type">게시글 유형</option>
-            <option value="title">제목</option> 
-          </select>
-          <font-awesome-icon 
-            :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" 
-            class="angle-dropdown-icon" 
-          />
-        </div>
-      
 
-
+      <!-- 카테고리 선택 -->
+      <div class="category-container">
+        <select v-model="searchCategory" class="search-category"
+          @focus="isDropdownOpen = true"
+          @blur="isDropdownOpen = false"
+          @change="isDropdownOpen = false">
+          <option value="all">전체</option>
+          <option value="nickname">작성자</option>
+          <option value="type">게시글 유형</option>
+          <option value="title">제목</option> 
+        </select>
+        <font-awesome-icon 
+          :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" 
+          class="angle-dropdown-icon" 
+        />
+      </div>
+          
         <!-- 검색 icon + 검색창 -->
          <div class="search-input-container">
           <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="search-icon" />
@@ -40,13 +46,6 @@
         </div>
       </div>
     </div>
-
-  <!-- 추가된 게시판 버튼들 -->
-  <div class="board-buttons" style="display: flex; justify-content: flex-start; margin-bottom: 20px;">
-    <button @click="loadInfoShareBoard" class="board-button" :class="{ active: selectedCategory === 'infoShareBoard' }">정보 공유</button>
-    <button @click="loadFreeCommunity" class="board-button" :class="{ active: selectedCategory === 'free-community' }">자유게시판</button>
-    <button @click="loadQnABoard" class="board-button" :class="{ active: selectedCategory === 'qnABoard' }">Q&A</button>
-  </div>
 
     <!-- 게시글 목록 테이블 -->
     <table class="post-list-table">
@@ -57,14 +56,21 @@
           <th>게시글 유형</th>
           <th>작성자</th>
           <th>등록일자</th>
-          <th>최종 수정일자</th>
+          <th>수정 일자</th>
           <th>게시글 제목</th>
+          <th>사용 여부</th>
           <!--<th>처리 상태</th>-->
           <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(post, index) in paginatedPosts" :key="post.id">
+          <!-- 게시글이 없을 때 문구 표시 -->
+          <tr v-if="paginatedPosts.length === 0">
+            <td colspan="8" style="text-align: center;">
+              {{ emptyMessage }}
+            </td>
+          </tr>
+        <tr v-for="(post, index) in paginatedPosts" :key="post.boardId">
           <td>{{  (currentPage -1) * postsPerPage + index + 1 }}</td>
           <td>{{ post.boardId || '-' }}</td>
           <td>{{ post.type || '-' }}</td>
@@ -72,23 +78,21 @@
           <td>{{ formatDate(post.regdate) || '-' }}</td>
           <td>{{ formatDate(post.editdate) || '-' }}</td>
           <td>{{ post.title || '-' }}</td>
+          <td>{{ post.use_yn || '-' }}</td>
           <td>
             <div class="dropdown-container" @click.stop="toggleDropdown(index)">
               <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
               <div v-if="openDropdownIndex === index" class="dropdown-menu">
                 <ul>
-                  <li @click="handleItemClick(post, 'delete')">
-                    <font-awesome-icon :icon="['fas', 'trash-can']" class="modal-icon" /> 삭제
+                  <li @click="handleItemClick(post, 'public')">
+                    <font-awesome-icon :icon="['fas', 'unlock']" class="modal-icon" /> 사용
                   </li>
-                  <li @click="handleItemClick(post, 'item1')">
+                  <li @click="handleItemClick(post, 'private')">
+                    <font-awesome-icon :icon="['fas', 'lock']" class="modal-icon" /> 미사용
+                  </li>
+                  <!--li @click="handleItemClick(post, 'item3')">
                     <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
-                  <li @click="handleItemClick(post, 'item2')">
-                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
-                  <li @click="handleItemClick(post, 'item3')">
-                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
+                  </li-->
                 </ul>
               </div>
             </div>
@@ -97,27 +101,25 @@
       </tbody>
     </table>
 
-    <!-- 삭제 확인 모달 -->
-    <div v-if="isDeleteModalOpen" class="modal-overlay">
+    <!-- 삭제 완료 모달 -->
+    <div v-if="isHideModalOpen" class="modal-overlay">
       <div class="modal-content">
-        <h3>정말 삭제하시겠습니까?</h3>
-        <p>선택하신 게시글 : {{ postToDelete?.title }}</p>
+        <h3>게시글 상태가 변경되었습니다.</h3>
         <div class="modal-buttons">
-          <button @click="deletePost">확인</button>
-          <button @click="cancelDelete">취소</button>
+          <button @click="isHideModalOpen = false">확인</button>
         </div>
       </div>
     </div>
 
-    <!-- 삭제 완료 모달 -->
-    <div v-if="isDeleteSuccessModalOpen" class="modal-success-overlay">
-      <div class="modal-success-content">
-        <div class="modal-icon-container">
-          <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
-        </div>
-        <p>삭제가 완료되었습니다</p>
+  <!-- 성공 완료 모달 -->
+  <div v-if="isHideSuccessModalOpen" class="modal-success-overlay">
+    <div class="modal-success-content">
+      <div class="modal-icon-container">
+        <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
       </div>
+      <p>상태 변경이 완료되었습니다</p>
     </div>
+  </div>
 
 
 
@@ -134,6 +136,7 @@
 
 <script>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import axios from 'axios';
 
 export default {
   components: {
@@ -142,7 +145,8 @@ export default {
   data() {
     return {
       searchQuery: '',
-      selectedCategory: 'allBoard',
+      boardCategory: 'all',  // 게시판 대분류 선택에 사용할 변수
+      selectedCategory: 'allBoard', // 게시판 대분류 선택에 사용할 변수 
       currentPage: 1,
       postsPerPage: 12,
       isDropdownOpen: false,
@@ -156,7 +160,19 @@ export default {
       inquiryData: [],
     };
   },
+
   computed: {
+    emptyMessage() {
+      if (this.boardCategory === 'infoShareBoard') {
+        return '정보공유 게시글이 없습니다.';
+      } else if (this.boardCategory === 'free-community') {
+        return '자유게시글이 없습니다.';
+      } else if (this.boardCategory === 'qnABoard') {
+        return 'Q&A 게시글이 없습니다.';
+      } else {
+        return '게시글이 없습니다.';
+      }
+    },
     // 모든 게시글을 하나의 배열로 병합
     allPosts() {
       return [
@@ -168,20 +184,29 @@ export default {
     // 선택된 카테고리에 따라 게시글 필터링
     filteredPosts() {
       return this.allPosts.filter(post => {
-        if (this.selectedCategory === 'all') {
+        // 게시판 카테고리에 따른 필터링
+        if (this.boardCategory === 'infoShareBoard' && post.type !== 'info') {
+          return false;
+        } else if (this.boardCategory === 'free-community' && post.type !== 'community') {
+          return false;
+        } else if (this.boardCategory === 'qnABoard' && post.type !== 'inquiry') {
+          return false;
+        }
+
+        // 검색 카테고리와 검색어에 따른 필터링
+        if (this.searchCategory === 'nickname') {
+          return (post.nickname || '-').includes(this.searchQuery);
+        } else if (this.searchCategory === 'type') {
+          return (post.type || '-').includes(this.searchQuery);
+        } else if (this.searchCategory === 'title') {
+          return (post.title || '-').includes(this.searchQuery);
+        } else {
           return (
             (post.title || '-').includes(this.searchQuery) ||
-            (post.content || '-').includes(this.searchQuery) ||
-            (post.nickname || '-').includes(this.searchQuery)
+            (post.nickname || '-').includes(this.searchQuery) ||
+            (post.content || '-').includes(this.searchQuery)
           );
-        } else if (this.selectedCategory === 'infoShareBoard' && post.type === 'info') {
-          return true;
-        } else if (this.selectedCategory === 'free-community' && post.type === 'community') {
-          return true;
-        } else if (this.selectedCategory === 'qnABoard' && post.type === 'inquiry') {
-          return true;
         }
-        return false;
       });
     },
     // 현재 페이지에 표시할 게시글
@@ -194,6 +219,9 @@ export default {
     totalPages() {
       return Math.ceil(this.filteredPosts.length / this.postsPerPage);
     },
+  },
+  mounted() {
+    this.loadAllBoards();
   },
   methods: {
     formatDate(date) {
@@ -208,48 +236,65 @@ export default {
     },
     // 드롭다운 토글
     toggleDropdown(index) {
+      console.log('Current openDropdownIndex: ', this.openDropdownIndex);
       this.openDropdownIndex = this.openDropdownIndex === index ? null : index;
+      console.log('Updated openDropdownIndex: ', this.openDropdownIndex);
     },
-    // 게시글 삭제 확인 모달 열기
+    // 게시글 숨김 확인 모달 열기 및 상태 변경 처리
     handleItemClick(post, action) {
-      if (action === 'delete') {
-        this.confirmDeletePost(post);
+      if (action === 'use') {
+        this.changePostStatus(post, 'Y');  // 게시글 사용
+      } else if (action === 'disuse') {
+        this.changePostStatus(post, 'N');  // 게시글 미사용
       }
     },
     confirmDeletePost(post) {
       this.postToDelete = post;
       this.isDeleteModalOpen = true;
     },
-    // 게시글 삭제
-    deletePost() {
-      if (!this.postToDelete) {
-        return;
-      }
-      // 게시글 삭제 로직 (API 연동 부분)
-      this.communityData = this.communityData.filter(post => post.id !== this.postToDelete.id);
-      this.infoData = this.infoData.filter(post => post.id !== this.postToDelete.id);
-      this.inquiryData = this.inquiryData.filter(post => post.id !== this.postToDelete.id);
+   // 게시글 상태 변경 함수 
+    async changePostStatus(post, status) {
+      try {
+        const token = localStorage.getItem('jwt');
+        if (!token) {
+          console.error('JWT 토큰이 없습니다.');
+          return;
+        }
 
-      this.isDeleteModalOpen = false;
-      this.isDeleteSuccessModalOpen = true;
-      setTimeout(() => {
-        this.isDeleteSuccessModalOpen = false;
-      }, 1500);
-    },
-    // 삭제 취소
-    cancelDelete() {
-      this.isDeleteModalOpen = false;
-      this.postToDelete = null;
+        await axios.put(`/api/admin/board/status/${post.boardId}`, {
+          useYn: status // 여기서 status는 'Y' 또는 'N'
+        }, { 
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        post.useYn = status;
+
+        this.isHideModalOpen = false;
+        this.isHideSuccessModalOpen = true;
+
+        setTimeout(() => {
+          this.isHideSuccessModalOpen = false;
+          this.postToHide = null;
+        }, 1500);
+      } catch (error) {
+        console.error("게시글 비공개 처리 중 오류 발생: ", error);
+      }
     },
     // 정보 공유 게시판 정보 불러오기
     loadInfoShareBoard() {
       this.selectedCategory = 'infoShareBoard';
+      this.searchQuery = ''; // 검색어 초기화
+      this.searchCategory = 'all'; // 검색 카테고리 초기화
       // 여기서 정보 공유 게시판 데이터를 불러오는 API 호출을 추가하면 됨
       console.log("정보 공유 게시판 데이터를 불러옵니다.");
     },
     // 자유게시판 정보 불러오기
     loadFreeCommunity() {
     this.selectedCategory = 'free-community';
+    this.searchQuery = '';
+    this.searchCategory = 'all';
 
     // 자유게시판 데이터를 불러오는 API 호출
     fetch('/api/board/community/all')
@@ -272,10 +317,64 @@ export default {
     // Q&A 게시판 정보 불러오기
     loadQnABoard() {
       this.selectedCategory = 'qnABoard';
+      this.searchQuery = '';
+      this.searchCategory = 'all';
       // Q&A 게시판 데이터를 불러오는 API 호출 추가
       console.log("Q&A 게시판 데이터를 불러옵니다.");
     },
+
+    // 모든 게시판 정보 불러오기
+    loadAllBoards() {
+      // 정보 공유 게시판 불러오기
+      fetch('/api/board/infoShare/all')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch info share posts');
+          }
+          return response.json();
+        })
+        .then(data => {
+          this.infoData = data;
+          console.log('정보 공유 게시판 데이터를 성공적으로 불러왔습니다:', data);
+        })
+        .catch(error => {
+          console.error('정보 공유 게시판 데이터를 불러오는 데 실패했습니다:', error);
+        });
+
+      // 자유 게시판 불러오기
+      fetch('/api/board/community/all')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch community posts');
+          }
+          return response.json();
+        })
+        .then(data => {
+          this.communityData = data;
+          console.log('자유 게시판 데이터를 성공적으로 불러왔습니다:', data);
+        })
+        .catch(error => {
+          console.error('자유 게시판 데이터를 불러오는 데 실패했습니다:', error);
+        });
+
+      // Q&A 게시판 불러오기
+      fetch('/api/board/qna/all')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch Q&A posts');
+          }
+          return response.json();
+        })
+        .then(data => {
+          this.inquiryData = data;
+          console.log('Q&A 게시판 데이터를 성공적으로 불러왔습니다:', data);
+        })
+        .catch(error => {
+          console.error('Q&A 게시판 데이터를 불러오는 데 실패했습니다:', error);
+        });
+    },
   },
+
 };
 </script>
 
@@ -344,7 +443,6 @@ export default {
 .dropdown-menu li {
   display: flex;
   align-items: center;
-  justify-content: space-around;
   padding: 11px;
   cursor: pointer;
   transition: background-color 0.2s;

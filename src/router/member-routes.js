@@ -63,7 +63,7 @@ const MemberRoutes = [
         name: "InfoShareBoard",
       },
       {
-        path: "board/post/:boardId",
+        path: "board/free-community/:boardId",
         component: PostDetail,
         name: "PostDetail",
         props: true,

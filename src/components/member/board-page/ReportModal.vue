@@ -1,3 +1,11 @@
+<!--
+ 담당자: 김호영
+ 시작 일자: 2024.09.30
+ 설명 : 신고 문의 기능 구현 및 디자인 개발
+ ---------------------
+ 2024.09.30 김호영 | 신고 모달 수정 백엔드 데이터 연동 구현.
+ -->
+
 <template>
   <!-- 신고 모달 -->
   <div v-if="show" class="modal">
@@ -11,8 +19,14 @@
           <option>기타</option>
         </select>
       </div>
+
       <div class="report-form">
-        <label for="reportContent">내용</label>
+        <label for="reportReson">신고 주제</label>
+        <textarea v-model="reportReason" id="reportReson" placeholder="신고 주제를 입력하세요"></textarea>
+      </div>
+
+      <div class="report-form">
+        <label for="reportContent">신고 내용</label>
         <textarea v-model="reportContent" id="reportContent" placeholder="신고 내용을 입력하세요"></textarea>
       </div>
       <div class="modal-actions">
@@ -46,6 +60,7 @@ export default {
   data() {
     return {
       reportType: '', // 신고 유형
+      reportReason: '',    // 신고 사유
       reportContent: '', // 신고 내용
     };
   },
@@ -57,13 +72,14 @@ export default {
     submitReport() {
       const memberStore = useMemberStore(); // Pinia 스토어에서 memberStore 가져오기
       const memberId = memberStore.member.memberId; // 로그인된 사용자 ID 가져오기
+      const token = memberStore.token; // 토큰 가져오기
 
       console.log("Member ID:", memberId);
       console.log('postId:', this.boardId); // postId 값이 제대로 전달되는지 확인
       console.log('commentId:', this.commentId); // commentId 값도 확인
 
-      if (this.reportType.trim() === '' || this.reportContent.trim() === '') {
-        alert('신고 유형과 내용을 입력하세요.');
+      if (!this.reportType || !this.reportReason || !this.reportContent) {
+        alert('모든 항목을 입력하세요.');
         return;
       }
 
@@ -73,37 +89,35 @@ export default {
         return;
       }
 
-      // 신고 데이터를 준비합니다.
       const reportData = {
-        memberId: memberId, // 작성자 ID
-        type: this.reportType, // 신고 유형
-        content: this.reportContent, // 신고 내용
-        boardId: this.isComment ? null : this.reportTargetId, // 댓글 신고면 boardId를 null로 설정
-        commentId: this.isComment ? this.reportTargetId : null // 게시글 신고면 commentId를 null로 설정
+        memberId: memberId,
+        postOrComment: this.boardId ? 'POST' : 'COMMENT',
+        boardId: this.boardId || (this.commentId ? null : 'defaultValue'), // commentId가 없을 경우 적절한 boardId 설정
+        boardTable: this.$route.path.split('/')[2] || 'free-community', // 경로의 첫 번째 세그먼트를 사용
+        commentId: this.commentId || null,
+        type: this.reportType,
+        reason: this.reportReason,
+        content: this.reportContent
       };
 
-      // boardId 또는 commentId가 있는 경우 해당 값을 추가합니다.
-      if (this.boardId) {
-        reportData.boardId = this.boardId; // 게시글 신고인 경우
-      }
-
-      if (this.commentId) {
-        reportData.commentId = this.commentId; // 댓글 신고인 경우
-      }
-
       // 서버로 신고 데이터 전송
-      axios.post('/api/member/report', reportData)
-          .then(() => {
-            alert("신고가 접수되었습니다.");
-            this.closeModal();
-          })
-          .catch(error => {
-            console.error('Error submitting report:', error);
-            alert('신고 접수 중 오류가 발생했습니다.');
-          });
+      axios.post('/api/member/report', reportData, {
+        headers: {
+          'Authorization': `Bearer ${token}` // 토큰을 헤더에 포함
+        }
+      })
+      .then(() => {
+        alert("신고가 접수되었습니다.");
+        this.closeModal();
+      })
+      .catch(error => {
+        console.error('Error submitting report:', error);
+        alert('신고 접수 중 오류가 발생했습니다.');
+      });
     },
     resetForm() {
       this.reportType = '';
+      this.reportReason = '';
       this.reportContent = '';
     }
   }
@@ -145,7 +159,7 @@ export default {
   font-weight: bold; /* 라벨 글자 굵게 */
 }
 
-#reportType, #reportContent {
+#reportType, #reportContent, #reportReson {
   width: 100%; /* 입력 요소 너비 */
   padding: 8px; /* 입력 요소 내부 패딩 */
   font-size: 14px;
@@ -158,8 +172,13 @@ export default {
   width: 100px;
 }
 
-#reportContent {
+#reportContent{
   height: 80px; /* 텍스트 영역 높이 줄임 */
+  width : 420px;
+}
+
+#reportReson{
+  height: 20px;
   width : 420px;
 }
 
