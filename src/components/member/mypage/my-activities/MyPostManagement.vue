@@ -14,22 +14,22 @@
     <table>
       <thead>
         <tr>
-          <th></th>
           <th>번호</th>
           <th>제목</th>
           <th>내용</th>
+          <th>카테고리</th>
           <th>작성일</th>
-          <th>최종 수정일</th>
+          <!-- <th>최종 수정일</th> -->
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(post, index) in filteredPosts" :key="index">
-          <td><input type="checkbox" /></td>
+        <tr v-for="(post, index) in posts" :key="post.postId">
           <td>{{ index + 1 }}</td>
           <td>{{ post.title }}</td>
           <td>{{ post.content }}</td>
+          <td>{{ post.category }}</td>
           <td>{{ formatDate(post.regdate) }}</td>
-          <td>{{ formatDate(post.editdate) }}</td>
+          <!-- <td>{{ formatDate(post.editdate) }}</td> -->
         </tr>
       </tbody>
     </table>
@@ -38,49 +38,63 @@
 
 <script>
 import axios from "axios";
+import { useMemberStore } from "/src/store/member-store"; // Pinia 상태관리에서 memberStore 가져오기
 
 export default {
   data() {
     return {
       selectedTab: "info", // 기본 탭 설정
       posts: [], // 모든 게시글 데이터를 저장
-      userId: null, // 로그인한 사용자 ID
+      memberId: null, // 로그인한 사용자 ID
     };
   },
   computed: {
+    currentUser() {
+      const memberStore = useMemberStore();
+      return memberStore.member || { memberId: null }; // 현재 로그인한 사용자 정보
+    },
     // 선택된 탭에 따라 게시글을 필터링
     filteredPosts() {
       return this.posts.filter((post) => post.category === this.selectedTab); // category로 필터링
     },
   },
   mounted() {
-    this.fetchUserInfo(); // 컴포넌트가 마운트되면 사용자 정보 및 게시글 데이터를 가져옴
+    this.memberId = this.currentUser.memberId;
+    console.log("마페게시판 현재 사용자 정보:", this.memberId); // 컴포넌트가 마운트되면 사용자 정보 및 게시글 데이터를 가져옴
+    if (this.memberId) {
+      this.fetchPosts(); // 게시글을 가져옴
+    }
   },
   methods: {
     fetchPosts() {
       // 로그인한 사용자 ID로 게시글을 가져옴
+
       axios
-        .get(`http://localhost:8080/api/board/community/${this.userId}`)
+        .get(`/api/board/community/${this.memberId}`)
         .then((response) => {
-          this.posts = response.data; // 모든 게시글을 저장
+          const posts = response.data; // 모든 게시글을 저장
+          console.log("게시판 글들 :", posts); // 데이터를 확인
+
+          if (Array.isArray(posts)) {
+            this.posts = posts.map((post) => {
+              return {
+                boardId: post.boardId,
+                category: post.category,
+                content: post.content,
+                editdate: post.editdate,
+                regdate: post.regdate,
+                title: post.title,
+              };
+            });
+          } else {
+            console.error("받아온 데이터가 배열이 아닙니다:", posts);
+          }
         })
         .catch((error) => {
           console.error("게시글 데이터를 가져오는 중 오류 발생", error);
         });
     },
-    // 사용자 정보를 서버에서 가져옴 (로그인한 사용자)
-    fetchUserInfo() {
-      axios
-        .get("http://localhost:8080/api/member/info")
-        .then((response) => {
-          this.userId = response.data.id; // 로그인한 사용자 ID 저장
-          console.log("게시판의 로그인된 유저아이디:", this.userId); // userId 로그 확인
-          this.fetchPosts(); // 사용자 ID로 게시글 호출
-        })
-        .catch((error) => {
-          console.error("회원 정보를 불러오는 중 오류 발생", error);
-        });
-    },
+
     // 날짜 형식 변환
     formatDate(date) {
       return new Date(date).toLocaleDateString();

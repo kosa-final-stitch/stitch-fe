@@ -17,12 +17,15 @@
           <strong>지역</strong>
           <p>{{ member.address }}</p>
         </div>
-        <div class="info-item">
+        <!-- <div class="info-item">
           <strong>평균 별점</strong>
           <div class="star-rating">
             <span class="stars">{{ member.star }}</span>
             <span class="rating-text">{{ member.ratingScore }} / 5.0</span>
           </div>
+        </div> -->
+        <div class="info-item">
+          <!-- 빈칸으로 공간 맞춤 -->
         </div>
         <div class="info-item">
           <!-- 빈칸으로 공간 맞춤 -->
@@ -97,7 +100,7 @@ export default {
 <style scoped>
 .member-info-header {
   width: 100%;
-  padding: 20px;   /* 호영 80 -> 20 으로 수정 */
+  padding: 20px; /* 호영 80 -> 20 으로 수정 */
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 10px;
