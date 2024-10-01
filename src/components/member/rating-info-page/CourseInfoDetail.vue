@@ -13,7 +13,7 @@
             </span>
           </span>
         </p>
-        <p>{{ academy.academy_name }}</p>
+
         <h2>{{ course.course_name }}</h2>
         <p>회차정보: {{ course.session_number }}회차</p>
         <p>
