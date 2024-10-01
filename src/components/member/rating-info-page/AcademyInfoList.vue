@@ -1,8 +1,10 @@
 <!--  
   2024.09.24 박요한 | 학원마다 평균 별점 가져오기 해결
+  2024.10.01 박요한 | 제목 추가
 -->
 <template>
   <div class="academy-list">
+    <h1>학원 정보 목록</h1>
     <!-- 학원 리스트 -->
     <div class="academy-container">
       <div
@@ -110,6 +112,13 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.academy-list h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 60px;
 }
 
 .academy-container {
