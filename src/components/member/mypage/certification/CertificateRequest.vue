@@ -103,10 +103,17 @@ export default {
       })
       .then(response => {
         console.log('신청 성공:', response.data);
+
+        alert('수료 신청이 성공적으로 완료되었습니다.');
+
         this.clearForm();  // 폼 전송 후 초기화
+        this.closeModal(); // 모달 닫기
+        window.location.reload(); // 페이지 새로고침
       })
       .catch(error => {
         console.error('신청 실패:', error);
+
+        alert('수료 신청에 실패했습니다. 다시 시도해주세요.');
       });
       // 여기에서 FormData를 백엔드로 전송할 수 있음
       console.log('신청한 데이터:', formData);

@@ -130,10 +130,10 @@
 
     <!-- 신고 모달 컴포넌트 -->
     <ReportModal
-        :show="showReportModal"
-        :boardId="selectedPostId"
-        :commentId="selectedCommentId"
-        @close="closeReportModal"
+      :show="showReportModal"
+      :boardId="selectedPostId"
+      :commentId="selectedCommentId"
+      @close="closeReportModal"
     />
   </div>
 </template>
@@ -191,10 +191,11 @@ export default {
   },
   mounted() {
     const boardId = this.$route.params.boardId; // 게시글 ID 가져오기
-    this.fetchComments(boardId); // 페이지 로드 시 댓글 데이터를 가져옴
-
-    console.log("현재 사용자 정보:", this.currentUser);
-    console.log("게시글 정보:", this.post);
+    console.log("boardId:", boardId); // 로그로 확인
+    if (boardId) {
+      this.fetchPost(boardId); // 페이지 로드 시 게시글 데이터를 가져옴
+      this.fetchComments(boardId); // 댓글 데이터를 함께 가져옴
+    }
   },
   methods: {
     fetchPost(boardId) {
@@ -308,16 +309,17 @@ export default {
     },
     // 신고 모달 열기
     openReportModalForPost(boardId) {
-      console.log('게시글 ID:', boardId);
-      this.selectedPostId = boardId;
+      console.log('게시글 ID:', boardId); // 로그로 확인
+      this.selectedPostId = boardId; // 선택된 게시글 ID 저장
       this.selectedCommentId = null; // 댓글 ID는 null로 설정
-      this.showReportModal = true; // 신고 모달 열기
+      this.showReportModal = true; // 모달 열기
     },
+
     openReportModalForComment(commentId) {
-      console.log('댓글 ID:', commentId);
-      this.selectedCommentId = commentId;
+      console.log('댓글 ID:', commentId); // 로그로 확인
+      this.selectedCommentId = commentId; // 선택된 댓글 ID 저장
       this.selectedPostId = null; // 게시글 ID는 null로 설정
-      this.showReportModal = true; // 신고 모달 열기
+      this.showReportModal = true; // 모달 열기
     },
     closeReportModal() {
       this.showReportModal = false; // 신고 모달 닫기

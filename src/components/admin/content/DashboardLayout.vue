@@ -80,7 +80,7 @@
               >
                 <div class="notice-content">
                   <strong>{{ notice.title }}</strong>
-                  <p>{{ notice.content.slice(0, 30) }}...</p>
+                  <p>내용 : {{ notice.content.slice(0, 30) }}</p>
                 </div>
                 <small class="notice-date">작성일 : {{ formatDate(notice.regdate) }}</small>
               </li>
@@ -102,9 +102,9 @@
               >
                 <div class="notice-content">
                     <strong>{{ direct.title }}</strong>
-                    <p>{{ direct.content.slice(0, 30) }}...</p>
+                    <p>내용 : {{ direct.content.slice(0, 30) }}</p>
                   </div>
-                  <small class="notice-date">작성일 : {{ formatDate(direct.regDate) }}</small>
+                  <small class="notice-date">문의일 : {{ formatDate(direct.regDate) }}</small>
               </li>
             </ul>
           </div>
@@ -115,18 +115,18 @@
           <div class="underline"></div>
           <div class="bottom-box">
             <ul class="report-list">
-              <li v-if="hasReportError" class="error-message">게시물이 없습니다.</li>
+              <li v-if="latestReports.length === 0" class="no-posts-message">게시물이 없습니다.</li>
               <li 
                 v-for="report in latestReports" 
-                :key="report.report_id" 
+                :key="report.reportId" 
                 class="notice-box" 
                 @click="navigateTo('admin/report-inquiry')"
               >
                 <div class="notice-content">
-                    <strong>{{ getCategory(report) }}</strong>
-                    <p>{{ report.reason }}...</p>
+                    <strong>신고 제목 : {{ report.reason }}</strong>
+                    <p>신고 항목 : {{ getCategory(report) }}</p>
                   </div>
-                  <small class="notice-date">작성일 : {{ formatDate(report.ansdate) }}</small>
+                  <small class="notice-date">신고일 : {{ formatDate(report.regdate) }}</small>
               </li>
             </ul>
           </div>
@@ -436,7 +436,7 @@ export default {
     async fetchReports() {
       try {
         const token = localStorage.getItem('jwt');
-        const response = await axios.get('/api/reports', {
+        const response = await axios.get('/api/member/report', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -450,6 +450,16 @@ export default {
         console.error("신고 문의 데이터를 불러오는 중 오류 발생:", error);
         this.latestReports = []; // 에러가 나도 빈 배열로 설정
         this.hasReportError = true; // 에러가 발생했음을 표시
+      }
+    },
+    // 카테고리 처리 로직 추가
+    getCategory(report) {
+      if (report.postOrComment === 'POST') {
+        return '게시글';
+      } else if (report.postOrComment === 'COMMENT') {
+        return '댓글';
+      } else {
+        return '-';
       }
     },
 
@@ -574,13 +584,13 @@ export default {
 
 .bottom-boxes {
   display: flex;
-  justify-content: space-between;
   gap: 20px;
 }
 
 .bottom-box-container {
   position: relative;
-  width: 30%;
+  flex: 1; /* 너비를 균등하게 분배 */
+  /* 기존의 width: 30%;는 제거합니다. */
 }
 
 .bottom-box {
@@ -623,6 +633,7 @@ div.bottom-box ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
+  width: 90%; /* 리스트 아이템의 너비를 동일하게 설정 */
 }
 
 div.bottom-box li {
