@@ -31,6 +31,7 @@ import MyReviewManagement from "@/components/member/mypage/my-activities/MyRevie
 import AcademyInfoDetail from "@/components/member/rating-info-page/AcademyInfoDetail.vue";
 import CourseInfoDetail from "@/components/member/rating-info-page/CourseInfoDetail.vue";
 import ReviewForm from "@/components/member/rating-info-page/ReviewForm.vue";
+import ReviewFormDetail from "@/components/member/rating-info-page/ReviewFormDetail.vue";
 import QnABoard from "@/components/member/board-page/QnABoard.vue";
 import InfoShareBoard from "@/components/member/board-page/InfoShareBoard.vue";
 
@@ -76,6 +77,11 @@ const MemberRoutes = [
         path: "member/review-form/:academyId/:courseId",
         component: ReviewForm,
         name: "ReviewForm",
+      },
+      {
+        path: "member/review-form/:academyId/:courseId",
+        component: ReviewFormDetail,
+        name: "ReviewFormDetail",
       },
       { path: "/board/PostForm", component: PostForm, name: "PostForm" },
       {
@@ -123,7 +129,7 @@ const MemberRoutes = [
             name: "ReviewManagement",
           },
           {
-            //리뷰작성디테일 불러오기
+            //내가 작성한 리뷰 디테일 불러오기
             path: "/academy/:academyId/course/:courseId/review/:reviewId",
             name: "ReviewDetail",
             component: ReviewDetail,

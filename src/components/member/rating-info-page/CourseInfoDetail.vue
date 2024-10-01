@@ -13,6 +13,7 @@
             </span>
           </span>
         </p>
+        <p>{{ academy.academy_name }}</p>
         <h2>{{ course.course_name }}</h2>
         <p>회차정보: {{ course.session_number }}회차</p>
         <p>
@@ -28,8 +29,10 @@
     </div>
 
     <!-- 수강 후기 작성 버튼 -->
-    <button class="write-review-btn" @click="goToReviewForm">수강 후기 쓰기</button>
-
+    <div class="button-container">
+      <button class="go-to-academyInfo" @click="goToAcademy">학원 정보</button>
+      <button class="write-review-btn" @click="goToReviewForm">수강 후기 쓰기</button>
+    </div>
     <!-- 리뷰 섹션 -->
     <h3>학생 리뷰</h3>
     <div class="review-container">
@@ -138,6 +141,9 @@ export default {
         title_link: "",
         reviews: [] || this.initialReviews, // prop에서 받은 리뷰 데이터를 기본값으로 설정
       }, // 코스 상세 정보를 저장할 객체
+      academy: {
+        academy_name: "",
+      }, // 학원 정보를 저장할 객체
       chart: null, // 차트를 저장할 변수 추가
       currentPage: 1, // 현재 페이지
       reviewsPerPage: 5, // 페이지 당 표시할 리뷰 수
@@ -158,6 +164,7 @@ export default {
     console.log("리뷰 현재 사용자 정보:", this.currentUser);
   },
   methods: {
+    //학원정보가져오기
     async fetchCourseDetail() {
       const courseId = this.$route.params.courseId;
       axios
@@ -167,6 +174,8 @@ export default {
           const reviewData = response.data;
           console.log("코스디테일:", reviewData); // 데이터를 확인
           this.course.completed = this.checkIfCourseCompleted(); // 완료 여부 확인
+          this.academy = response.data; // 학원 정보 받아오기
+          console.log("코스디테일의 아카데미정보:", this.academy.academy_name); // 데이터를 확인
         })
         .catch((error) => {
           console.error("코스 정보를 불러오는 중 오류 발생:", error);
@@ -182,8 +191,18 @@ export default {
       const options = { year: "numeric", month: "2-digit", day: "2-digit" };
       return new Date(date).toLocaleDateString("ko-KR", options);
     },
+    // 학원 정보 페이지로 이동하는 메서드
+    goToAcademy() {
+      console.log("학원정보 버튼클릭");
+      const academyId = this.$route.params.academyId;
+      this.$router.push({
+        name: "AcademyInfoDetail",
+        params: { academyId },
+      });
+    },
     // 리뷰 작성 페이지로 이동
     goToReviewForm() {
+      console.log("리뷰작성 버튼클릭");
       // 로그인 여부 확인
       if (!this.currentUser.memberId) {
         // currentUser.memberId로 로그인 상태 확인
@@ -230,7 +249,15 @@ export default {
           console.error("리뷰 데이터를 불러오는 중 오류 발생:", error);
         });
     },
-
+    // 리뷰 디테일 페이지로 이동()
+    goToReviewDetail(reviewId) {
+      const courseId = this.$route.params.courseId;
+      const academyId = this.$route.params.academyId;
+      this.$router.push({
+        name: "ReviewFormDetail",
+        params: { academyId, courseId, reviewId },
+      });
+    },
     //리뷰데이터들의 평균별점 구하기
     calculateAverageRating(reviews) {
       console.log("평균 별점 calculateAverageRating호출");
@@ -344,15 +371,6 @@ export default {
       });
     },
   },
-  // 리뷰 디테일 페이지로 이동()
-  goToReviewDetail(reviewId) {
-    const courseId = this.$route.params.courseId;
-    const academyId = this.$route.params.academyId;
-    this.$router.push({
-      name: "ReviewDetail",
-      params: { academyId, courseId, reviewId },
-    });
-  },
 };
 </script>
 
@@ -411,14 +429,20 @@ canvas {
   border-radius: 10px;
 }
 
-.write-review-btn {
+.button-container {
+  display: flex;
+  justify-content: center; /* 버튼을 중앙에 정렬 */
+  gap: 10px; /* 버튼 사이 간격 */
+  margin-top: 20px; /* 위쪽 여백 추가 */
+}
+
+.write-review-btn,
+.go-to-academyInfo {
   background-color: #f28c00;
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  display: block;
-  margin: 0 auto;
 }
 </style>
