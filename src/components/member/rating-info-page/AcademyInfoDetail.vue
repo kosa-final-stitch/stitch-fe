@@ -64,7 +64,7 @@
             <span v-for="n in 5" :key="n">
               {{ n <= Math.round(course.rating) ? "★" : "☆" }}
             </span>
-            별점:{{ course.rating }}
+            <!-- {{ course.rating }} -->
           </p>
         </div>
         <div class="course-details">
@@ -199,6 +199,7 @@ export default {
             // 완료된 과정: 종료일이 오늘 이전
             if (endDate < today) {
               completedCourses.push(course);
+              this.fetchCourseReviews(course); // 각 과정의 리뷰 데이터를 가져와서 별점 계산
             }
             // 현재 진행 중인 과정: 시작일이 오늘 이전이거나 같고, 종료일이 오늘 이후거나 같은 경우
             else if (startDate <= today && endDate >= today) {
@@ -218,8 +219,6 @@ export default {
 
           // 진행 예정 과정: 시작일 기준 내림차순 정렬
           this.upcomingCourses = upcomingCourses.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
-          const completedCoursescheck = this.completedCourses;
-          console.log("완료과정: ", completedCoursescheck);
         })
 
         .catch((error) => {
@@ -240,7 +239,58 @@ export default {
           console.error("모든 과정 리뷰 데이터를 불러오는 중 오류가 발생했습니다.", error);
         });
     },
+    // 각 강좌에 대한 리뷰 데이터를 가져와서 별점을 계산하는 메서드
+    fetchCourseReviews(course) {
+      axios
+        .get(`/api/courses/${course.course_id}/reviews`) // 각 과정의 리뷰 API 호출
+        .then((response) => {
+          const reviews = response.data;
+          if (reviews.length > 0) {
+            const averageRating = this.calculateAverageRating(reviews); // 리뷰 데이터를 통해 별점 계산
+            course.rating = averageRating; // 계산된 별점을 course.rating에 저장
+          } else {
+            course.rating = 0; // 리뷰가 없는 경우 별점 0으로 설정
+          }
+        })
+        .catch((error) => {
+          console.error(`강좌 ${course.course_id}의 리뷰 데이터를 불러오는 중 오류가 발생했습니다.`, error);
+        });
+    },
 
+    // 리뷰 데이터를 통해 평균 별점 계산
+    calculateAverageRating(reviews) {
+      const totalRatings = reviews.reduce(
+        (acc, review) => {
+          acc.education += review.educationRating || 0;
+          acc.instructor += review.instructorRating || 0;
+          acc.facility += review.facilityRating || 0;
+          acc.atmosphere += review.atmosphereRating || 0;
+          acc.management += review.managementRating || 0;
+          acc.later += review.laterRating || 0;
+          return acc;
+        },
+        {
+          education: 0,
+          instructor: 0,
+          facility: 0,
+          atmosphere: 0,
+          management: 0,
+          later: 0,
+        }
+      );
+
+      const totalReviews = reviews.length;
+      const averageRating =
+        (totalRatings.education +
+          totalRatings.instructor +
+          totalRatings.facility +
+          totalRatings.atmosphere +
+          totalRatings.management +
+          totalRatings.later) /
+        (6 * totalReviews);
+
+      return averageRating.toFixed(1); // 소수점 1자리까지 표시
+    },
     // 학원 모든리뷰의 차트 생성 함수
     generateChart(reviewData) {
       if (this.chart) {
