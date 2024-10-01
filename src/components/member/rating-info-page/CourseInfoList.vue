@@ -1,8 +1,10 @@
 <!-- 
  2024.9.30. 박요한 | 리팩토링: 전체 강의 목록 + 페이지네이션, 정렬 + 진행 구분
+ 2024.10.1. 박요한 | 별점 표시, 디자인 수정, 코드 단순화
 -->
 <template>
   <div class="course-info">
+    <h1>교육과정 정보 목록</h1>
     <!-- 과정별 탭 -->
     <div class="tab-header">
       <div :class="{ active: selectedTab === 'upcoming' }" @click="selectTab('upcoming')">진행 예정 과정</div>
@@ -10,61 +12,22 @@
       <div :class="{ active: selectedTab === 'completed' }" @click="selectTab('completed')">진행 완료 과정</div>
     </div>
 
-    <!-- 현재 진행 중인 과정 -->
-    <div v-if="selectedTab === 'current'" class="course-section">
+    <!-- 하나의 course-section으로 통합 -->
+    <div class="course-section">
       <div
-        v-for="course in currentCourses"
+        v-for="(course, index) in filteredCourses"
         :key="course.course_id"
         class="course-card"
         @click="goToCourseDetail(course.course_id, course.academy_id)"
       >
-        <div class="course-details">
-          <h4>{{ course.course_name }}</h4>
-          <p>
-            일정: {{ formatDate(course.start_date) }} ~
-            {{ formatDate(course.end_date) }}
-          </p>
-          <p>강사: {{ course.lector || "정보 없음" }}</p>
-          <a :href="course.title_link" target="_blank">훈련과정 보러가기</a>
+        <div v-if="selectedTab === 'completed'" class="stars">
+          {{ "★".repeat(roundedStars[index]) }}{{ "☆".repeat(5 - roundedStars[index]) }}
         </div>
-      </div>
-    </div>
-
-    <!-- 진행 완료 과정 -->
-    <div v-if="selectedTab === 'completed'" class="course-section">
-      <div
-        v-for="course in completedCourses"
-        :key="course.course_id"
-        class="course-card"
-        @click="goToCourseDetail(course.course_id, course.academy_id)"
-      >
+        <h4>{{ course.course_name }}</h4>
         <div class="course-details">
-          <h4>{{ course.course_name }}</h4>
-          <p>
-            일정: {{ formatDate(course.start_date) }} ~
-            {{ formatDate(course.end_date) }}
-          </p>
-          <p>강사: {{ course.lector || "정보 없음" }}</p>
-          <a :href="course.title_link" target="_blank">훈련과정 보러가기</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- 진행 예정 과정 -->
-    <div v-if="selectedTab === 'upcoming'" class="course-section">
-      <div
-        v-for="course in upcomingCourses"
-        :key="course.course_id"
-        class="course-card"
-        @click="goToCourseDetail(course.course_id, course.academy_id)"
-      >
-        <div class="course-details">
-          <h4>{{ course.course_name }}</h4>
-          <p>
-            일정: {{ formatDate(course.start_date) }} ~
-            {{ formatDate(course.end_date) }}
-          </p>
-          <p>강사: {{ course.lector || "정보 없음" }}</p>
+          <p>회차: {{ course.session_number || "-" }}</p>
+          <p>학원: {{ course.academy_name || "-" }}</p>
+          <p>일정: {{ formatDate(course.start_date) }} ~ {{ formatDate(course.end_date) }}</p>
           <a :href="course.title_link" target="_blank">훈련과정 보러가기</a>
         </div>
       </div>
@@ -93,6 +56,27 @@ export default {
       upcomingCourses: [], // 진행 예정 과정
       totalPages: 0, // 총 페이지 수를 초기값 0으로 설정
     };
+  },
+  computed: {
+    // 탭에 따른 필터링된 데이터 반환
+    filteredCourses() {
+      if (this.selectedTab === "upcoming") {
+        return this.upcomingCourses;
+      } else if (this.selectedTab === "current") {
+        return this.currentCourses;
+      } else {
+        return this.completedCourses;
+      }
+    },
+    // 평균 별점 반올림
+    roundedStars() {
+      return this.filteredCourses.map((course) => {
+        if (course.average_rating) {
+          return Math.round(course.average_rating);
+        }
+        return 0; // 값이 없으면 0으로 설정
+      });
+    },
   },
   mounted() {
     this.fetchCourses(); // 강좌 정보 가져오기
@@ -167,6 +151,14 @@ export default {
   margin: 0 auto;
   padding: 20px;
   background-color: #fff;
+  gap: 40px;
+}
+
+.course-info h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 60px;
 }
 
 /* 탭 스타일 */
@@ -202,7 +194,6 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: flex-start;
   border: 1px solid #ddd;
   padding: 20px;
   background-color: #fff;
@@ -216,16 +207,31 @@ export default {
   transform: scale(1.02);
 }
 
+.stars {
+  color: #ffcc00;
+  font-size: 20px;
+  text-align: center;
+}
+
+.course-card h4 {
+  margin-bottom: 30px;
+}
+
 /* course-details: 강의 세부 정보 */
 .course-details {
+  margin-top: auto; /* 아래로 정렬 */
   width: 100%;
+}
+
+.course-details p {
+  margin: 8px 0; /* 원하는 대로 margin 값 수정 */
 }
 
 /* pagination 스타일 */
 .pagination {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 60px;
 }
 
 .pagination button {
