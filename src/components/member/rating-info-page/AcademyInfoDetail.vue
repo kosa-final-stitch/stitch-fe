@@ -64,7 +64,7 @@
             <span v-for="n in 5" :key="n">
               {{ n <= Math.round(course.rating) ? "★" : "☆" }}
             </span>
-            <!-- {{ course.rating }} -->
+            별점:{{ course.rating }}
           </p>
         </div>
         <div class="course-details">
@@ -218,6 +218,8 @@ export default {
 
           // 진행 예정 과정: 시작일 기준 내림차순 정렬
           this.upcomingCourses = upcomingCourses.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+          const completedCoursescheck = this.completedCourses;
+          console.log("완료과정: ", completedCoursescheck);
         })
 
         .catch((error) => {

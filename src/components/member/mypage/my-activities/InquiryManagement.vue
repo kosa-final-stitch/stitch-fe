@@ -39,6 +39,7 @@ export default {
     return {
       inquiries: [], //모든 문의글 저장
       memberId: null, // 로그인한 사용자 ID
+
       // 카테고리명 매핑
       categoryMap: {
         "service-use": "서비스 이용",

@@ -4,14 +4,8 @@
     <div class="review-container">
       <!-- 평가 항목 리스트 -->
       <div class="review-grid">
-        <div
-          class="review-item"
-          v-for="(review, index) in reviews"
-          :key="index"
-        >
-          <label :for="'review-' + index"
-            >{{ index + 1 }}. {{ review.title }}</label
-          >
+        <div class="review-item" v-for="(review, index) in reviews" :key="index">
+          <label :for="'review-' + index">{{ index + 1 }}. {{ review.title }}</label>
           <div class="rating">
             <!-- 별을 클릭할 때마다 별점을 변경하는 이벤트 바인딩 -->
             <span
@@ -64,15 +58,7 @@ import {
   Legend,
 } from "chart.js";
 
-Chart.register(
-  RadarController,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-);
+Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
 export default {
   data() {
@@ -101,9 +87,7 @@ export default {
         this.chart.destroy(); // 기존 차트를 제거하여 중복되지 않도록 함
       }
 
-      const labels = this.reviews.map(
-        (review) => review.title || `항목 ${this.reviews.indexOf(review) + 1}`
-      );
+      const labels = this.reviews.map((review) => review.title || `항목 ${this.reviews.indexOf(review) + 1}`);
       const data = this.reviews.map((review) => review.rating);
 
       const ctx = document.getElementById("radarChart").getContext("2d");
@@ -149,7 +133,7 @@ export default {
     saveReviewData() {
       // 서버에 데이터를 전송하는 POST 요청
       axios
-        .post("http://localhost:8080/api/reviews", this.reviews)
+        .post("/api/reviews", this.reviews)
         .then((response) => {
           // 요청이 성공했을 때 실행될 코드
           alert("리뷰가 성공적으로 저장되었습니다.");
