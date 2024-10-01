@@ -7,82 +7,110 @@
     <div class="tabs">
       <button :class="{ active: selectedTab === 'info' }" @click="selectedTab = 'info'">정보공유 게시판</button>
       <button :class="{ active: selectedTab === 'qna' }" @click="selectedTab = 'qna'">Q&A</button>
-      <button :class="{ active: selectedTab === 'free' }" @click="selectedTab = 'free'">자유게시판</button>
+      <button :class="{ active: selectedTab === 'community' }" @click="selectedTab = 'community'">자유게시판</button>
     </div>
 
     <!-- 게시글 테이블 -->
-    <table>
+    <table v-if="posts.length > 0">
       <thead>
         <tr>
-          <th></th>
           <th>번호</th>
           <th>제목</th>
           <th>내용</th>
+          <th>카테고리</th>
           <th>작성일</th>
-          <th>최종 수정일</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(post, index) in filteredPosts" :key="index">
-          <td><input type="checkbox" /></td>
+        <tr v-for="(post, index) in posts" :key="post.boardId">
           <td>{{ index + 1 }}</td>
           <td>{{ post.title }}</td>
           <td>{{ post.content }}</td>
+          <td>{{ post.category }}</td>
           <td>{{ formatDate(post.regdate) }}</td>
-          <td>{{ formatDate(post.editdate) }}</td>
         </tr>
       </tbody>
     </table>
+
+    <!-- 게시글이 없는 경우 -->
+    <p v-else>게시글이 없습니다.</p>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import { useMemberStore } from "/src/store/member-store"; // Pinia 상태관리에서 memberStore 가져오기
 
 export default {
   data() {
     return {
-      selectedTab: "info", // 기본 탭 설정
+      selectedTab: "community", // 기본 탭 설정
       posts: [], // 모든 게시글 데이터를 저장
-      userId: null, // 로그인한 사용자 ID
+      memberId: null, // 로그인한 사용자 ID
     };
   },
   computed: {
-    // 선택된 탭에 따라 게시글을 필터링
-    filteredPosts() {
-      return this.posts.filter((post) => post.category === this.selectedTab); // category로 필터링
+    currentUser() {
+      const memberStore = useMemberStore();
+      return memberStore.member || { memberId: null }; // 현재 로그인한 사용자 정보
+    },
+  },
+  watch: {
+    // selectedTab이 변경될 때마다 fetchPosts 호출
+    selectedTab() {
+      this.fetchPosts();
     },
   },
   mounted() {
-    this.fetchUserInfo(); // 컴포넌트가 마운트되면 사용자 정보 및 게시글 데이터를 가져옴
+    this.memberId = this.currentUser.memberId;
+    console.log("마페게시판 현재 사용자 정보:", this.memberId);
+    if (this.memberId) {
+      this.fetchPosts(); // 초기 데이터 로드
+    }
   },
   methods: {
     fetchPosts() {
-      // 로그인한 사용자 ID로 게시글을 가져옴
+      let apiUrl = "";
+
+      // 선택된 탭에 맞는 API 호출
+      if (this.selectedTab === "info") {
+        apiUrl = `/api/board/info/${this.memberId}`; // 정보공유 게시판 API
+      } else if (this.selectedTab === "qna") {
+        apiUrl = `/api/board/qna/${this.memberId}`; // Q&A 게시판 API
+      } else if (this.selectedTab === "community") {
+        apiUrl = `/api/board/community/${this.memberId}`; // 자유게시판 API
+      }
+
       axios
-        .get(`http://localhost:8080/api/board/community/${this.userId}`)
+        .get(apiUrl)
         .then((response) => {
-          this.posts = response.data; // 모든 게시글을 저장
+          const posts = response.data || []; // 데이터가 없을 경우 빈 배열 처리
+          console.log("게시판 글들 :", posts); // 데이터를 확인
+
+          if (Array.isArray(posts)) {
+            this.posts = posts.map((post) => {
+              return {
+                boardId: post.boardId,
+                category: post.category,
+                content: post.content,
+                regdate: post.regdate,
+                title: post.title,
+              };
+            });
+          } else {
+            console.error("받아온 데이터가 배열이 아닙니다:", posts);
+            this.posts = []; // 배열이 아닌 경우 빈 데이터 처리s
+          }
         })
         .catch((error) => {
           console.error("게시글 데이터를 가져오는 중 오류 발생", error);
+          this.posts = []; // 오류 발생 시 빈 배열로 설정
         });
     },
-    // 사용자 정보를 서버에서 가져옴 (로그인한 사용자)
-    fetchUserInfo() {
-      axios
-        .get("http://localhost:8080/api/member/info")
-        .then((response) => {
-          this.userId = response.data.id; // 로그인한 사용자 ID 저장
-          console.log("게시판의 로그인된 유저아이디:", this.userId); // userId 로그 확인
-          this.fetchPosts(); // 사용자 ID로 게시글 호출
-        })
-        .catch((error) => {
-          console.error("회원 정보를 불러오는 중 오류 발생", error);
-        });
-    },
+
     // 날짜 형식 변환
     formatDate(date) {
+      if (!date) return null;
       return new Date(date).toLocaleDateString();
     },
   },
@@ -137,10 +165,5 @@ td {
 /* 테이블 헤더 배경색 */
 th {
   background-color: #f2f2f2;
-}
-
-/* 체크박스 스타일 */
-input[type="checkbox"] {
-  margin: 0;
 }
 </style>

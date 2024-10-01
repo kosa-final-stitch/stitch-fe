@@ -36,16 +36,13 @@
 
     <!-- 버튼 영역 -->
     <div class="buttons">
-      <button class="cancel-btn" @click="handleCancel">취소</button>
-      <button class="submit-btn" @click="handleButtonClick">
-        {{ buttonText }}
-      </button>
+      <button class="cancel-btn" @click="handleCancel">돌아가기</button>
     </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+// import axios from "axios";
 import { useMemberStore } from "/src/store/member-store"; // Pinia 상태관리에서 memberStore 가져오기
 import {
   Chart,
@@ -94,7 +91,7 @@ export default {
   mounted() {
     this.courseId = this.$route.params.courseId;
     // 컴포넌트가 마운트되면 사용자 정보를 가져옴
-    this.fetchMemberInfo();
+    // this.fetchMemberInfo();
   },
   methods: {
     setRating(index, rating) {
@@ -181,61 +178,61 @@ export default {
         this.$router.push({ name: "CourseInfoDetail", params: { courseId: this.courseId } });
       }
     },
-    fetchMemberInfo() {
-      const memberStore = useMemberStore(); // Pinia 상태 가져오기
-      if (memberStore.member && memberStore.member.memberId) {
-        this.memberId = memberStore.member.memberId; // memberId를 Pinia에서 가져와 설정
-        console.log("리뷰에서 사용자정보: ", this.memberId);
-      } else {
-        console.error("회원 정보를 가져오지 못했습니다. 로그인 필요.");
-        alert("로그인 후 리뷰 작성이 가능합니다.");
-      }
-    },
-    saveReviewData() {
-      if (!this.currentUser.memberId || !this.courseId) {
-        console.log("리뷰폼 회원아이디 : " + this.currentUser.memberId + " 코스아이디 : " + this.courseId);
-        console.error("회원 ID를 가져오지 못했습니다.");
-        alert("로그인 후 리뷰 작성이 가능합니다. 로그인 후 이용해 주세요");
-        return;
-      }
-      const reviewData = [
-        {
-          memberId: this.memberId,
-          courseId: this.courseId,
-          education: this.reviews[0].comment,
-          educationRating: this.reviews[0].rating,
-          instructor: this.reviews[1].comment,
-          instructorRating: this.reviews[1].rating,
-          facility: this.reviews[2].comment,
-          facilityRating: this.reviews[2].rating,
-          atmosphere: this.reviews[3].comment,
-          atmosphereRating: this.reviews[3].rating,
-          management: this.reviews[4].comment,
-          managementRating: this.reviews[4].rating,
-          later: this.reviews[5].comment,
-          laterRating: this.reviews[5].rating,
-          regDate: new Date(),
-        },
-      ];
-      console.log("전송할 리뷰 데이터:", reviewData);
-      axios
-        .post(`/api/member/reviews`, reviewData)
-        .then((response) => {
-          alert("리뷰가 성공적으로 저장되었습니다.");
-          console.log("리뷰서버 응답:", response.data); // 서버 응답 데이터를 처리
+    // fetchMemberInfo() {
+    //   const memberStore = useMemberStore(); // Pinia 상태 가져오기
+    //   if (memberStore.member && memberStore.member.memberId) {
+    //     this.memberId = memberStore.member.memberId; // memberId를 Pinia에서 가져와 설정
+    //     console.log("리뷰에서 사용자정보: ", this.memberId);
+    //   } else {
+    //     console.error("회원 정보를 가져오지 못했습니다. 로그인 필요.");
+    //     alert("로그인 후 리뷰 작성이 가능합니다.");
+    //   }
+    // },
+    // saveReviewData() {
+    //   if (!this.currentUser.memberId || !this.courseId) {
+    //     console.log("리뷰폼 회원아이디 : " + this.currentUser.memberId + " 코스아이디 : " + this.courseId);
+    //     console.error("회원 ID를 가져오지 못했습니다.");
+    //     alert("로그인 후 리뷰 작성이 가능합니다. 로그인 후 이용해 주세요");
+    //     return;
+    //   }
+    //   const reviewData = [
+    //     {
+    //       memberId: this.memberId,
+    //       courseId: this.courseId,
+    //       education: this.reviews[0].comment,
+    //       educationRating: this.reviews[0].rating,
+    //       instructor: this.reviews[1].comment,
+    //       instructorRating: this.reviews[1].rating,
+    //       facility: this.reviews[2].comment,
+    //       facilityRating: this.reviews[2].rating,
+    //       atmosphere: this.reviews[3].comment,
+    //       atmosphereRating: this.reviews[3].rating,
+    //       management: this.reviews[4].comment,
+    //       managementRating: this.reviews[4].rating,
+    //       later: this.reviews[5].comment,
+    //       laterRating: this.reviews[5].rating,
+    //       regDate: new Date(),
+    //     },
+    //   ];
+    //   console.log("전송할 리뷰 데이터:", reviewData);
+    //   axios
+    //     .post(`/api/member/reviews`, reviewData)
+    //     .then((response) => {
+    //       alert("리뷰가 성공적으로 저장되었습니다.");
+    //       console.log("리뷰서버 응답:", response.data); // 서버 응답 데이터를 처리
 
-          // 저장 후 courseDetail 페이지로 이동
-          this.$router.push({
-            name: "CourseInfoDetail",
-            params: { courseId: this.courseId },
-            query: { reviews: reviewData },
-          });
-        })
-        .catch((error) => {
-          console.error("리뷰 저장 중 오류 발생:", error);
-          alert("빈 칸을 채워주세요.");
-        });
-    },
+    //       // 저장 후 courseDetail 페이지로 이동
+    //       this.$router.push({
+    //         name: "CourseInfoDetail",
+    //         params: { courseId: this.courseId },
+    //         query: { reviews: reviewData },
+    //       });
+    //     })
+    //     .catch((error) => {
+    //       console.error("리뷰 저장 중 오류 발생:", error);
+    //       alert("빈 칸을 채워주세요.");
+    //     });
+    // },
   },
 };
 </script>

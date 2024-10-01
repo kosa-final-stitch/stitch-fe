@@ -12,8 +12,8 @@
               {{ n <= Math.round(course.rating) ? "★" : "☆" }}
             </span>
           </span>
-          <!-- ({{ course.rating }} / 5) -->
         </p>
+
         <h2>{{ course.course_name }}</h2>
         <p>회차정보: {{ course.session_number }}회차</p>
         <p>
@@ -29,12 +29,19 @@
     </div>
 
     <!-- 수강 후기 작성 버튼 -->
-    <button class="write-review-btn" @click="goToReviewForm">수강 후기 쓰기</button>
-
+    <div class="button-container">
+      <button class="go-to-academyInfo" @click="goToAcademy">학원 정보</button>
+      <button class="write-review-btn" @click="goToReviewForm">수강 후기 쓰기</button>
+    </div>
     <!-- 리뷰 섹션 -->
     <h3>학생 리뷰</h3>
     <div class="review-container">
-      <div class="review-card" v-for="review in course.reviews" :key="review.reviewId">
+      <div
+        class="review-card"
+        v-for="review in course.reviews"
+        :key="review.reviewId"
+        @click="goToReviewDetail(review.reviewId)"
+      >
         <!-- memberId로 리뷰 작성자 표시 -->
         <!-- <h4>{{ review.memberId }}</h4> -->
         <!-- <div class="rating-stars">
@@ -42,7 +49,7 @@
         </div> -->
         <div class="review-details">
           <p>
-            <strong>교육 </strong>
+            <strong>강의 </strong>
             <span class="stars">
               <span v-for="n in 5" :key="n">
                 {{ n <= review.educationRating ? "▬" : "▭" }}
@@ -53,7 +60,7 @@
             <strong>강사 </strong>
             <span class="stars">
               <span v-for="n in 5" :key="n">
-                {{ n <= review.educationRating ? "▬" : "▭" }}
+                {{ n <= review.instructorRating ? "▬" : "▭" }}
               </span>
             </span>
           </p>
@@ -61,7 +68,7 @@
             <strong>시설 </strong>
             <span class="stars">
               <span v-for="n in 5" :key="n">
-                {{ n <= review.educationRating ? "▬" : "▭" }}
+                {{ n <= review.facilityRating ? "▬" : "▭" }}
               </span>
             </span>
           </p>
@@ -69,7 +76,7 @@
             <strong>분위기 </strong>
             <span class="stars">
               <span v-for="n in 5" :key="n">
-                {{ n <= review.educationRating ? "▬" : "▭" }}
+                {{ n <= review.atmosphereRating ? "▬" : "▭" }}
               </span>
             </span>
           </p>
@@ -77,7 +84,7 @@
             <strong>행정 </strong>
             <span class="stars">
               <span v-for="n in 5" :key="n">
-                {{ n <= review.educationRating ? "▬" : "▭" }}
+                {{ n <= review.managementRating ? "▬" : "▭" }}
               </span>
             </span>
           </p>
@@ -85,7 +92,7 @@
             <strong>사후관리 </strong>
             <span class="stars">
               <span v-for="n in 5" :key="n">
-                {{ n <= review.educationRating ? "▬" : "▭" }}
+                {{ n <= review.laterRating ? "▬" : "▭" }}
               </span>
             </span>
           </p>
@@ -94,16 +101,17 @@
     </div>
 
     <!-- 페이지네이션 버튼 -->
-    <div class="pagination">
+    <!-- <div class="pagination">
       <button v-for="page in totalPages" :key="page" @click="changePage(page)" class="page-button">
         {{ page }}
       </button>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import { useMemberStore } from "/src/store/member-store"; // Pinia 상태관리에서 memberStore 가져오기
 
 // Chart.js 관련 import 추가
 import {
@@ -133,17 +141,19 @@ export default {
         title_link: "",
         reviews: [] || this.initialReviews, // prop에서 받은 리뷰 데이터를 기본값으로 설정
       }, // 코스 상세 정보를 저장할 객체
+      academy: {
+        academy_name: "",
+      }, // 학원 정보를 저장할 객체
       chart: null, // 차트를 저장할 변수 추가
       currentPage: 1, // 현재 페이지
       reviewsPerPage: 5, // 페이지 당 표시할 리뷰 수
     };
   },
-  watch: {
-    "$route.params.courseId": {
-      immediate: true, // 처음 로드될 때도 실행
-      handler(newCourseId) {
-        this.fetchCourseDetail(newCourseId); // 새로운 courseId로 데이터를 가져옴
-      },
+
+  computed: {
+    currentUser() {
+      const memberStore = useMemberStore();
+      return memberStore.member || { memberId: null }; // 현재 로그인한 사용자 정보
     },
   },
   mounted() {
@@ -151,17 +161,21 @@ export default {
     if (!this.initialReviews) {
       this.fetchReviewData(); // 초기 데이터가 없으면 서버에서 다시 가져옴
     }
+    console.log("리뷰 현재 사용자 정보:", this.currentUser);
   },
   methods: {
-    fetchCourseDetail() {
+    //학원정보가져오기
+    async fetchCourseDetail() {
       const courseId = this.$route.params.courseId;
       axios
-        .get(`http://localhost:8080/api/courses/${courseId}`)
+        .get(`/api/courses/${courseId}`)
         .then((response) => {
           this.course = response.data;
           const reviewData = response.data;
           console.log("코스디테일:", reviewData); // 데이터를 확인
           this.course.completed = this.checkIfCourseCompleted(); // 완료 여부 확인
+          this.academy = response.data; // 학원 정보 받아오기
+          console.log("코스디테일의 아카데미정보:", this.academy.academy_name); // 데이터를 확인
         })
         .catch((error) => {
           console.error("코스 정보를 불러오는 중 오류 발생:", error);
@@ -177,33 +191,55 @@ export default {
       const options = { year: "numeric", month: "2-digit", day: "2-digit" };
       return new Date(date).toLocaleDateString("ko-KR", options);
     },
+    // 학원 정보 페이지로 이동하는 메서드
+    goToAcademy() {
+      console.log("학원정보 버튼클릭");
+      const academyId = this.$route.params.academyId;
+      this.$router.push({
+        name: "AcademyInfoDetail",
+        params: { academyId },
+      });
+    },
     // 리뷰 작성 페이지로 이동
     goToReviewForm() {
-      if (this.course.completed) {
-        const academyId = this.$route.params.academyId;
-        const courseId = this.$route.params.courseId;
-        this.$router.push({
-          name: "ReviewForm", // ReviewForm으로 라우팅
-          params: { academyId, courseId },
-        });
+      console.log("리뷰작성 버튼클릭");
+      // 로그인 여부 확인
+      if (!this.currentUser.memberId) {
+        // currentUser.memberId로 로그인 상태 확인
+        console.log("리뷰 user id:", this.currentUser.memberId); // currentUser.id 값 확인
+        alert("로그인 후 리뷰 작성이 가능합니다.");
+        // 0.5초 후 로그인 페이지로 이동
+        setTimeout(() => {
+          this.$router.push({ name: "Login" }); // 로그인 페이지로 이동
+        }, 500);
       } else {
-        alert("강의 종료 이후에만 리뷰를 남길 수 있습니다.");
+        // 로그인된 경우 강의 종료 여부 확인
+        if (this.course.completed) {
+          const academyId = this.$route.params.academyId;
+          const courseId = this.$route.params.courseId;
+          this.$router.push({
+            name: "ReviewForm", // ReviewForm으로 라우팅
+            params: { academyId, courseId },
+          });
+        } else {
+          // 강의가 종료되지 않은 경우 알림 메시지
+          alert("강의 종료 이후에만 리뷰를 남길 수 있습니다.");
+        }
       }
     },
+
     // 리뷰 데이터를 불러오는 메서드 추가
-    fetchReviewData() {
+    async fetchReviewData() {
       const courseId = this.$route.params.courseId;
       axios
-        .get(`http://localhost:8080/api/courses/${courseId}/reviews`)
+        .get(`/api/courses/${courseId}/reviews`)
         .then((response) => {
           const reviewData = response.data;
           console.log("받아온 리뷰 데이터:", reviewData); // 데이터를 확인
           this.course.reviews = reviewData;
-          // 리뷰가 있을 경우 별점 평균 계산
-          if (reviewData.length > 0) {
-            this.calculateAverageRating(reviewData);
-          }
+
           if (Array.isArray(reviewData)) {
+            this.calculateAverageRating(reviewData);
             this.generateChartFromData(reviewData);
           } else {
             console.error("리뷰 데이터가 배열이 아닙니다:", reviewData);
@@ -213,19 +249,61 @@ export default {
           console.error("리뷰 데이터를 불러오는 중 오류 발생:", error);
         });
     },
-
-    // 별점 평균 계산하는 메서드
+    // 리뷰 디테일 페이지로 이동()
+    goToReviewDetail(reviewId) {
+      const courseId = this.$route.params.courseId;
+      const academyId = this.$route.params.academyId;
+      this.$router.push({
+        name: "ReviewFormDetail",
+        params: { academyId, courseId, reviewId },
+      });
+    },
+    //리뷰데이터들의 평균별점 구하기
     calculateAverageRating(reviews) {
-      let totalRating = 0;
+      console.log("평균 별점 calculateAverageRating호출");
+      let totalRatings = {
+        education: 0,
+        instructor: 0,
+        facility: 0,
+        atmosphere: 0,
+        management: 0,
+        later: 0,
+      };
       let totalReviews = reviews.length;
 
       reviews.forEach((review) => {
-        // 각 리뷰의 educationRating를 사용해서 합산
-        totalRating += review.educationRating || 0;
+        // 각 항목의 rating 값을 합산
+        totalRatings.education += review.educationRating || 0;
+        totalRatings.instructor += review.instructorRating || 0;
+        totalRatings.facility += review.facilityRating || 0;
+        totalRatings.atmosphere += review.atmosphereRating || 0;
+        totalRatings.management += review.managementRating || 0;
+        totalRatings.later += review.laterRating || 0;
       });
 
-      // 평균 계산 (평균은 소수점 한 자리로 표시)
-      this.course.rating = (totalRating / totalReviews).toFixed(1);
+      // 각 항목의 평균을 계산
+      let averageRatings = {
+        education: totalRatings.education / totalReviews,
+        instructor: totalRatings.instructor / totalReviews,
+        facility: totalRatings.facility / totalReviews,
+        atmosphere: totalRatings.atmosphere / totalReviews,
+        management: totalRatings.management / totalReviews,
+        later: totalRatings.later / totalReviews,
+      };
+
+      // 전체 항목들의 평균 계산
+      const overallAverageRating =
+        (averageRatings.education +
+          averageRatings.instructor +
+          averageRatings.facility +
+          averageRatings.atmosphere +
+          averageRatings.management +
+          averageRatings.later) /
+        6;
+
+      // 소수점 한 자리로 반올림된 값을 course.rating에 할당
+      this.course.rating = overallAverageRating.toFixed(1);
+      console.log("평균 별점 : " + this.course.rating);
     },
 
     // 서버에서 받아온 리뷰 데이터를 차트로 변환
@@ -317,8 +395,18 @@ export default {
 }
 
 .radar-chart {
-  flex: 1;
+  width: 300px; /* 차트 크기를 줄이기 */
+  height: 300px; /* 차트 크기를 줄이기 */
   text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+canvas {
+  max-width: 100%; /* 부모 요소에 맞게 크기 조정 */
+  max-height: 100%; /* 부모 요소에 맞게 크기 조정 */
+  width: 100%; /* 부모 요소에 맞게 크기 조정 */
+  height: auto; /* 높이 자동 조절 */
 }
 
 .reviews {
@@ -341,14 +429,20 @@ export default {
   border-radius: 10px;
 }
 
-.write-review-btn {
+.button-container {
+  display: flex;
+  justify-content: center; /* 버튼을 중앙에 정렬 */
+  gap: 10px; /* 버튼 사이 간격 */
+  margin-top: 20px; /* 위쪽 여백 추가 */
+}
+
+.write-review-btn,
+.go-to-academyInfo {
   background-color: #f28c00;
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  display: block;
-  margin: 0 auto;
 }
 </style>

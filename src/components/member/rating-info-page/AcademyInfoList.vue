@@ -63,7 +63,7 @@ export default {
     // 학원 리스트 가져오는 메서드
     fetchAcademies() {
       axios
-        .get(`http://localhost:8080/api/academies/academy`) // 학원 리스트 API 엔드포인트
+        .get(`/api/academies/academy`) // 학원 리스트 API 엔드포인트
         .then((response) => {
           this.academyList = response.data;
           console.log("학원정보리스트실행.", response.data);
@@ -76,7 +76,7 @@ export default {
     // 학원 평균 별점 가져오는 메서드
     fetchAcademyRating(academyId) {
       axios
-        .get(`http://localhost:8080/api/academies/academy/${academyId}/rating`)
+        .get(`/api/academies/academy/${academyId}/rating`)
         .then((response) => {
           const academy = this.academyList.find((a) => a.academy_id === academyId);
           if (academy) {
