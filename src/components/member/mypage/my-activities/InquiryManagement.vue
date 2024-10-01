@@ -20,7 +20,7 @@
         <!-- 여러 개의 문의를 리스트로 출력 -->
         <tr v-for="(inquiry, index) in inquiries" :key="inquiry.inquiryid" @click="goToDetail(inquiry.inquiryid)">
           <td>{{ index + 1 }}</td>
-          <td>{{ inquiry.category }}</td>
+          <td>{{ categoryName(inquiry.category) }}</td>
           <td>{{ inquiry.title }}</td>
           <td>{{ formatDate(inquiry.regDate) }}</td>
           <td>{{ formatDate(inquiry.ansDate) }}</td>
@@ -39,6 +39,15 @@ export default {
     return {
       inquiries: [], //모든 문의글 저장
       memberId: null, // 로그인한 사용자 ID
+      // 카테고리명 매핑
+      categoryMap: {
+        "service-use": "서비스 이용",
+        "account-management": "계정 관리",
+        "payment-issue": "결제 관련",
+        "technical-support": "기술 지원",
+        "content-feedback": "콘텐츠 피드백",
+        other: "기타",
+      },
     };
   },
   computed: {
@@ -82,6 +91,10 @@ export default {
           console.error("게시글 데이터를 가져오는 중 오류 발생", error);
           this.inquiries = []; // 오류 발생 시 빈 배열로 설정
         });
+    },
+    // 카테고리명을 한글로 변환
+    categoryName(categoryKey) {
+      return this.categoryMap[categoryKey] || "알 수 없음";
     },
     // 날짜 형식 변환
     formatDate(date) {
