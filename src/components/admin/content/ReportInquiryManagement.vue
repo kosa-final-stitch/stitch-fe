@@ -5,7 +5,7 @@
  ---------------------
  2024.09.10 김호영 | admin 초기 설정
  2024.09.19 김호영 | 신고 문의 페이지 기능 및 디자인 구현
- 2024.09.29 김호영 | 신고 정보 백엔드에서 갖고오기
+ 2024.09.29 김호영 | 신고 정보 백엔드에서 데이터 갖고오기
  -->
 
  <template>
@@ -17,8 +17,8 @@
         <div class="category-container">
           <select v-model="selectedCategory" class="search-category">
             <option value="all">전체</option>
-            <option value="answered">처리 완료</option>
-            <option value="unanswered">미처리</option>
+            <option value="comment">댓글</option>
+            <option value="post">게시글</option>
           </select>
           <font-awesome-icon 
             :icon="isDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']" class="angle-dropdown-icon" />
@@ -41,9 +41,9 @@
           <th>카테고리</th>
           <th>게시글 번호</th>
           <th>댓글 번호</th>
+          <th>신고 유형</th>
           <th>신고 사유</th>
           <th>신고 일자</th>
-          <th>처리 일자</th>
           <th></th>
         </tr>
       </thead>
@@ -57,9 +57,9 @@
           <td>{{ getCategory(report) }}</td> <!-- 카테고리 결정 -->
           <td>{{ report.boardId }}</td>
           <td>{{ report.commentId || '-' }}</td>
+          <td>{{  report.type || '-' }}</td>
           <td>{{ report.reason }}</td>
           <td>{{ formatDate(report.regdate) }}</td>
-          <td>{{ report.ansdate ? formatDate(report.ansdate) : '-' }}</td>
           <td>
             <button v-if="report.status !== 'answered'" class="report-write-btn" @click="openReportAnswerModal(report)">
               확인하기
@@ -89,6 +89,10 @@
             <input id="reason" type="text" v-model="selectedReport.reason" class="info-input" readonly />
           </div>
           <div class="info-item">
+            <label for="reason">신고 유형</label>
+            <input id="reason" type="text" v-model="selectedReport.type" class="info-input" readonly />
+          </div>
+          <div class="info-item">
             <label for="nickname">신고자:</label>
             <input id="nickname" type="text" v-model="selectedReport.nickname" class="info-input" readonly />
           </div>
@@ -97,48 +101,56 @@
             <textarea id="content" v-model="selectedReport.content" class="info-textarea" rows="5" readonly></textarea>
           </div>
         </div>
+          <form @submit.prevent="submitReportAnswer">
+            <div class="report-answer-info">
+              <strong>해당 게시글/댓글 내용</strong>
 
-        <form @submit.prevent="submitReportAnswer">
-          <div class="report-answer-info">
-            <strong>해당 게시글/댓글 내용</strong>
-            <div class="info-item">
-              <label for="postOrComment">작성 유형</label>
-              <!-- postOrComment가 POST일 때 게시글, COMMENT일 때 댓글로 표시 -->
-              <input id="postOrComment" type="text" :value="getPostOrCommentType(selectedReport.postOrComment)" class="info-input" readonly />
+              <!-- 작성 유형 (POST or COMMENT) -->
+              <div class="info-item">
+                <label for="postOrComment">작성 유형</label>
+                <input id="postOrComment" type="text" :value="getPostOrCommentType(selectedReport.postOrComment)" class="info-input" readonly />
+              </div>
+
+              <!-- 게시글/댓글 번호 -->
+              <div class="info-item">
+                <label for="number">게시글/댓글 번호</label>
+                <input id="number" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.boardId : selectedReport.commentId || '-'" class="info-input" readonly />
+              </div>
+
+              <!-- 작성자 정보 -->
+              <div class="info-item">
+                <label for="writerId">작성자:</label>
+                <input id="writerId" type="text" :value="selectedReport.writerId || '-'" class="info-input" readonly />
+              </div>
+
+              <!-- 게시글일 경우 제목 표시 -->
+              <div class="info-item" v-if="selectedReport.title !== '-'">
+                <label for="title">제목:</label>
+                <input id="title" type="text" v-model="selectedReport.title" class="info-input" readonly />
+              </div>
+
+              <!-- 내용 (게시글 또는 댓글) -->
+              <div class="info-item">
+                <label for="postContent">내용:</label>
+                <textarea id="postContent" v-model="selectedReport.postContent" class="info-textarea" rows="5" readonly></textarea>
+              </div>
+              
             </div>
-            <div class="info-item">
-              <label for="number">게시글/댓글 번호</label>
-              <input id="number" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.boardId : selectedReport.commentId" class="info-input" readonly />
-            </div>
-            <div class="info-item">
-              <label for="writerId">작성자:</label>
-              <input id="writerId" type="text" v-model="selectedReport.writerId" class="info-input" readonly />
-            </div>
-            <div class="info-item">
-              <label for="title">제목:</label>
-              <input id="title" type="text" :value="selectedReport.postOrComment === 'POST' ? selectedReport.title : '-'" class="info-input" readonly />
-            </div>
-            <div class="info-item">
-              <label for="postContent">내용:</label>
-              <textarea id="postContent" v-model="selectedReport.postContent" class="info-textarea" rows="5" readonly></textarea>
-            </div>
+              <div class="modal-buttons">
+                <button type="button" class="btn-secondary" @click="closeReportAnswerModal">확인 완료</button>
+              </div>
+            </form>
           </div>
-          <div class="modal-buttons">
-            <button type="submit" class="btn-primary">조치 완료</button>
-            <button type="button" class="btn-secondary" @click="closeReportAnswerModal">취소</button>
-          </div>
-        </form>
+        </div>
       </div>
-    </div>
-  </div>
 
-      <!-- 조치 완료 모달 -->
-      <div v-if="isChangeSuccessModalOpen" class="modal-success-overlay">
+      <!-- 확인 완료 모달 -->
+    <div v-if="isChangeSuccessModalOpen" class="modal-success-overlay">
       <div class="modal-success-content">
         <div class="modal-icon-container">
           <font-awesome-icon :icon="['fas', 'circle-check']" class="modal-success-icon" />
         </div>
-        <p>조치가 완료되었습니다</p>
+        <p>확인이 완료되었습니다</p>
       </div>
     </div>
 </template>
@@ -168,15 +180,18 @@ export default {
       return this.reportsData.filter(report => {
         const matchesCategory =
           this.selectedCategory === 'all' ||
-          (this.selectedCategory === 'answered' && report.status === 'answered') ||
-          (this.selectedCategory === 'unanswered' && report.status === 'unanswered');
+          (this.selectedCategory === 'post' && report.postOrComment === 'POST') ||
+          (this.selectedCategory === 'comment' && report.postOrComment === 'COMMENT');
         const matchesQuery = 
-          report.content.includes(this.searchQuery) ||
-          report.reason.includes(this.searchQuery) ||
-          String(report.memberId).includes(this.searchQuery) || 
-          (report.postOrComment === 'POST' && report.boardTable.includes(this.searchQuery)) ||
-          (report.postOrComment === 'COMMENT' && report.commentId && String(report.commentId).includes(this.searchQuery));
-        return matchesCategory && matchesQuery;
+          (report.content || '').includes(this.searchQuery) ||             // 신고 내용
+          String(report.reason || '').includes(this.searchQuery) ||        // 신고 사유
+          String(report.nickname || '').includes(this.searchQuery) ||      // 신고자
+          String(this.getCategory(report)).includes(this.searchQuery) ||   // 카테고리
+          String(report.boardId || '').includes(this.searchQuery) ||       // 게시글 번호
+          String(report.commentId || '').includes(this.searchQuery) ||     // 댓글 번호
+          String(report.type || '').includes(this.searchQuery) ||          // 신고 유형
+          String(report.regdate || '').includes(this.searchQuery);         // 신고 일자
+          return matchesCategory && matchesQuery;
       });
     },
     paginatedReports() {
@@ -221,40 +236,107 @@ export default {
         this.currentPage = page;
       }
     },
-    openReportAnswerModal(report) {
-      this.selectedReport = {
-        ...report,
-        writer_id: this.getWriterId(report), // 게시글/댓글 작성자
-        title: report.postOrComment === 'POST' ? report.boardTitle : '-', // 게시글 제목 or "-"
-        postContent: this.getPostContent(report), // 게시글 또는 댓글 내용
-      };
-      this.isReportAnswerModalOpen = true;
+    async openReportAnswerModal(report) {
+      try {
+        // 서버에서 작성자, 게시글/댓글 정보 가져오기
+        const writerId = await this.getWriterId(report);
+        console.log('Writer ID:', writerId);  // 확인
+
+        // 게시글 또는 댓글 내용을 가져옴
+        const postContentResponse = await this.getPostContent(report);
+        console.log('Post Content Response:', postContentResponse); // 전체 응답 확인
+
+
+        // 'postContentResponse' 객체에서 'content' 키를 가져온다.
+        // 1. 먼저 'content' 키(소문자)가 있는지 확인
+        // 2. 없으면 'CONTENT' 키(대문자)가 있는지 확인
+        // 3. 둘 다 없으면 기본값 '-' 반영
+        const postContent = postContentResponse.content || postContentResponse.CONTENT || '-';
+
+        // 'postTitle'은 게시글인 경우에만 사용
+        // 'report.postOrComment'가 'POST'인지 확인
+        const postTitle = report.postOrComment === 'POST'
+          ? (
+              // 1. 'title'(소문자)가 있는지 확인
+              postContentResponse.title ||
+              // 2. 없으면 'TITLE'(대문자)가 있는지 확인
+              postContentResponse.TITLE ||
+              // 3. 둘 다 없으면 기본값 '-'
+              '-'
+            )
+          // 댓글인 경우 제목은 '-'
+          : '-';
+
+
+        console.log('Post Content:', postContent);  // 확인
+        console.log('Post Title:', postTitle);      // 제목 확인
+
+        this.selectedReport = {
+          ...report,
+          writerId: writerId || '-', // 작성자 정보 없으면 '-'
+          title: postTitle, // 게시글 제목
+          postContent: postContent || '-', // 게시글 또는 댓글 내용
+        };
+        this.isReportAnswerModalOpen = true;
+      } catch (error) {
+        console.error('게시글/댓글 정보 로드 실패:', error);
+      }
     },
-    getWriterId(report) {
-      // 게시글/댓글 작성자 정보 가져오기
-      return report.postOrComment === 'POST' ? report.boardWriterId : report.commentWriterId;
+    async getWriterId(report) {
+      try {
+        const response = await axios.get(`/api/member/report/${report.reportId}/writer`);
+        console.log('Writer Response:', response.data);  // 확인
+        return response.data;
+      } catch (error) {
+        console.error('작성자 정보 로드 실패:', error);
+        return '-';
+      }
     },
-    getPostContent(report) {
-      // 게시글/댓글 내용 가져오기
-      return report.postOrComment === 'POST' ? report.boardContent : report.commentContent;
+
+    async getPostContent(report) {
+      try {
+        const response = await axios.get(`/api/member/report/${report.reportId}/content`);
+        console.log('Content Response:', response.data);  // 응답 데이터 확인
+
+        // response.data가 Map<String, String> 형태라면
+        return response.data;
+      } catch (error) {
+        console.error('게시글/댓글 내용 로드 실패:', error);
+        return '-';  // 에러 발생 시 대체값
+      }
     },
     closeReportAnswerModal() {
       this.isReportAnswerModalOpen = false;
       this.answerContent = '';
     },
-    submitReportAnswer() {
+    async submitReportAnswer() {
       if (!this.selectedReport) return;
 
-      // 상태를 변경해서 UI에서 확인 완료로 표시되도록 변경
-      this.selectedReport.ansdate = new Date().toISOString().split('T')[0];
-      this.selectedReport.status = 'answered';
-      this.selectedReport.answer = this.answerContent;
+      try {
+        // 서버로 상태 업데이트 전송
+        const token = localStorage.getItem('token');
+        const response = await axios.post(`/api/member/report/${this.selectedReport.reportId}/answer`, {
+          status: 'answered',
+          answer: this.answerContent
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-      // reportsData에서 해당 report를 찾아서 업데이트
-      const reportIndex = this.reportsData.findIndex(report => report.reportId === this.selectedReport.reportId);
-      if (reportIndex !== -1) {
-        this.reportsData.splice(reportIndex, 1, { ...this.selectedReport });
-      }
+        console.log('Response:', response.data); // 서버 응답 확인
+
+        // 상태를 변경해서 UI에서 확인 완료로 표시되도록 변경
+        this.selectedReport.ansdate = new Date().toISOString().split('T')[0];
+        this.selectedReport.status = 'answered';
+        this.selectedReport.answer = this.answerContent;
+
+        // reportsData에서 해당 report를 찾아서 업데이트
+        const reportIndex = this.reportsData.findIndex(report => report.reportId === this.selectedReport.reportId);
+        if (reportIndex !== -1) {
+          this.reportsData.splice(reportIndex, 1, { ...this.selectedReport });
+        }
 
       // UI 업데이트 후 모달 닫기
       this.closeReportAnswerModal();
@@ -266,8 +348,11 @@ export default {
       setTimeout(() => {
         this.isChangeSuccessModalOpen = false;
       }, 1500);
-    },
-
+    } catch (error) {
+        console.error('신고 처리 실패:', error);
+    }
+  },
+  
     // 카테고리 처리 로직
     getCategory(report) {
       if (report.postOrComment === 'POST') {
@@ -278,6 +363,7 @@ export default {
         return '-';
       }
     }
+  
   },
 };
 </script>
@@ -344,11 +430,11 @@ export default {
 
 .report-answer-modal-content .modal-buttons {
   display: flex;
-  justify-content: space-between;
+
 }
 
 .report-answer-modal-content .btn-secondary {
-  background-color: #ccc;
+  background-color: #ffa15e;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -502,18 +588,9 @@ export default {
   width: 160px;
 }
 
-.modal-buttons button:first-child {
-  background-color: #f56565;
-  color: white;
-}
-
-.modal-buttons button:first-child:hover {
-  background-color: #ec2727;
-  color:white;
-}
 
 .modal-buttons button:last-child:hover {
-  background-color: #b3b3b3; /* 호버 시 더 짙은 회색 */
+  background-color: #fb822c; /* 호버 시 더 짙은 회색 */
 }
 
 
