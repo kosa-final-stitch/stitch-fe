@@ -73,15 +73,9 @@
                   <li @click="handleItemClick(pay, 'change')">
                     <font-awesome-icon :icon="['fas', 'check']" class="modal-icon" /> 처리 완료
                   </li>
-                  <li @click="handleItemClick(pay, 'item1')">
+                  <!--li @click="handleItemClick(pay, 'item3')">
                     <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
-                  <li @click="handleItemClick(pay, 'item2')">
-                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
-                  <li @click="handleItemClick(pay, 'item3')">
-                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
+                  </li-->
                 </ul>
               </div>
             </div>

@@ -80,15 +80,9 @@
                   <li @click="handleItemClick(post, 'delete')">
                     <font-awesome-icon :icon="['fas', 'trash-can']" class="modal-icon" /> 삭제
                   </li>
-                  <li @click="handleItemClick(post, 'item1')">
+                  <!--li @click="handleItemClick(post, 'item3')">
                     <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
-                  <li @click="handleItemClick(post, 'item2')">
-                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
-                  <li @click="handleItemClick(post, 'item3')">
-                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
+                  </li-->
                 </ul>
               </div>
             </div>

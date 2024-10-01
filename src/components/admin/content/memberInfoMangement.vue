@@ -84,15 +84,9 @@
                   <li @click="handleItemClick(member, 'delete')">
                     <font-awesome-icon :icon="['fas', 'trash-can']" class="modal-icon" /> 삭제
                   </li>
-                  <li @click="handleItemClick(member, 'item1')">
-                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
-                  <li @click="handleItemClick(member, 'item2')">
-                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
-                  <li @click="handleItemClick(member, 'item3')">
-                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" /> 항목
-                  </li>
+                  <!--li @click="handleItemClick(member, 'item3')">
+                    <font-awesome-icon :icon="['fas', 'question']" class="modal-icon" > 항목
+                  </li-->
                 </ul>
               </div>
             </div>
