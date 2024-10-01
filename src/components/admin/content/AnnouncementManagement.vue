@@ -7,6 +7,7 @@
  2024.09.17 김호영 | 공지사항 페이지 초기 디자인 및 구현 
  2024.09.18 김호영 | 작성 기능 완.
  2024.09.24 김호영 | 공지사항 작성 백엔드 연결.
+ 2024.10.01 김호영 | 공지사항 공개 비공개 기능 추가.
  -->
 
  <template>
@@ -55,7 +56,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(notice, index) in paginatedNotices" :key="notice.notice_id">
+        <tr v-for="(notice, index) in paginatedNotices" :key="notice.noticeId">
           <td>{{ (currentPage - 1) * noticesPerPage + index + 1 }}</td>
           <td>{{ notice.title }}</td>
           <td>{{ notice.adminName }}</td>
@@ -181,15 +182,15 @@ export default {
     },
 
     filteredNotices() {
-      return this.noticementsData.filter(notice => {
-        const matchesCategory =
-          this.selectedCategory === 'all' ||
-          this.selectedCategory === notice.status;
-        const matchesQuery =
-          notice.title.includes(this.searchQuery) ||
-          notice.content.includes(this.searchQuery);
-        return matchesCategory && matchesQuery;
-      });
+    return this.noticementsData.filter(notice => {
+      const matchesCategory =
+        this.selectedCategory === 'all' || // 전체 선택 시 모든 상태를 보여줌
+        this.selectedCategory === notice.status; // 선택한 카테고리와 공지사항의 상태가 일치해야 함
+      const matchesQuery =
+        notice.title.includes(this.searchQuery) || // 검색어와 제목 일치
+        notice.content.includes(this.searchQuery); // 검색어와 내용 일치
+      return matchesCategory && matchesQuery;
+    });
     },
     paginatedNotices() {
       const start = (this.currentPage - 1) * this.noticesPerPage;
@@ -216,6 +217,106 @@ export default {
         console.error('공지사항 데이터를 불러오는 중 오류 발생:', error);
       }
     },
+    // 공지사항 공개/비공개 상태 변경
+    async changeNotice() {
+      if (!this.noticeToChange) return;
+
+      // 상태 업데이트 요청을 서버로 전송
+      try {
+        const token = localStorage.getItem('jwt'); // JWT 토큰
+        console.log("변경할 공지사항 ID:", this.noticeToChange.noticeId);
+        console.log("변경할 상태:", this.noticeToChange.newStatus);
+
+        await axios.put(`/api/notices/${this.noticeToChange.noticeId}/status`, 
+          this.noticeToChange.newStatus,  // 단순 문자열로 전송
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'text/plain' // 명시적으로 텍스트로 보낸다고 지정
+          }
+        });
+
+        // 로컬 데이터 상태 변경
+        this.noticeToChange.status = this.noticeToChange.newStatus;
+        const index = this.noticementsData.findIndex(
+          (notice) => notice.noticeId === this.noticeToChange.noticeId
+        );
+
+        if (index !== -1) {
+          console.log("변경된 상태를 로컬에 업데이트:", this.noticeToChange.newStatus);
+          this.noticementsData[index].status = this.noticeToChange.status;
+        }
+
+        // 모달 닫기 및 성공 모달 표시
+        this.isChangeModalOpen = false;
+        this.isChangeSuccessModalOpen = true;
+        setTimeout(() => {
+          this.isChangeSuccessModalOpen = false;
+        }, 1500);
+
+        this.closeCreateModal();
+
+        // 공지사항 목록 새로고침
+        this.fetchNotices();
+        
+      } catch (error) {
+        console.error("공지사항 상태 변경 중 오류 발생:", error);
+      }
+    },
+    // 공지사항 작성 요청
+    async createNotice() {
+      const today = new Date().toISOString().split('T')[0]; // 오늘 날짜 생성
+      
+      // 공지사항 데이터를 서버로 전송
+      const newNotice = {
+        title: this.newNotice.title,
+        content: this.newNotice.content,
+        regdate: today, // 등록일자
+        member_id: this.adminId, // 현재 로그인한 관리자 ID
+        isPinned: true, // 공지사항 여부
+      };
+
+      try {
+        const token = localStorage.getItem('jwt'); // JWT 토큰
+        const response = await axios.post('/api/notices', newNotice, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // 서버에서 응답 성공 시
+        console.log('공지사항이 성공적으로 저장되었습니다:', response.data);
+
+        // 작성 완료 모달 표시
+        this.isCreateSuccessModalOpen = true;
+
+        // 일정 시간 후 작성 완료 모달 닫기
+        setTimeout(() => {
+          this.isCreateSuccessModalOpen = false;
+        }, 1500);
+
+        // 모달 닫기 및 초기화
+        this.closeCreateModal();
+        this.newNotice = { title: '', content: '', status: 'public' };
+
+        // 공지사항 목록 새로고침
+        this.fetchNotices();
+
+      } catch (error) {
+        console.error('공지사항 작성 중 오류 발생:', error);
+      }
+    },
+    openCreateModal() {
+      this.isCreateModalOpen = true;  // 작성하기 모달을 여는 상태로 변경
+      
+    },
+    cancelChange() {
+      this.isChangeModalOpen = false;
+      this.noticeToChange = null;
+    },
+    closeCreateModal() {
+      this.isCreateModalOpen = false; // 작성하기 모달을 닫는 상태로 변경
+    },
     formatDate(date) {
       if (!date) return "날짜 없음"; // date가 없을 경우 처리
 
@@ -240,82 +341,11 @@ export default {
       this.openDropdownIndex = this.openDropdownIndex === index ? null : index;
     },
     handleItemClick(notice, status) {
+      console.log("클릭한 공지사항 ID:", notice.noticeId);  // ID가 올바르게 전달되는지 확인
       this.noticeToChange = { ...notice, newStatus: status };
       this.isChangeModalOpen = true;
     },
-    changeNotice() {
-      if (!this.noticeToChange) return;
 
-      // 상태 업데이트
-      this.noticeToChange.status = this.noticeToChange.newStatus;
-
-      const index = this.noticementsData.findIndex(
-        (notice) => notice.notice_id === this.noticeToChange.notice_id
-      );
-      if (index !== -1) {
-        this.noticementsData[index].status = this.noticeToChange.status;
-      }
-
-      // 모달 닫기 및 성공 모달 표시
-      this.isChangeModalOpen = false;
-      this.isChangeSuccessModalOpen = true;
-      setTimeout(() => {
-        this.isChangeSuccessModalOpen = false;
-      }, 1500);
-    },
-    cancelChange() {
-      this.isChangeModalOpen = false;
-      this.noticeToChange = null;
-    },
-    openCreateModal() {
-      this.isCreateModalOpen = true;
-    },
-    closeCreateModal() {
-      this.isCreateModalOpen = false;
-    },
-  // 공지사항 작성 요청
-  async createNotice() {
-    const today = new Date().toISOString().split('T')[0]; // 오늘 날짜 생성
-    
-    // 공지사항 데이터를 서버로 전송
-    const newNotice = {
-      title: this.newNotice.title,
-      content: this.newNotice.content,
-      regdate: today, // 등록일자
-      member_id: this.adminId, // 현재 로그인한 관리자 ID
-      isPinned: true, // 공지사항 여부
-    };
-
-    try {
-      const token = localStorage.getItem('jwt'); // JWT 토큰
-      const response = await axios.post('/api/notices', newNotice, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // 서버에서 응답 성공 시
-      console.log('공지사항이 성공적으로 저장되었습니다:', response.data);
-
-      // 작성 완료 모달 표시
-      this.isCreateSuccessModalOpen = true;
-
-      // 일정 시간 후 작성 완료 모달 닫기
-      setTimeout(() => {
-        this.isCreateSuccessModalOpen = false;
-      }, 1500);
-
-      // 모달 닫기 및 초기화
-      this.closeCreateModal();
-      this.newNotice = { title: '', content: '', status: 'public' };
-
-      // 공지사항 목록 새로고침
-      this.fetchNotices();
-
-    } catch (error) {
-      console.error('공지사항 작성 중 오류 발생:', error);
-    }
-  },
 },
 mounted() {
     // 페이지가 로드될 때 공지사항 데이터를 불러옴

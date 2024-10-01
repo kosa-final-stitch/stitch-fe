@@ -97,9 +97,11 @@ export default {
     pinnedNotices() {
       return this.items.filter(item => item.isPinned);
     },
+
     filteredItems() {
       const selectedCategory = this.categories[this.activeTab];
       let filtered = [];
+
       if (selectedCategory === "전체") {
         filtered = this.items;
       } else {
@@ -109,6 +111,10 @@ export default {
       if (this.searchKeyword) {
         filtered = filtered.filter((item) => item.title.includes(this.searchKeyword));
       }
+
+      // 공지사항 상태에 따라 필터링 (비공개 상태의 공지사항은 제외)
+      filtered = filtered.filter(item => item.status !== 'private');
+
       // 정렬 기준에 따라 정렬
       if (this.activeSort === "popular") {
         filtered.sort((a, b) => b.views - a.views); // 조회수 내림차순으로 정렬
