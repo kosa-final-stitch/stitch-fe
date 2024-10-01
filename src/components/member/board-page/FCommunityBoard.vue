@@ -39,8 +39,9 @@
         <tbody>
           <tr v-for="(item, index) in paginatedData" :key="index" :class="{'notice-row': item.isPinned}">
             <td>{{ index + 1 }}</td>
-            <td @click="goToPostDetail(item.boardId)" class="clickable">
-              <span v-if="item.isPinned">(공지) </span>{{ item.title }}
+            <td @click="goToPostDetail(item.boardId)" class="clickable" 
+            :style="{ color: item.isPinned ? '#007bff' : 'black', textAlign: 'left' }">
+              <span v-if="item.isPinned"> (공지) </span>{{ item.title }}
             </td>
             <td>{{ item.adminName ||item.nickname || '알 수 없음' }}</td>
             <td>{{ formatDate(item.regdate) }}</td>
@@ -469,15 +470,22 @@ export default {
 }
 
 
-.clickable {
-  cursor: pointer;
-  color: #007bff;
-  text-decoration: underline;
+/* 공지사항 행 전체에 배경색 적용 */
+.notice-row {
+  background-color: #f8f8f8; /* 공지사항 행 전체 배경색 */
 }
 
-/* 공지사항 행 스타일 */
-.notice-row {
-  background-color: #f8f8f8; /* 공지사항 배경색 */
-  font-weight: bold;
+/* 공지사항 제목에만 밑줄 및 파란색 적용 */
+.notice-row .clickable {
+  text-decoration: underline; /* 공지사항에만 밑줄 추가 */
+  color: blue; /* 공지사항 제목은 파란색 */
+  font-weight: 600;
+}
+
+/* 일반 게시글 제목에 밑줄 없음 */
+.clickable {
+  cursor: pointer;
+  color: #333; /* 일반 게시글 제목은 검정색 */
+  text-decoration: none; /* 일반 게시글에 밑줄 없음 */
 }
 </style>
