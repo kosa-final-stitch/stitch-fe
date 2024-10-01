@@ -109,7 +109,7 @@ export default {
     // 강좌 정보 가져오는 메서드
     fetchCourses() {
       axios
-        .get(`http://localhost:8080/api/academies/courses`)
+        .get(`/api/academies/courses`)
         .then((response) => {
           const today = new Date();
           const upcomingCourses = [];

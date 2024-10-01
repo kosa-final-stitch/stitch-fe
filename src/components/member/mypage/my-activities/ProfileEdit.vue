@@ -1,10 +1,7 @@
 <template>
   <div class="profile-edit">
     <h3>나의 정보</h3>
-    <p>
-      회원정보를 관리할 수 있습니다. 아래에서 정보를 수정하고 저장할 수
-      있습니다.
-    </p>
+    <p>회원정보를 관리할 수 있습니다. 아래에서 정보를 수정하고 저장할 수 있습니다.</p>
 
     <div class="info-section">
       <h4>내 정보</h4>
@@ -44,27 +41,15 @@
       <!-- 비밀번호 변경 필드 -->
       <div class="info-row">
         <label for="currentPassword">현재 비밀번호</label>
-        <input
-          type="password"
-          id="currentPassword"
-          v-model="editableUserInfo.currentPassword"
-        />
+        <input type="password" id="currentPassword" v-model="editableUserInfo.currentPassword" />
       </div>
       <div class="info-row">
         <label for="newPassword">새 비밀번호</label>
-        <input
-          type="password"
-          id="newPassword"
-          v-model="editableUserInfo.newPassword"
-        />
+        <input type="password" id="newPassword" v-model="editableUserInfo.newPassword" />
       </div>
       <div class="info-row">
         <label for="confirmPassword">새 비밀번호 확인</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          v-model="editableUserInfo.confirmPassword"
-        />
+        <input type="password" id="confirmPassword" v-model="editableUserInfo.confirmPassword" />
       </div>
     </div>
 
@@ -106,14 +91,10 @@ export default {
     // 사용자 정보를 서버에서 가져오는 함수
     fetchUserInfo() {
       axios
-        .get("http://localhost:8080/api/member/info")
+        .get("/api/member/info")
         .then((response) => {
           this.userInfo = response.data;
-          console.log(
-            JSON.stringify(
-              "사용자정보를 서버에서 가져오기" + JSON.stringify(this.userInfo)
-            )
-          );
+          console.log(JSON.stringify("사용자정보를 서버에서 가져오기" + JSON.stringify(this.userInfo)));
           this.editableUserInfo = { ...this.userInfo };
         })
         .catch((error) => {
@@ -122,15 +103,12 @@ export default {
     },
     // 사용자 정보를 서버에 저장하는 함수
     saveProfile() {
-      if (
-        this.editableUserInfo.newPassword !==
-        this.editableUserInfo.confirmPassword
-      ) {
+      if (this.editableUserInfo.newPassword !== this.editableUserInfo.confirmPassword) {
         alert("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         return;
       }
       axios
-        .put("http://localhost:8080/api/member/info", this.editableUserInfo)
+        .put("/api/member/info", this.editableUserInfo)
         .then(() => {
           alert("회원 정보가 저장되었습니다.");
           this.userInfo = { ...this.editableUserInfo }; // 저장 후 현재 사용자 정보 업데이트
