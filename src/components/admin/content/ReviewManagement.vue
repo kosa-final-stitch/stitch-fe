@@ -5,6 +5,7 @@
  ---------------------
  2024.09.10 김호영 | admin 초기 설정
  2024.09.19 김호영 | 수강평 페이지 디자인 및 기능 구현.
+ 2024.10.01 김호영 | 수강평 데이터 불러오기 및 삭제 구현 완.
  -->
 
  <template>
@@ -26,8 +27,6 @@
           />
         </div>
       
-
-
         <!-- 검색 icon + 검색창 -->
          <div class="search-input-container">
           <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="search-icon" />
@@ -35,6 +34,7 @@
         </div>
       </div>
     </div>
+
 
     <!-- 수강평 목록 테이블 -->
     <table class="review-list-table">
@@ -51,13 +51,16 @@
         </tr>
       </thead>
       <tbody>
+        <tr v-if="filteredReviews.length === 0">
+          <td colspan="8">신고문의가 없습니다.</td>
+        </tr>
         <tr v-for="(review, index) in paginatedReviews" :key="review.id">
           <td>{{  (currentPage -1) * reviewsPerPage + index + 1 }}</td>
-          <td>{{ review.id || '-' }}</td>
+          <td>{{ review.reviewId || '-' }}</td>
           <td>{{ review.education || '-' }}</td>
-          <td>{{ review.member || '-' }}</td>  <!-- 작성자 -->
-          <td>{{ formatDate(review.regdate) || '-' }}</td>
-          <td>{{ formatDate(review.editdate) || '-' }}</td>
+          <td>{{ review.nickname || '-' }}</td>  <!-- 작성자 -->
+          <td>{{ formatDate(review.regDate) || '-' }}</td>
+          <td>{{ formatDate(review.editDate) || '-' }}</td>
           <td> {{ calculateAverageRating(review) + ' 점' || '-' }}</td>
           <td>
             <div class="dropdown-container" @click.stop="toggleDropdown(index)">
@@ -82,7 +85,7 @@
     <div v-if="isDeleteModalOpen" class="modal-overlay">
       <div class="modal-content">
         <h3>정말 삭제하시겠습니까?</h3>
-        <p>선택하신 수강평 번호 : {{ reviewToDelete?.id }}</p>
+        <p>선택하신 수강평 번호 : {{ reviewToDelete?.reviewId }} 번</p>
         <div class="modal-buttons">
           <button @click="deleteReview">확인</button>
           <button @click="cancelDelete">취소</button>
@@ -115,6 +118,7 @@
 
 <script>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import axios from 'axios';
 
 export default {
   components: {
@@ -173,18 +177,26 @@ export default {
     },
   },
   methods: {
+
+    // 날짜 형식
     formatDate(date) {
+      // 날짜가 유효한지 확인
+      if (!date || isNaN(new Date(date).getTime())) {
+        return '-'; // 유효하지 않은 날짜는 '-'로 반환
+      }
+
       const d = new Date(date);
       return d.toISOString().replace('T', ' ').substring(0, 10);
     },
+
     // 평균 별점 계산 함수
     calculateAverageRating(review) {
-      const total = review.education_rating +
-                    review.instructor_rating +
-                    review.facility_rating +
-                    review.atmosphere_rating +
-                    review.management_rating +
-                    review.later_rating;
+      const total = review.educationRating +
+                    review.instructorRating +
+                    review.facilityRating +
+                    review.atmosphereRating +
+                    review.managementRating +
+                    review.laterRating;
       const average = total / 6;
       return average.toFixed(1);  // 소수점 1자리까지 표시
     },
@@ -209,200 +221,47 @@ export default {
       this.isDeleteModalOpen = true;
     },
     // 수강평 삭제
-    deleteReview() {
+    async deleteReview() {
       if (!this.reviewToDelete || !this.reviews) {
         return;
       }
-      // 수강평 삭제 로직 (API 연동 부분)
-      this.reviews = this.reviews.filter(review => review.id !== this.reviewToDelete.id);
 
+      try {
+      // API로 DELETE 요청 전송
+      await axios.delete(`/api/member/reviews/${this.reviewToDelete.reviewId}`);
+      
+      // 로컬 데이터에서 삭제
+      this.reviews = this.reviews.filter(review => review.reviewId !== this.reviewToDelete.reviewId);
+
+      // 모달 닫기 및 성공 모달 열기
       this.isDeleteModalOpen = false;
       this.isDeleteSuccessModalOpen = true;
       setTimeout(() => {
         this.isDeleteSuccessModalOpen = false;
       }, 1500);
-    },
+
+    } catch (error) {
+      console.error('리뷰 삭제 중 오류 발생:', error);
+    }
+  },
     // 삭제 취소
     cancelDelete() {
       this.isDeleteModalOpen = false;
       this.reviewToDelete = null;
     },
   },
+
   mounted() {
-  // 수강평 데이터를 불러오는 로직 (임시 데이터로 테스트)
-  this.reviews = [
-    { 
-      id: 1, 
-      member: '박요한', 
-      education: 'MSA 4차 취업 연계 교육과정', 
-      regdate: '2024-09-01', 
-      editdate: '2024-09-02', 
-      education_rating: 5, 
-      instructor_rating: 4, 
-      facility_rating: 4, 
-      atmosphere_rating: 5, 
-      management_rating: 5, 
-      later_rating: 4 
-    },
-    { 
-      id: 2, 
-      member: '홍길동', 
-      education: 'MSA 4차 취업 연계 교육과정', 
-      regdate: '2024-09-05', 
-      editdate: '2024-09-06', 
-      education_rating: 4, 
-      instructor_rating: 3, 
-      facility_rating: 1, 
-      atmosphere_rating: 4, 
-      management_rating: 5, 
-      later_rating: 5 
-    },
-    { 
-      id: 3, 
-      member: '임꺽정', 
-      education: 'MSA 4차 취업 연계 교육과정', 
-      regdate: '2024-09-01', 
-      editdate: '2024-09-02', 
-      education_rating: 2, 
-      instructor_rating: 2, 
-      facility_rating: 5, 
-      atmosphere_rating: 5, 
-      management_rating: 1, 
-      later_rating: 5 
-    },
-    { 
-      id: 4, 
-      member: '김판장', 
-      education: '파이썬을 이용한 자동화 스크립트', 
-      regdate: '2024-09-03', 
-      editdate: '2024-09-04', 
-      education_rating: 3, 
-      instructor_rating: 4, 
-      facility_rating: 3, 
-      atmosphere_rating: 3, 
-      management_rating: 4, 
-      later_rating: 3 
-    },
-    { 
-      id: 5, 
-      member: '유재석', 
-      education: '[R&D 전문가 양성 코스]', 
-      regdate: '2024-09-01', 
-      editdate: '2024-09-02', 
-      education_rating: 5, 
-      instructor_rating: 5, 
-      facility_rating: 4, 
-      atmosphere_rating: 4, 
-      management_rating: 4, 
-      later_rating: 4 
-    },
-    { 
-      id: 6, 
-      member: '이애플', 
-      education: '인공지능과 빅데이터 분석을 위한 파이썬(Python) 프로그래밍', 
-      regdate: '2024-09-05', 
-      editdate: '2024-09-06', 
-      education_rating: 3, 
-      instructor_rating: 5, 
-      facility_rating: 3, 
-      atmosphere_rating: 1, 
-      management_rating: 3, 
-      later_rating: 3 
-    },
-    { 
-      id: 7, 
-      member: '이이경', 
-      education: '인공지능과 빅데이터 분석을 위한 파이썬(Python) 프로그래밍', 
-      regdate: '2024-09-05', 
-      editdate: '2024-09-06', 
-      education_rating: 3, 
-      instructor_rating: 1, 
-      facility_rating: 4, 
-      atmosphere_rating: 4, 
-      management_rating: 3, 
-      later_rating: 3 
-    },
-    { 
-      id: 8, 
-      member: '이수박', 
-      education: '(사물인터넷)IoT를 활용한 자바(JAVA) 프로그램 개발자', 
-      regdate: '2024-09-05', 
-      editdate: '2024-09-06', 
-      education_rating: 2, 
-      instructor_rating: 3, 
-      facility_rating: 3, 
-      atmosphere_rating: 5, 
-      management_rating: 4, 
-      later_rating: 3 
-    },
-    { 
-      id: 9, 
-      member: '김미정', 
-      education: '[IT코칭] 파이썬으로 배우는 실전 프로그래밍', 
-      regdate: '2024-09-05', 
-      editdate: '2024-09-06', 
-      education_rating: 3, 
-      instructor_rating: 4, 
-      facility_rating: 4, 
-      atmosphere_rating: 5, 
-      management_rating: 3, 
-      later_rating: 3 
-    },
-    { 
-      id: 10, 
-      member: '룰루', 
-      education: '김영한의 Spring Boot', 
-      regdate: '2024-09-05', 
-      editdate: '2024-09-06', 
-      education_rating: 4, 
-      instructor_rating: 5, 
-      facility_rating: 5, 
-      atmosphere_rating: 5, 
-      management_rating: 5, 
-      later_rating: 5 
-    },
-    { 
-      id: 11, 
-      member: '카카오', 
-      education: '우아한 테크', 
-      regdate: '2024-09-05', 
-      editdate: '2024-09-06', 
-      education_rating: 4, 
-      instructor_rating: 4, 
-      facility_rating: 4, 
-      atmosphere_rating: 4, 
-      management_rating: 5, 
-      later_rating: 3 
-    },
-    { 
-      id: 12, 
-      member: '네이버', 
-      education: 'SSAFY', 
-      regdate: '2024-09-05', 
-      editdate: '2024-09-06', 
-      education_rating: 5, 
-      instructor_rating: 3, 
-      facility_rating: 3, 
-      atmosphere_rating: 5, 
-      management_rating: 3, 
-      later_rating: 2 
-    },
-    { 
-      id: 13, 
-      member: '네이버', 
-      education: 'SSAFY', 
-      regdate: '2024-09-05', 
-      editdate: '2024-09-06', 
-      education_rating: 5, 
-      instructor_rating: 3, 
-      facility_rating: 3, 
-      atmosphere_rating: 5, 
-      management_rating: 3, 
-      later_rating: 2 
-    },
-    
-  ];
-},
+      // 서버로부터 수강평 데이터를 불러오는 로직
+    axios.get('/api/member/reviews/all') // 모든 리뷰를 가져오는 API 호출
+      .then(response => {
+        console.log('수강평 데이터:', response.data); // 데이터 확인
+        this.reviews = response.data; // 데이터를 reviews 배열에 저장
+      })
+      .catch(error => {
+        console.error('수강평 데이터를 불러오는 중 오류 발생:', error);
+    });
+  },
 };
 </script>
 
