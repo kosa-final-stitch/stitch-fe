@@ -51,6 +51,7 @@
           <th>결제 항목</th>
           <th>결제 금액</th>
           <th>결제 수단</th>
+          <th>결제 확정 날짜</th>
           <th>상태</th>
           <th></th>
         </tr>
@@ -64,7 +65,9 @@
           <td>{{ pay.category }}</td> <!-- 결제 항목 -->
           <td>{{ formatAmount(pay.amount) }} 원</td> <!-- 결제 금액 -->
           <td>{{ pay.method === 'card' ? '카드' : '계좌이체' }}</td>
+          <td>{{ pay.editDate ? formatDate(pay.editDate) : '-' }}</td>
           <td>{{ pay.status === 'pending' ? '미처리' : '처리 완료' }}</td>
+
           <td>
             <div class="dropdown-container" @click.stop="toggleDropdown(index)">
               <font-awesome-icon :icon="['fas', 'bars']" class="icon-bars" />
@@ -206,56 +209,30 @@ export default {
       this.payToChange = pay;
       this.isChangeModalOpen = true;
     },
-
-
-/*    changePay() {
-      if (!this.payToChange) {
-        console.error("payToChange가 정의되지 않았습니다");
-        return;
-      }
-
-      // 상태를 'completed'로 변경하면서 Vue가 반응하도록 처리
-      this.payToChange.status = 'completed'; // 직접 변경
-
-      // paymentsData 배열에서 상태가 변경된 항목을 반영
-      const index = this.paymentsData.findIndex(payment => payment.payment_id === this.payToChange.payment_id);
-      if (index !== -1) {
-      // Vue 3에서는 배열의 항목을 직접 업데이트해도 반응성을 유지함
-      this.paymentsData[index] = { ...this.payToChange };
-      }
-
-      // 모달 닫기 및 성공 모달 표시
-      this.isChangeModalOpen = false;
-      this.isChangeSuccessModalOpen = true;
-
-      setTimeout(() => {
-        this.isChangeSuccessModalOpen = false;
-      }, 1500);
-    },
-
-    */
- //axios 
-
-   changePay() {
-    if (!this.payToChange) return;
+    async changePay() {
+      if (!this.payToChange) return;
 
     // 상태를 'completed'로 변경하면서 Vue가 반응하도록 처리
     Object.assign(this.payToChange, { status: 'completed' });
 
-    // 서버로 상태 업데이트 API 요청
-    axios.post('/api/update-payment-status', { paymentId: this.payToChange.payment_id, status: 'completed' })
-    .catch(error => {
-      console.error('Error updating payment status', error);
-    });
+        try {
+        // 서버로 상태 업데이트 API 요청
+        await axios.post('/api/update-payment-status', { 
+          paymentId: this.payToChange.paymentId, 
+          status: 'completed' });
+        
+        // 성공 처리
+        this.isChangeModalOpen = false;
+        this.isChangeSuccessModalOpen = true;
 
-  // 모달 닫기 및 성공 모달 표시
-  this.isChangeModalOpen = false;
-  this.isChangeSuccessModalOpen = true;
+        setTimeout(() => {
+          this.isChangeSuccessModalOpen = false;
+        }, 1500);
 
-  setTimeout(() => {
-    this.isChangeSuccessModalOpen = false;
-  }, 1500);
-},
+      } catch (error) {
+        console.error('Error updating payment status', error);
+      }
+    },
 
     // 변경 취소
     cancelChange() {
