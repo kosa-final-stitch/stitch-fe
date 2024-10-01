@@ -110,6 +110,7 @@ export default {
 
     // 날짜 형식 변환
     formatDate(date) {
+      if (!date) return null;
       return new Date(date).toLocaleDateString();
     },
   },

@@ -9,8 +9,8 @@
       <thead>
         <tr>
           <th></th>
-          <th>번호</th>
-          <th>내용</th>
+          <th>카테고리</th>
+          <th>제목</th>
           <th>질문일</th>
           <th>답변일</th>
         </tr>
@@ -18,16 +18,12 @@
       <!-- 테이블 바디 -->
       <tbody>
         <!-- 여러 개의 문의를 리스트로 출력 -->
-        <tr
-          v-for="inquiry in inquiries"
-          :key="inquiry.id"
-          @click="goToDetail(inquiry.id)"
-        >
-          <td><input type="checkbox" /></td>
-          <td>{{ inquiry.id }}</td>
+        <tr v-for="(inquiry, index) in inquiries" :key="inquiry.inquiryid" @click="goToDetail(inquiry.inquiryid)">
+          <td>{{ index + 1 }}</td>
+          <td>{{ inquiry.category }}</td>
           <td>{{ inquiry.title }}</td>
-          <td>{{ inquiry.date }}</td>
-          <td>{{ inquiry.replyDate }}</td>
+          <td>{{ formatDate(inquiry.regDate) }}</td>
+          <td>{{ formatDate(inquiry.ansDate) }}</td>
         </tr>
       </tbody>
     </table>
@@ -35,29 +31,62 @@
 </template>
 
 <script>
+import axios from "axios";
+import { useMemberStore } from "/src/store/member-store"; // Pinia 상태관리에서 memberStore 가져오기
+
 export default {
   data() {
     return {
-      inquiries: [
-        {
-          id: 1,
-          title: "로그인이 안된다구요",
-          date: "2024-09-01",
-          replyDate: "2024-09-02",
-        },
-        {
-          id: 2,
-          title: "비밀번호가 기억이 안납니다",
-          date: "2024-09-02",
-          replyDate: "2024-09-03",
-        },
-        // 추가적인 문의 항목들
-      ],
+      inquiries: [], //모든 문의글 저장
+      memberId: null, // 로그인한 사용자 ID
     };
   },
+  computed: {
+    currentUser() {
+      const memberStore = useMemberStore();
+      return memberStore.member || { memberId: null }; // 현재 로그인한 사용자 정보
+    },
+  },
+  mounted() {
+    this.memberId = this.currentUser.memberId;
+    console.log("마페 문의 현재 사용자 정보:", this.memberId);
+    if (this.memberId) {
+      this.fetchInquiries(); // 초기 데이터 로드
+    }
+  },
   methods: {
-    navigateToCertificateRequest() {
-      this.$router.push({ name: "CertificateRequest" });
+    fetchInquiries() {
+      axios
+        .get(`/api/member/inquiry/${this.memberId}`)
+        .then((response) => {
+          const inquiries = response.data || []; // 데이터가 없을 경우 빈 배열 처리
+          console.log("문의 글들 :", inquiries); // 데이터를 확인
+
+          if (Array.isArray(inquiries)) {
+            this.inquiries = inquiries.map((inquiry) => {
+              return {
+                inquiryid: inquiry.inquiryid,
+                category: inquiry.category,
+                content: inquiry.content,
+                regDate: inquiry.regDate,
+                ansDate: inquiry.ansDate,
+                title: inquiry.title,
+              };
+            });
+          } else {
+            console.error("받아온 데이터가 배열이 아닙니다:", inquiries);
+            this.inquiries = []; // 배열이 아닌 경우 빈 데이터 처리s
+          }
+        })
+        .catch((error) => {
+          console.error("게시글 데이터를 가져오는 중 오류 발생", error);
+          this.inquiries = []; // 오류 발생 시 빈 배열로 설정
+        });
+    },
+    // 날짜 형식 변환
+    formatDate(date) {
+      if (!date) return null;
+      return new Date(date).toLocaleDateString();
     },
     goToDetail(id) {
       // 해당 문의의 상세 페이지로 이동
