@@ -39,7 +39,9 @@
         <tbody>
           <tr v-for="(item, index) in paginatedData" :key="index" :class="{'notice-row': item.isPinned}">
             <td>{{ index + 1 }}</td>
-            <td @click="goToPostDetail(item.boardId)" class="clickable">{{ item.title }}</td>
+            <td @click="goToPostDetail(item.boardId)" class="clickable">
+              <span v-if="item.isPinned">(공지) </span>{{ item.title }}
+            </td>
             <td>{{ item.adminName ||item.nickname || '알 수 없음' }}</td>
             <td>{{ formatDate(item.regdate) }}</td>
           </tr>
@@ -107,6 +109,7 @@ export default {
       } else {
         filtered = this.items.filter((item) => item.category === selectedCategory);
       }
+      
       // 검색어로 필터링
       if (this.searchKeyword) {
         filtered = filtered.filter((item) => item.title.includes(this.searchKeyword));
@@ -115,14 +118,23 @@ export default {
       // 공지사항 상태에 따라 필터링 (비공개 상태의 공지사항은 제외)
       filtered = filtered.filter(item => item.status !== 'private');
 
-      // 정렬 기준에 따라 정렬
+      // 정렬 기준에 따라 정렬 (공지사항을 먼저 상단에 고정)
+      const pinnedItems = filtered.filter(item => item.isPinned);
+      const unpinnedItems = filtered.filter(item => !item.isPinned);
+
       if (this.activeSort === "popular") {
-        filtered.sort((a, b) => b.views - a.views); // 조회수 내림차순으로 정렬
+        // 게시글을 조회수 내림차순으로 정렬
+        unpinnedItems.sort((a, b) => b.views - a.views);
       } else if (this.activeSort === "recent") {
-        filtered.sort((a, b) => new Date(b.regdate) - new Date(a.regdate)); // 최신순 정렬
+        // 게시글을 최신순으로 정렬
+        unpinnedItems.sort((a, b) => new Date(b.regdate) - new Date(a.regdate));
       }
-      return filtered;
+
+      // 공지사항을 상단에 고정한 후 게시글을 이어 붙임
+      return [...pinnedItems, ...unpinnedItems];
     },
+
+    // 페이지네이션
     paginatedData() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
@@ -178,16 +190,22 @@ export default {
       // 공지사항과 게시글을 합침
       this.items = [...notices, ...posts];
 
-      // 공지사항을 상단에 배치하기 위해 정렬
-      this.items.sort((a, b) => {
-        if (b.isPinned - a.isPinned !== 0) {
-          return b.isPinned - a.isPinned;
-        }
-        return new Date(b.regdate) - new Date(a.regdate); // 최신순 정렬
-      });
+
+      // 공지사항 상단에 배치하려고 먼저 분리 후 정렬
+      const pinnedItems = this.items.filter(item => item.isPinned);
+      const unpinnedItems = this.items.filter(item => !item.isPinned);
+
+      // 공지사항 그대로 상단에 배치, 최신순으로 정렬
+      pinnedItems.sort((a, b) => new Date(b.regdate) - new Date(a.regdate)); // 공지사항 최신순 정렬
+      unpinnedItems.sort((a, b) => new Date(b.regdate) - new Date(a.regdate)); // 게시글 최신순 정렬
+
+
+      this.items = [...pinnedItems, ...unpinnedItems];
+
     } catch (error) {
       console.error("Error fetching posts or notices:", error);
     }
+  
   },
     searchPosts() {
       if (!this.searchKeyword) {
@@ -213,7 +231,24 @@ export default {
     },
     setActiveSort(sortType) {
       this.activeSort = sortType;
-      // 정렬 로직을 추가할 수 있음
+      
+      // 정렬 기준에 따라 공지사항과 게시글을 다시 정렬
+      const pinnedItems = this.items.filter(item => item.isPinned);
+      const unpinnedItems = this.items.filter(item => !item.isPinned);
+
+      // 공지사항은 최신순으로 고정 (정렬 변경 시 영향 받지 않음)
+      pinnedItems.sort((a, b) => new Date(b.regdate) - new Date(a.regdate));
+
+      if (sortType === "recent") {
+        // 게시글을 최신순으로 정렬
+        unpinnedItems.sort((a, b) => new Date(b.regdate) - new Date(a.regdate));
+      } else if (sortType === "popular") {
+        // 게시글을 조회수 순으로 정렬
+        unpinnedItems.sort((a, b) => b.views - a.views);
+      }
+
+      // 공지사항 상단 고정 후 게시글을 이어 붙임
+      this.items = [...pinnedItems, ...unpinnedItems];
     },
     previousPage() {
       if (this.currentPage > 1) {
