@@ -240,11 +240,12 @@ export default {
         });
     },
     // 각 강좌에 대한 리뷰 데이터를 가져와서 별점을 계산하는 메서드
-    fetchCourseReviews(course) {
+    async fetchCourseReviews(course) {
       axios
         .get(`/api/courses/${course.course_id}/reviews`) // 각 과정의 리뷰 API 호출
         .then((response) => {
           const reviews = response.data;
+          console.log("강좌에 대한 리뷰 데이터를 가져와서 별점" + reviews);
           if (reviews.length > 0) {
             const averageRating = this.calculateAverageRating(reviews); // 리뷰 데이터를 통해 별점 계산
             course.rating = averageRating; // 계산된 별점을 course.rating에 저장
@@ -291,6 +292,7 @@ export default {
 
       return averageRating.toFixed(1); // 소수점 1자리까지 표시
     },
+
     // 학원 모든리뷰의 차트 생성 함수
     generateChart(reviewData) {
       if (this.chart) {
