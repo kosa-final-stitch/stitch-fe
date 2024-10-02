@@ -1,5 +1,9 @@
 <template>
-  <div class="inquiry-detail" v-if="inquiry">
+  <div v-if="loading">
+    <!-- 로딩 중일 때 표시할 내용 -->
+    <p>로딩 중입니다...</p>
+  </div>
+  <div class="inquiry-detail" v-else-if="inquiry">
     <h1>문의상세보기</h1>
     <p>회원님께서 문의하신 정보 입니다.</p>
 
@@ -31,23 +35,26 @@
 
 <script>
 export default {
-  name: "InquiryDetail",
   data() {
     return {
       inquiry: null, // 초기값은 null로 설정
+      loading: true, // 로딩 상태 추가
     };
   },
   created() {
-    const inquiryId = this.$route.params.id; // URL 매개변수로부터 id를 가져옴
-    this.fetchInquiry(inquiryId); // 해당 id로 데이터를 가져옴
+    const inquiryId = this.$route.params.inquiryId; // URL에서 inquiryId를 가져옴
+    console.log("inquiryId:", inquiryId); // 콘솔에 inquiryId 출력
+    this.fetchInquiry(inquiryId);
   },
   methods: {
-    fetchInquiry(id) {
-      // 실제 데이터 가져오는 로직
-      // 예시로 하드코딩된 데이터를 사용함
+    fetchInquiry(inquiryId) {
+      // 데이터를 가져오기 전에 로딩 상태 시작
+      this.loading = true;
+
+      // 하드코딩된 데이터 예시
       const inquiries = [
         {
-          id: 1,
+          inquiryId: 1,
           title: "로그인이 왜 안되죠?",
           author: "박호영",
           date: "2024-09-01",
@@ -59,18 +66,20 @@ export default {
           },
         },
         {
-          id: 2,
+          inquiryId: 2,
           title: "비밀번호가 기억이 안납니다",
           author: "김철수",
           date: "2024-09-02",
           content: "비밀번호를 잊어버렸습니다.",
           reply: { author: "관리자", date: "2024-09-03", content: "비밀번호 초기화 링크를 이메일로 보내드렸습니다." },
         },
-        // 추가적인 문의 항목들
       ];
 
-      // 데이터 배열에서 해당 id를 가진 문의를 찾아서 설정
-      this.inquiry = inquiries.find((inquiry) => inquiry.id == id);
+      // id에 맞는 데이터를 찾기
+      this.inquiry = inquiries.find((inquiry) => inquiry.inquiryId == inquiryId);
+
+      // 데이터를 설정한 후 로딩 상태 종료
+      this.loading = false;
     },
   },
 };

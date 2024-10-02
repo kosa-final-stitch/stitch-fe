@@ -102,9 +102,9 @@ export default {
       if (!date) return null;
       return new Date(date).toLocaleDateString();
     },
-    goToDetail(id) {
+    goToDetail(inquiryid) {
       // 해당 문의의 상세 페이지로 이동
-      this.$router.push({ name: "InquiryDetail", params: { id } });
+      this.$router.push({ name: "InquiryDetail", params: { inquiryid } });
     },
   },
 };
