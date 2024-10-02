@@ -72,7 +72,7 @@
           <td>{{ member.nickname }}</td>
           <td>{{ member.address }}</td>
           <td>{{ member.gender }}</td>
-          <td>{{ member.birth }}</td>
+          <td>{{ formatDate(member.birth) }}</td>
           <td>{{ member.phone }}</td>
           <td>{{ formatDate(member.signupdate) }}</td>
           <td>{{ formatDate(member.editdate) }}</td>
@@ -198,8 +198,12 @@ export default {
       }
     },
     formatDate(date) {
-      const d = new Date(date);
-      return d.toISOString().replace('T', ' ').substring(0, 10);
+      if (!date) return '-';  // 날짜가 없을 때 처리
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) {
+        return '유효하지 않은 날짜';
+      }
+      return parsedDate.toISOString().split('T')[0];  // 시간 정보 제거하고 YYYY-MM-DD만 반환
     },
     // 드롭다운 토글
     toggleDropdown(index) {
@@ -227,6 +231,7 @@ export default {
         console.log('isDeleteModalOpen:', this.isDeleteModalOpen);
         this.memberToDelete = null; // 초기화 
         this.$nextTick(() => {
+          this.$forceUpdate(); // 강제 렌더링
         console.log('모달 상태 및 멤버 초기화 완료');
         });
       },
@@ -255,21 +260,25 @@ export default {
       setTimeout(() => {
         this.isDeleteSuccessModalOpen = false;
         this.memberToDelete = null; // 초기화
-      }, 1500);   
-    } catch (error) {
-      console.error("사용자 삭제 중 오류 발생: ", error);
-    }
-  },
-      closeSuccessModal() {
-        this.isDeleteSuccessModalOpen = false;
-      },
-      // 페이지 이동 메서드
-      goToPage(page) {
-        if (page >= 1 && page <= this.totalPages) {
-          this.currentPage = page;
-        }
-      },
+        this.$nextTick(() => {
+          this.$forceUpdate(); // 강제 렌더링
+          });
+        }, 1500);   
+      } catch (error) {
+        console.error("사용자 삭제 중 오류 발생: ", error);
+      }
     },
+    closeSuccessModal() {
+      this.isDeleteSuccessModalOpen = false;
+    },
+    
+    // 페이지 이동 메서드
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    },
+  },
     created() {
       // 컴포넌트가 로드될 때 API 호출
       this.fetchMembers();
