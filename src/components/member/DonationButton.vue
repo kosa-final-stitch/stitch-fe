@@ -6,7 +6,7 @@
  2024.09.19 박요한 | 컴포넌트 생성
  2024.09.20 박요한 | 포트원 연결
  2024.09.24 박요한 | 결제 성공 로직
- 2024.10.01 박요한 | 완료 시 status 기본값 pending
+ 2024.10.01 박요한 | 완료 시 status는 pending, category는 donation
  -->
 
 <template>
@@ -125,7 +125,7 @@ export default {
         const response = await axios.post("/api/payment/complete", {
           amount: paymentData.paid_amount, // 결제 금액
           method: paymentData.pay_method, // 결제 방식 (예: 카드)
-          category: "후원", // 결제 카테고리 (후원)
+          category: "donation", // 결제 카테고리 (후원)
           status: "pending", // 결제 상태 (완료)
         });
 
