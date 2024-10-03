@@ -132,7 +132,7 @@ const MemberRoutes = [
             name: "ReviewManagement",
           },
           {
-            path: "activities/review/detail/:reviewId",
+            path: "activities/academy/:academyId/course/:courseId/review/:reviewId",
             component: MyReviewDetail,
             name: "MyReviewDetail",
           },

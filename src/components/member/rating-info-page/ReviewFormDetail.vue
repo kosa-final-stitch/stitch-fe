@@ -117,6 +117,8 @@ export default {
             console.log("서버 응답 데이터:", error.response.data);
           } else {
             console.log("네트워크 오류:", error.message);
+            alert("로그인 후 확인이 가능합니다.");
+            this.$router.go(-1); // 이전 페이지로 이동
           }
         });
     },
