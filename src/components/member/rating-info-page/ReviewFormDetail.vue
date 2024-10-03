@@ -1,27 +1,15 @@
 <template>
   <div class="review-page">
-    <h2>후기 작성 페이지(ReviewFormDetail)</h2>
+    <h2>후기 확인 페이지</h2>
     <div class="review-container">
       <!-- 평가 항목 리스트 -->
       <div class="review-grid">
-        <div class="review-item" v-for="(review, index) in reviews" :key="index">
-          <label :for="'review-' + index">{{ index + 1 }}. {{ review.title }}</label>
+        <div v-for="review in reviews" :key="review.title" class="review-item">
+          <label>{{ review.title }}</label>
           <div class="rating">
-            <span
-              v-for="n in 5"
-              :key="n"
-              class="star"
-              :class="{ filled: n <= review.rating }"
-              @click="setRating(index, n)"
-              >★</span
-            >
+            <span v-for="n in 5" :key="n" class="star" :class="{ filled: n <= review.rating }">★</span>
           </div>
-          <textarea
-            class="onetext"
-            :id="'review-' + index"
-            v-model="review.comment"
-            placeholder="한줄평을 입력해주세요"
-          ></textarea>
+          <div class="comment">{{ review.comment }}</div>
         </div>
       </div>
 
@@ -36,7 +24,7 @@
 
     <!-- 버튼 영역 -->
     <div class="buttons">
-      <button class="cancel-btn" @click="handleCancel">돌아가기</button>
+      <button class="cancel-btn" @click="goBack">돌아가기</button>
     </div>
   </div>
 </template>
@@ -58,6 +46,20 @@ import {
 Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
 export default {
+  props: {
+    academyId: {
+      type: String,
+      required: true,
+    },
+    courseId: {
+      type: String,
+      required: true,
+    },
+    reviewId: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       reviews: [
@@ -68,18 +70,8 @@ export default {
         { title: "행정", comment: "", rating: 1 },
         { title: "취업관련", comment: "", rating: 1 },
       ],
-      initialReviews: [
-        { title: "강의", comment: "", rating: 1 },
-        { title: "강사", comment: "", rating: 1 },
-        { title: "시설", comment: "", rating: 1 },
-        { title: "반 분위기", comment: "", rating: 1 },
-        { title: "행정", comment: "", rating: 1 },
-        { title: "취업관련", comment: "", rating: 1 },
-      ], // 초기 리뷰 값 저장
       chart: null,
       isChartGenerated: false,
-      buttonText: "등록",
-      memberId: null, // 회원 정보를 저장할 변수
     };
   },
   computed: {
@@ -89,30 +81,43 @@ export default {
     },
   },
   mounted() {
-    this.courseId = this.$route.params.courseId;
-    this.fetchReviewData(); // 리뷰 데이터를 불러옵니다
+    console.log("academyId:", this.academyId); // 확인용 로그
+    console.log("courseId:", this.courseId); // 확인용 로그
+    console.log("reviewId:", this.reviewId); // 확인용 로그
+    // 여기서 academyId, courseId, reviewId 값을 넘겨줌
+    this.fetchReviewData(this.academyId, this.courseId, this.reviewId);
   },
   methods: {
-    fetchReviewData() {
+    fetchReviewData(academyId, courseId, reviewId) {
+      const apiUrl = `/api/member/reviews/${academyId}/course/${courseId}/review/${reviewId}`;
+      console.log("API 요청 URL:", apiUrl); // API 경로 출력 확인
+
       axios
-        .get(`/api/member/reviews/${this.currentUser.memberId}/course/${this.courseId}`)
+        .get(apiUrl)
         .then((response) => {
-          const reviewData = response.data;
-          // 서버에서 받은 데이터를 reviews 배열에 반영합니다.
-          console.log("리뷰상세 리뷰 데이터:", reviewData); // 확인용
-          this.reviews = [
-            { title: "강의", comment: reviewData.educationComment, rating: reviewData.educationRating },
-            { title: "강사", comment: reviewData.instructorComment, rating: reviewData.instructorRating },
-            { title: "시설", comment: reviewData.facilityComment, rating: reviewData.facilityRating },
-            { title: "반 분위기", comment: reviewData.atmosphereComment, rating: reviewData.atmosphereRating },
-            { title: "행정", comment: reviewData.managementComment, rating: reviewData.managementRating },
-            { title: "취업관련", comment: reviewData.employmentComment, rating: reviewData.employmentRating },
-          ];
-          // 데이터를 바탕으로 차트를 생성합니다.
-          this.generateChart();
+          console.log("응답 데이터:", response.data); // 응답 데이터 확인
+          if (response.data) {
+            this.reviews = [
+              { title: "강의", comment: response.data.education, rating: response.data.educationRating },
+              { title: "강사", comment: response.data.instructor, rating: response.data.instructorRating },
+              { title: "시설", comment: response.data.facility, rating: response.data.facilityRating },
+              { title: "반 분위기", comment: response.data.atmosphere, rating: response.data.atmosphereRating },
+              { title: "행정", comment: response.data.management, rating: response.data.managementRating },
+              { title: "취업관련", comment: response.data.later, rating: response.data.laterRating },
+            ];
+            this.generateChart();
+          } else {
+            console.error("응답 데이터가 비어있습니다.");
+          }
         })
         .catch((error) => {
           console.error("리뷰 데이터를 가져오는 중 오류 발생:", error);
+          if (error.response) {
+            console.log("서버 응답 상태 코드:", error.response.status);
+            console.log("서버 응답 데이터:", error.response.data);
+          } else {
+            console.log("네트워크 오류:", error.message);
+          }
         });
     },
     generateChart() {
@@ -149,12 +154,14 @@ export default {
         },
       });
     },
+    goBack() {
+      this.$router.go(-1); // 이전 페이지로 이동
+    },
   },
 };
 </script>
 
 <style scoped>
-/* 동일한 스타일 유지 */
 .review-page {
   max-width: 1200px;
   margin: 20px auto;
@@ -200,13 +207,14 @@ label {
 .filled {
   color: orange;
 }
-textarea {
+.comment {
   width: 90%;
   min-height: 60px;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ddd;
   resize: none;
+  background-color: #f9f9f9;
 }
 .buttons {
   display: flex;

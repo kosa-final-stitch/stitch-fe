@@ -1,6 +1,6 @@
 <template>
   <div class="review-page">
-    <h2>후기 작성 페이지(ReviewDetail)</h2>
+    <h2>후기 작성 페이지</h2>
     <div class="review-container">
       <!-- 평가 항목 리스트 -->
       <div class="review-grid">
@@ -37,10 +37,7 @@
 
     <!-- 버튼 영역 -->
     <div class="buttons">
-      <button class="cancel-btn">취소</button>
-      <button class="submit-btn" @click="handleButtonClick">
-        {{ buttonText }}
-      </button>
+      <button class="cancel-btn">내 리뷰 목록으로돌아가기</button>
     </div>
   </div>
 </template>
@@ -75,6 +72,11 @@ export default {
       isChartGenerated: false, // 버튼 클릭 상태를 저장할 변수
       buttonText: "등록", // 버튼에 표시할 텍스트
     };
+  },
+  created() {
+    const reviewId = this.$route.params.reviewId; // URL에서 inquiryId를 가져옴
+    console.log("문의디테일 reviewId:", reviewId); // 콘솔에서 inquiryId 확인
+    this.fetchReviews(reviewId);
   },
   methods: {
     // 별점 설정 함수
@@ -119,32 +121,20 @@ export default {
         },
       });
     },
-    // 버튼 클릭 시 차트 생성 또는 DB 저장 실행
-    handleButtonClick() {
-      if (!this.isChartGenerated) {
-        this.generateChart(); // 차트 생성
-        this.buttonText = "저장"; // 버튼 텍스트를 '저장'으로 변경
-        this.isChartGenerated = true; // 차트가 생성되었음을 기록
-      } else {
-        this.saveReviewData(); // DB에 데이터 저장
+    async fetchReviews(reviewId) {
+      try {
+        // 백엔드에서 문의 상세 데이터를 가져오는 API 요청
+        const response = await axios.get(`/api/member/review/detail/${reviewId}`);
+
+        // 데이터를 설정
+        this.review = response.data;
+        console.log("문의 상세 정보:", this.review);
+      } catch (error) {
+        console.error("문의 상세 정보를 가져오는 중 오류 발생:", error);
+      } finally {
+        // 데이터를 가져온 후 로딩 상태 종료
+        this.loading = false;
       }
-    },
-    // 리뷰 데이터를 서버로 전송하는 함수
-    saveReviewData() {
-      // 서버에 데이터를 전송하는 POST 요청
-      axios
-        .post("/api/reviews", this.reviews)
-        .then((response) => {
-          // 요청이 성공했을 때 실행될 코드
-          alert("리뷰가 성공적으로 저장되었습니다.");
-          console.log("리뷰디테일 서버 응답:", response);
-          // 필요한 후처리 (예: 페이지 이동 또는 상태 초기화 등)
-        })
-        .catch((error) => {
-          // 요청이 실패했을 때 실행될 코드
-          console.error("리뷰 저장 중 오류가 발생했습니다.", error);
-          alert("리뷰 저장 중 오류가 발생했습니다. 다시 시도해 주세요.");
-        });
     },
   },
 };
