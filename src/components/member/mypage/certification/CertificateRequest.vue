@@ -1,19 +1,20 @@
 <!--
  담당자: 김호영
  시작 일자: 2024.09.29
- 설명 : admin 수강인증 확인 페이지 기능 구현 및 디자인 개발
+ 설명 : 수강인증 모달 기능 구현 및 디자인 개발
  ---------------------
 
  2024.09.29 김호영 | 수강증 제출 확인 모달 기능 구현.
+ 2024.10.03 김호영 | ADD:교육명, 학원명, 회차 정보로 course_id 조회 구현"
  -->
 
 
  <template>
   <!-- 모달 오버레이 -->
-  <div class="inquiry-modal-overlay" @click="closeModal"></div>
+  <div class="certificate-modal-overlay" @click="closeModal"></div>
 
   <!-- 모달 컨테이너 -->
-  <div class="inquiry-modal-container">
+  <div class="certificate-modal-container">
     <h2>수료과목 신청하기</h2>
     <form @submit.prevent="submitCertificate">
       <!-- 교육 과정명 -->
@@ -144,7 +145,7 @@ export default {
 </script>
 
 <style scoped>
-.inquiry-modal-container {
+.certificate-modal-container {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -159,7 +160,12 @@ export default {
   overflow-y: auto; /* 모달 내부 스크롤 활성화 */
 }
 
-.inquiry-modal-overlay {
+/* Chrome, Safari, Opera에서 스크롤바 숨기기 */
+.certificate-modal-container::-webkit-scrollbar {
+  display: none;
+}
+
+.certificate-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;

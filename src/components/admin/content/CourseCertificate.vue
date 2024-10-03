@@ -5,6 +5,7 @@
  ---------------------
 
  2024.09.29 김호영 | 수강인증 확인 페이지 구현.
+ 2024.10.03 김호영 | S3 연동 및 이미지 파일 표시.
  -->
 
  <template>
@@ -119,7 +120,7 @@
           <div class="info-item">
             <label for="fileUrl">수료증 사진</label>
             <div class="certificate-image-container">
-              <img :src="selectedCertificate.fileUrl" alt="수료증 사진" class="certificate-image" />
+              <img v-if="imageUrl" :src="imageUrl" alt="수료증 사진" class="certificate-image" />
             </div>
           </div>
         </div>
@@ -173,6 +174,7 @@ export default {
       isCertificateAnswerModalOpen: false, // 수료 모달 열림 여부
       selectedCertificate: null, // 선택된 수료 인증
       isChangeSuccessModalOpen: false, // 변경 완료 모달 상태 추가
+      imageUrl: '', // 이미지 URL을 저장할 변수
     };
   },
   mounted() {
@@ -217,24 +219,32 @@ export default {
       }
     },
 
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // 월을 2자리로 변환
+      const day = String(date.getDate()).padStart(2, '0'); // 일을 2자리로 변환
 
-    formatDate(date) {
-      const d = new Date(date);
-      return d.toISOString().replace('T', ' ').substring(0, 10);
+      // 원하는 형식으로 직접 반환 (점 없이)
+      return `${year}-${month}-${day}`;  // 예: 2024-10-03
     },
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
       }
     },
-    openCertificateAnswerModal(certificate) {
+    async openCertificateAnswerModal(certificate) {
       this.selectedCertificate = {
         ...certificate,
       };
       this.isCertificateAnswerModalOpen = true;
-    },
-    closeCertificateAnswerModal() {
-      this.isCertificateAnswerModalOpen = false;
+
+      // certificate 객체와 filename 값 로그로 출력
+      console.log('Certificate data:', certificate);
+      console.log('Certificate filename:', certificate.filename);
+
+      // S3에서 이미지 URL을 가져와서 설정
+      this.imageUrl = await this.getS3ImageUrl(certificate.filename);
     },
     // 수료 상태 변경 처리 메서드
     async submitCertificateAnswer(status) {
@@ -289,13 +299,35 @@ export default {
     } catch (error) {
       console.error('수료 상태 업데이트 실패:', error);
     }
+    },
+
+    // 이미지 불러오기 
+    async getS3ImageUrl(filename) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('/api/certificate/signed-url', {
+          params: { filename },  // filename 파라미터를 전달
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        return response.data;  // S3 서명된 URL 반환
+      } catch (error) {
+        console.error('이미지 URL을 가져오는 중 오류 발생:', error);
+        return '';  // 오류 시 빈 문자열 반환
+      }
+    },
+    closeCertificateAnswerModal() {
+      this.isCertificateAnswerModalOpen = false;  // 모달 닫기
+      this.selectedCertificate = null;            // 선택된 인증서 초기화
+      this.imageUrl = '';                         // 이미지 URL 초기화
+    }
   }
-  },
 };
 </script>
   
   <style scoped>
-/* 신고 확인 모달 스타일 */
+/* 수료 확인 모달 스타일 */
 .certificate-answer-modal-overlay {
   position: fixed;
   top: 0;
@@ -313,9 +345,17 @@ export default {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
-  width: 400px;
+  width: 90%; /* 너비를 90%로 설정하여 작은 화면에서도 적절히 보이도록 */
+  max-width: 400px; /* 최대 너비 제한 */
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  text-align: center; /* 텍스트 중앙 정렬 */
+  text-align: center;
+}
+
+/* Chrome, Safari, Opera에서 스크롤바 숨기기 */
+.certificate-answer-modal-content::-webkit-scrollbar {
+  display: none;
 }
 
 .certificate-answer-info .info-item {
