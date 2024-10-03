@@ -145,7 +145,7 @@ const MemberRoutes = [
             name: "InquiryManagement",
           },
           {
-            path: "activities/inquirydetail",
+            path: "activities/inquirydetail/:inquiryId",
             component: InquiryDetail,
             name: "InquiryDetail",
           },

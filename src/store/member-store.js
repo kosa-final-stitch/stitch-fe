@@ -27,7 +27,10 @@ export const useMemberStore = defineStore('memberStore', {
       this.member = member;
       this.isAuthenticated = true;
       // 권한 정보가 있는지 확인하고, 없다면 빈 배열로 처리
-      this.authority = member.authorities || []; 
+      this.authority = member.authorities || [];
+    },
+    setAuthorities(roles) {
+      this.authority = roles;  // 권한 정보 설정
     },
     logout() {
       this.isAuthenticated = false;

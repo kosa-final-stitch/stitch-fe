@@ -108,7 +108,23 @@ export default {
     },
     googleLogin() {
       // 구글 소셜 로그인 URL로 리다이렉트
-      window.location.href = 'http://localhost:8080/login/oauth2/code/google';
+      // const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&scope=${encodeURIComponent(scope)}&state=${state}`;
+      const googleAuthUrl = 'http://localhost:8080/oauth2/authorization/google'
+      window.location.href = googleAuthUrl;
+    },
+    mounted() {
+      // 소셜 로그인 후 리다이렉트된 URL에서 토큰을 추출
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token'); // ?token=... 에서 토큰 추출
+
+      if (token) {
+        localStorage.setItem('jwt', token); // JWT 토큰을 로컬 스토리지에 저장
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Axios 기본 헤더에 추가
+        alert('소셜 로그인 성공!');
+        this.$router.push('/'); // 홈으로 리다이렉트
+      } else {
+        console.error('JWT 토큰이 없습니다. 로그인 실패.');
+      }
     }
   }
 };
