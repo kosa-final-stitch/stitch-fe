@@ -16,22 +16,22 @@
   <div class="inquiry-modal-container">
     <h2>수료과목 신청하기</h2>
     <form @submit.prevent="submitCertificate">
-      <!-- 수료 과정명 -->
+      <!-- 교육 과정명 -->
       <div class="form-group">
         <label for="course">수료 과정명</label>
         <input type="text" id="course" v-model="courseName" placeholder="예: MSA 4차 풀스택 개발 과정" required />
       </div>
 
-      <!-- 수료 과정 id -->
-      <div class="form-group">
-      <label for="courseId">수료 과정 ID</label>
-      <input type="number" id="courseId" v-model="courseId" placeholder="예: 105" required />
-      </div>  
-
-      <!-- 수료 학원명 -->
+      <!-- 학원명 -->
       <div class="form-group">
         <label for="academy">수료 학원명</label>
-        <input type="text" id="academy" v-model="academyName" placeholder="예: 한국소프트웨어산업협회" required />
+        <input type="text" id="academy" v-model="academyName" placeholder="예: KOSA" required />
+      </div>
+
+      <!-- 회차 정보 -->
+      <div class="form-group">
+        <label for="sessionNumber">회차</label>
+        <input type="number" id="sessionNumber" v-model="sessionNumber" placeholder="회차 정보를 입력해주세요 예: 1" required />
       </div>
 
       <!-- 수료일 -->
@@ -60,7 +60,6 @@
 </template>
 
 <script>
-
 import axios from 'axios';
 
 export default {
@@ -68,57 +67,50 @@ export default {
     return {
       courseName: '',
       academyName: '',
-      startDate: '',
+      sessionNumber: '', // 회차 정보
       completionDate: '',
-      file: null,
+      file: null, // 파일 정보
       imagePreview: null, // 이미지 미리보기 URL
-      status: '처리중', // 수료 상태 추가
-      courseId: '', // courseId 필드 추가
+      status: '처리중', // 수료 상태
     };
   },
   methods: {
-    submitCertificate() {
-      if (!this.courseName || !this.academyName || !this.completionDate || !this.courseId) {
-        alert("모든 필수 항목을 입력해주세요.");
+    // 수료 신청 제출
+    async submitCertificate() {
+      if (!this.courseName || !this.academyName || !this.sessionNumber || !this.completionDate || !this.file) {
+        alert('모든 필수 항목을 입력해주세요.');
         return;
       }
+
       const formData = new FormData();
       formData.append('courseName', this.courseName);
       formData.append('academyName', this.academyName);
+      formData.append('sessionNumber', this.sessionNumber);
       formData.append('completionDate', this.completionDate);
-      formData.append('status', this.status);
-      formData.append('courseId', this.courseId); // courseId 추가
-      if (this.file) {
-        formData.append('file', this.file);
-      }
+      formData.append('status', this.status); // status 값을 포함
+      formData.append('file', this.file); // 파일 첨부
 
-      // 인증 헤더 추가
-      const token = localStorage.getItem('token'); // 로컬 스토리지에서 JWT 토큰 가져오기
+      try {
+        const token = localStorage.getItem('token'); // JWT 토큰 가져오기
 
-      axios.post('/api/certificate/register', formData, {
+        await axios.post('/api/certificate/register', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`, // 토큰을 Authorization 헤더에 추가
+          Authorization: `Bearer ${token}`, // JWT 인증
           'Content-Type': 'multipart/form-data',
-        }
-      })
-      .then(response => {
-        console.log('신청 성공:', response.data);
+        },
+      });
 
         alert('수료 신청이 성공적으로 완료되었습니다.');
-
-        this.clearForm();  // 폼 전송 후 초기화
+        this.clearForm();  // 폼 초기화
         this.closeModal(); // 모달 닫기
         window.location.reload(); // 페이지 새로고침
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('신청 실패:', error);
-
         alert('수료 신청에 실패했습니다. 다시 시도해주세요.');
-      });
-      // 여기에서 FormData를 백엔드로 전송할 수 있음
-      console.log('신청한 데이터:', formData);
-      this.closeModal();
+      }
     },
+
+    // 파일 업로드 처리
     handleFileUpload(event) {
       const file = event.target.files[0];
       if (file && file.type.startsWith('image/')) {
@@ -127,21 +119,26 @@ export default {
         reader.onload = (e) => {
           this.imagePreview = e.target.result;
         };
-        reader.readAsDataURL(file); // 사진 미리보기.
+        reader.readAsDataURL(file); // 이미지 미리보기 처리
       } else {
-        alert("이미지 파일만 업로드할 수 있습니다.");
+        alert('이미지 파일만 업로드할 수 있습니다.');
       }
     },
+
+    // 모달 닫기
     closeModal() {
       this.$emit('close');
     },
+
+    // 폼 초기화
     clearForm() {
       this.courseName = '';
       this.academyName = '';
+      this.sessionNumber = '';
       this.completionDate = '';
       this.file = null;
       this.imagePreview = null;
-    }
+    },
   },
 };
 </script>

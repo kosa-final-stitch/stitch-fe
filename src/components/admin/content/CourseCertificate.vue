@@ -38,7 +38,7 @@
         <tr>
           <th>No.</th>
           <th>수료신청 ID</th>
-          <th>신청자 ID</th>
+          <th>신청자 닉네임</th>
           <th>교육 과정 ID</th>
           <th>교육 과정명</th>
           <th>교육 학원명</th>
@@ -105,7 +105,7 @@
 
           <!-- 신청자 ID -->
           <div class="info-item">
-            <label for="nickname">신청자</label>
+            <label for="nickname">신청자 닉네임</label>
             <input id="nickname" type="text" v-model="selectedCertificate.nickname" class="info-input" readonly />
           </div>
 
