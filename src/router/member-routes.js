@@ -25,7 +25,7 @@ import DonationManagement from "../components/member/mypage/my-activities/Donati
 import InquiryManagement from "../components/member/mypage/my-activities/InquiryManagement.vue";
 import InquiryDetail from "@/components/member/mypage/my-activities/InquiryDetail.vue";
 import CertificateList from "../components/member/mypage/certification/CertificateList.vue";
-import ReviewDetail from "@/components/member/mypage/my-activities/ReviewDetail.vue";
+// import ReviewFormDetail from "@/components/member/mypage/my-activities/ReviewFormDetail.vue";
 import MyPostManagement from "@/components/member/mypage/my-activities/MyPostManagement.vue";
 import MyReviewManagement from "@/components/member/mypage/my-activities/MyReviewManagement.vue";
 import AcademyInfoDetail from "@/components/member/rating-info-page/AcademyInfoDetail.vue";
@@ -79,7 +79,7 @@ const MemberRoutes = [
         name: "ReviewForm",
       },
       {
-        path: "member/review-form/:academyId/:courseId",
+        path: ":memberId/academy/:academyId/course/:courseId",
         component: ReviewFormDetail,
         name: "ReviewFormDetail",
       },
@@ -131,8 +131,8 @@ const MemberRoutes = [
           {
             //내가 작성한 리뷰 디테일 불러오기
             path: "/academy/:academyId/course/:courseId/review/:reviewId",
-            name: "ReviewDetail",
-            component: ReviewDetail,
+            name: "ReviewFormDetail",
+            component: ReviewFormDetail,
           },
           {
             path: "activities/donation",
@@ -145,7 +145,7 @@ const MemberRoutes = [
             name: "InquiryManagement",
           },
           {
-            path: "activities/inquirydetail/:inquiryId",
+            path: "activities/inquiry/detail/:inquiryId",
             component: InquiryDetail,
             name: "InquiryDetail",
           },

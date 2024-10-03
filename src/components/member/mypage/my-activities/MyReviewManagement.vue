@@ -7,7 +7,7 @@
         v-for="review in reviews"
         :key="review.reviewId"
         class="review-card"
-        @click="goToReviewDetail(review.reviewId)"
+        @click="goToReviewDetail(academy.academyId, review.reviewId, courseId)"
       >
         <div class="review-details">
           <p>학원 : {{ review.academyName }}</p>
@@ -122,12 +122,10 @@ export default {
         });
     },
     // 리뷰 디테일 페이지로 이동()
-    goToReviewDetail(reviewId) {
-      const courseId = this.$route.params.courseId;
-      const academyId = this.$route.params.academyId;
+    goToReviewDetail(academyId, reviewId, courseId) {
       this.$router.push({
         name: "ReviewDetail",
-        params: { academyId, courseId, reviewId },
+        params: { academyId: academyId, reviewId: reviewId, courseId: courseId },
       });
     },
   },

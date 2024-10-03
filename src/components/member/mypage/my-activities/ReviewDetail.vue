@@ -1,6 +1,6 @@
 <template>
   <div class="review-page">
-    <h2>후기 작성 페이지</h2>
+    <h2>후기 작성 페이지(ReviewDetail)</h2>
     <div class="review-container">
       <!-- 평가 항목 리스트 -->
       <div class="review-grid">
