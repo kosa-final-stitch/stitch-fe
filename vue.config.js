@@ -9,9 +9,8 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       "/api": {
-        // target: "http://localhost:8080", // Spring Boot가 동작하는 서버
-        target: process.env.VUE_APP_API_URL,
-
+        // 로컬 개발에서는 localhost로 설정
+        target: process.env.VUE_APP_API_URL || "http://localhost:8080", // API 서버 URL을 환경 변수로 처리, 없을 시 로컬 기본값
         ws: false, // 웹소켓 비활성화
         changeOrigin: true,
       },
