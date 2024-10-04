@@ -8,6 +8,7 @@
  2024.09.19 김호영 | 날짜 출력형식 수정
  2024.09.25 김호영 | 게시글 백엔드 작업 및 게시판 버튼 추가 후 검색 카테고리 기능 수정.
  2024.10.01 김호영 | 게시판 필터 및 검색, 대분류 카테고리 기능 수정 + 삭제기능 구현.
+ 2024.10.04 김호영 | formData 형식 수정.
  -->
 
  <template>
@@ -225,6 +226,9 @@ export default {
   },
   methods: {
     formatDate(date) {
+      if (!date) {
+        return '-'; // 날짜가 null 또는 undefined이면 '-' 반환
+      }
       const d = new Date(date);
       return d.toISOString().replace('T', ' ').substring(0, 10);
     },
