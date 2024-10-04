@@ -25,11 +25,7 @@ module.exports = defineConfig({
   },
   chainWebpack: config => {
     config.plugin('html').tap(args => {
-      args[0].minify = {
-        removeComments: true,
-        collapseWhitespace: false,  // 공백 유지
-        removeAttributeQuotes: false,  // 속성에 따옴표 유지
-      };
+      args[0].minify = false;  // HTML 압축 비활성화
       return args;
     });
   },
