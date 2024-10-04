@@ -112,6 +112,8 @@ export default {
         })
         .catch((error) => {
           console.error("리뷰 데이터를 가져오는 중 오류 발생:", error);
+          alert("로그인 후 확인이 가능합니다.");
+          this.$router.go(-1); // 이전 페이지로 이동
           if (error.response) {
             console.log("서버 응답 상태 코드:", error.response.status);
             console.log("서버 응답 데이터:", error.response.data);
