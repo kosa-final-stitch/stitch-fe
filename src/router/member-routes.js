@@ -25,7 +25,7 @@ import DonationManagement from "../components/member/mypage/my-activities/Donati
 import InquiryManagement from "../components/member/mypage/my-activities/InquiryManagement.vue";
 import InquiryDetail from "@/components/member/mypage/my-activities/InquiryDetail.vue";
 import CertificateList from "../components/member/mypage/certification/CertificateList.vue";
-import ReviewDetail from "@/components/member/mypage/my-activities/ReviewDetail.vue";
+import MyReviewDetail from "@/components/member/mypage/my-activities/MyReviewDetail.vue";
 import MyPostManagement from "@/components/member/mypage/my-activities/MyPostManagement.vue";
 import MyReviewManagement from "@/components/member/mypage/my-activities/MyReviewManagement.vue";
 import AcademyInfoDetail from "@/components/member/rating-info-page/AcademyInfoDetail.vue";
@@ -79,10 +79,13 @@ const MemberRoutes = [
         name: "ReviewForm",
       },
       {
-        path: "member/review-form/:academyId/:courseId",
-        component: ReviewFormDetail,
+        //리뷰 디테일 불러오기
+        path: "academy/:academyId/course/:courseId/review/:reviewId",
         name: "ReviewFormDetail",
+        component: ReviewFormDetail,
+        props: true, // URL 파라미터를 props로 전달
       },
+
       { path: "/board/PostForm", component: PostForm, name: "PostForm" },
       {
         path: "/academies/academy", // 학원 목록 페이지
@@ -129,10 +132,9 @@ const MemberRoutes = [
             name: "ReviewManagement",
           },
           {
-            //내가 작성한 리뷰 디테일 불러오기
-            path: "/academy/:academyId/course/:courseId/review/:reviewId",
-            name: "ReviewDetail",
-            component: ReviewDetail,
+            path: "activities/academy/:academyId/course/:courseId/review/:reviewId",
+            component: MyReviewDetail,
+            name: "MyReviewDetail",
           },
           {
             path: "activities/donation",
@@ -145,7 +147,7 @@ const MemberRoutes = [
             name: "InquiryManagement",
           },
           {
-            path: "activities/inquirydetail/:inquiryId",
+            path: "activities/inquiry/detail/:inquiryId",
             component: InquiryDetail,
             name: "InquiryDetail",
           },

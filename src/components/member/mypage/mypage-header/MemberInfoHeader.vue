@@ -25,15 +25,18 @@
           </div>
         </div> -->
         <div class="info-item">
-          <!-- 빈칸으로 공간 맞춤 -->
+          <strong>닉네임</strong>
+          <p>{{ member.nickname }}</p>
         </div>
+
         <div class="info-item">
-          <!-- 빈칸으로 공간 맞춤 -->
+          <strong>이메일</strong>
+          <p>{{ member.email }}</p>
         </div>
       </div>
 
       <!-- 두 번째 줄: 닉네임, 이메일, 수강평 수, 게시글 수 -->
-      <div class="info-row">
+      <!-- <div class="info-row">
         <div class="info-item">
           <strong>닉네임</strong>
           <p>{{ member.nickname }}</p>
@@ -50,7 +53,7 @@
           <strong>게시글 수</strong>
           <p>{{ member.postCount }}개</p>
         </div>
-      </div>
+      </div>-->
     </div>
   </div>
 </template>

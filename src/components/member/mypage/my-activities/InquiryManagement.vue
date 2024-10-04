@@ -18,7 +18,7 @@
       <!-- 테이블 바디 -->
       <tbody>
         <!-- 여러 개의 문의를 리스트로 출력 -->
-        <tr v-for="(inquiry, index) in inquiries" :key="inquiry.inquiryid" @click="goToDetail(inquiry.inquiryid)">
+        <tr v-for="(inquiry, index) in inquiries" :key="inquiry.inquiryId" @click="goToDetail(inquiry.inquiryId)">
           <td>{{ index + 1 }}</td>
           <td>{{ categoryName(inquiry.category) }}</td>
           <td>{{ inquiry.title }}</td>
@@ -75,7 +75,7 @@ export default {
           if (Array.isArray(inquiries)) {
             this.inquiries = inquiries.map((inquiry) => {
               return {
-                inquiryid: inquiry.inquiryid,
+                inquiryId: inquiry.inquiryId,
                 category: inquiry.category,
                 content: inquiry.content,
                 regDate: inquiry.regDate,
@@ -102,9 +102,10 @@ export default {
       if (!date) return null;
       return new Date(date).toLocaleDateString();
     },
-    goToDetail(inquiryid) {
+    goToDetail(inquiryId) {
+      console.log("inquiryId:", inquiryId); // inquiryId 확인을 위해 콘솔에 출력
       // 해당 문의의 상세 페이지로 이동
-      this.$router.push({ name: "InquiryDetail", params: { inquiryid } });
+      this.$router.push({ name: "InquiryDetail", params: { inquiryId } });
     },
   },
 };

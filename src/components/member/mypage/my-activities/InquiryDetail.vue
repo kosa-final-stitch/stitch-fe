@@ -1,18 +1,15 @@
 <template>
-  <div v-if="loading">
-    <!-- 로딩 중일 때 표시할 내용 -->
-    <p>로딩 중입니다...</p>
-  </div>
-  <div class="inquiry-detail" v-else-if="inquiry">
-    <h1>문의상세보기</h1>
-    <p>회원님께서 문의하신 정보 입니다.</p>
-
+  <div class="inquiry-detail" v-if="inquiry">
+    <div class="inquiry-title-header">
+      <h1>문의 사항</h1>
+      <p>문의하신 내용에 대한 답변을 드립니다.</p>
+    </div>
     <!-- 문의 제목과 작성자 정보 -->
     <div class="inquiry-header">
       <h2>{{ inquiry.title }}</h2>
       <div class="inquiry-info">
-        <span>{{ inquiry.author }}</span>
-        <span>{{ inquiry.date }}</span>
+        <span>{{ inquiry.memberName }}</span>
+        <span>{{ formatDate(inquiry.regDate) }}</span>
       </div>
     </div>
 
@@ -22,64 +19,51 @@
     </div>
 
     <!-- 관리자 답변 -->
-    <div class="inquiry-reply" v-if="inquiry.reply">
+    <div class="inquiry-reply" v-if="inquiry.answer">
       <h3>답변</h3>
       <div class="reply-info">
-        <span>{{ inquiry.reply.author }}</span>
-        <span>{{ inquiry.reply.date }}</span>
+        <span>{{ inquiry.adminName }}</span>
+        <span>{{ formatDate(inquiry.ansDate) }}</span>
       </div>
-      <p>{{ inquiry.reply.content }}</p>
+      <p>{{ inquiry.answer }}</p>
     </div>
   </div>
 </template>
 
 <script>
+import axios from "axios"; // axios import
+
 export default {
   data() {
     return {
       inquiry: null, // 초기값은 null로 설정
-      loading: true, // 로딩 상태 추가
     };
   },
   created() {
     const inquiryId = this.$route.params.inquiryId; // URL에서 inquiryId를 가져옴
-    console.log("inquiryId:", inquiryId); // 콘솔에 inquiryId 출력
+    console.log("문의디테일 inquiryId:", inquiryId); // 콘솔에서 inquiryId 확인
     this.fetchInquiry(inquiryId);
   },
   methods: {
-    fetchInquiry(inquiryId) {
-      // 데이터를 가져오기 전에 로딩 상태 시작
-      this.loading = true;
+    async fetchInquiry(inquiryId) {
+      try {
+        // 백엔드에서 문의 상세 데이터를 가져오는 API 요청
+        const response = await axios.get(`/api/member/inquiry/detail/${inquiryId}`);
 
-      // 하드코딩된 데이터 예시
-      const inquiries = [
-        {
-          inquiryId: 1,
-          title: "로그인이 왜 안되죠?",
-          author: "박호영",
-          date: "2024-09-01",
-          content: "로그인이 안됩니다! 왜 나만 안되죠?",
-          reply: {
-            author: "관리자",
-            date: "2024-09-02",
-            content: "처리되도록 해드렸습니다. 다시한번 시도 부탁드립니다.",
-          },
-        },
-        {
-          inquiryId: 2,
-          title: "비밀번호가 기억이 안납니다",
-          author: "김철수",
-          date: "2024-09-02",
-          content: "비밀번호를 잊어버렸습니다.",
-          reply: { author: "관리자", date: "2024-09-03", content: "비밀번호 초기화 링크를 이메일로 보내드렸습니다." },
-        },
-      ];
-
-      // id에 맞는 데이터를 찾기
-      this.inquiry = inquiries.find((inquiry) => inquiry.inquiryId == inquiryId);
-
-      // 데이터를 설정한 후 로딩 상태 종료
-      this.loading = false;
+        // 데이터를 설정
+        this.inquiry = response.data;
+        console.log("문의 상세 정보:", this.inquiry);
+      } catch (error) {
+        console.error("문의 상세 정보를 가져오는 중 오류 발생:", error);
+      } finally {
+        // 데이터를 가져온 후 로딩 상태 종료
+        this.loading = false;
+      }
+    },
+    // 날짜 형식을 보기 좋게 변환하는 메서드
+    formatDate(date) {
+      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+      return new Date(date).toLocaleDateString("ko-KR", options);
     },
   },
 };
@@ -97,11 +81,13 @@ h1 {
   color: #ff6600;
   font-size: 24px;
   margin-bottom: 10px;
+  line-height: 1.6;
 }
 
 p {
   color: #666;
   margin-bottom: 20px;
+  line-height: 1.6;
 }
 
 .inquiry-header {
@@ -110,8 +96,10 @@ p {
 }
 
 .inquiry-header h2 {
-  font-size: 20px;
-  margin: 0;
+  font-size: 18px; /* 제목 크기 */
+  font-weight: normal; /* 제목 굵기 */
+  margin: 10;
+  line-height: 1.5;
 }
 
 .inquiry-info,
@@ -120,20 +108,35 @@ p {
   justify-content: space-between;
   font-size: 14px;
   color: #999;
+  margin-bottom: 10px;
+}
+.inquiry-title-header {
+  margin-bottom: 100px;
 }
 
-.inquiry-content,
+.inquiry-content {
+  margin-bottom: 140px;
+}
+
 .inquiry-reply {
-  margin-bottom: 20px;
-}
-
-.inquiry-reply h3 {
-  font-size: 18px;
-  color: #333;
   margin-bottom: 10px;
 }
 
-.inquiry-reply p {
-  margin: 0;
+.inquiry-reply {
+  background-color: #f0f0f0; /* 옅은 회색 배경 */
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.inquiry-info {
+  font-size: 12px; /* 작성자 정보 크기 */
+  color: #999;
+}
+
+.inquiry-reply h3 {
+  font-size: 16px; /* 답변 제목 크기 */
+  color: #333;
 }
 </style>

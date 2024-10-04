@@ -40,7 +40,7 @@
         class="review-card"
         v-for="review in course.reviews"
         :key="review.reviewId"
-        @click="goToReviewDetail(review.reviewId)"
+        @click="goToReviewFormDetail(review.reviewId)"
       >
         <!-- memberId로 리뷰 작성자 표시 -->
         <!-- <h4>{{ review.memberId }}</h4> -->
@@ -218,7 +218,7 @@ export default {
           const academyId = this.$route.params.academyId;
           const courseId = this.$route.params.courseId;
           this.$router.push({
-            name: "ReviewForm", // ReviewForm으로 라우팅
+            name: "ReviewDetail", // ReviewForm으로 라우팅
             params: { academyId, courseId },
           });
         } else {
@@ -250,7 +250,7 @@ export default {
         });
     },
     // 리뷰 디테일 페이지로 이동()
-    goToReviewDetail(reviewId) {
+    goToReviewFormDetail(reviewId) {
       const courseId = this.$route.params.courseId;
       const academyId = this.$route.params.academyId;
       this.$router.push({

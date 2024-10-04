@@ -81,9 +81,9 @@ export default {
     },
   },
   mounted() {
-    console.log("academyId:", this.academyId); // 확인용 로그
-    console.log("courseId:", this.courseId); // 확인용 로그
-    console.log("reviewId:", this.reviewId); // 확인용 로그
+    console.log("마패academyId:", this.academyId); // 확인용 로그
+    console.log("마페courseId:", this.courseId); // 확인용 로그
+    console.log("마페reviewId:", this.reviewId); // 확인용 로그
     // 여기서 academyId, courseId, reviewId 값을 넘겨줌
     this.fetchReviewData(this.academyId, this.courseId, this.reviewId);
   },
@@ -112,6 +112,8 @@ export default {
         })
         .catch((error) => {
           console.error("리뷰 데이터를 가져오는 중 오류 발생:", error);
+          alert("로그인 후 확인이 가능합니다.");
+          this.$router.go(-1); // 이전 페이지로 이동
           if (error.response) {
             console.log("서버 응답 상태 코드:", error.response.status);
             console.log("서버 응답 데이터:", error.response.data);

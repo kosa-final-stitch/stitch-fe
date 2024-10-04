@@ -1,13 +1,13 @@
 <template>
   <div class="review-list-page">
-    <h2>학생 리뷰</h2>
+    <h2>내가 작성한 리뷰</h2>
     <div class="review-container">
       <!-- 리뷰 리스트 -->
       <div
         v-for="review in reviews"
         :key="review.reviewId"
         class="review-card"
-        @click="goToReviewDetail(review.reviewId)"
+        @click="goToReviewDetail(academy.academyId, review.reviewId, courseId)"
       >
         <div class="review-details">
           <p>학원 : {{ review.academyName }}</p>
@@ -20,6 +20,8 @@
               </span>
             </span>
           </p>
+          <p class="education-text">{{ review.education }}</p>
+
           <p>
             <strong>강사 </strong>
             <span class="stars">
@@ -28,6 +30,8 @@
               </span>
             </span>
           </p>
+          <p class="instructor-text">{{ review.instructor }}</p>
+
           <p>
             <strong>시설 </strong>
             <span class="stars">
@@ -36,6 +40,8 @@
               </span>
             </span>
           </p>
+          <p class="facility-text">{{ review.facility }}</p>
+
           <p>
             <strong>분위기 </strong>
             <span class="stars">
@@ -44,6 +50,8 @@
               </span>
             </span>
           </p>
+          <p class="atmosphere-text">{{ review.atmosphere }}</p>
+
           <p>
             <strong>행정 </strong>
             <span class="stars">
@@ -52,6 +60,8 @@
               </span>
             </span>
           </p>
+          <p class="management-text">{{ review.management }}</p>
+
           <p>
             <strong>사후관리 </strong>
             <span class="stars">
@@ -60,6 +70,7 @@
               </span>
             </span>
           </p>
+          <p class="later-text">{{ review.later }}</p>
         </div>
       </div>
     </div>
@@ -103,11 +114,17 @@ export default {
             this.reviews = reviewData.map((review) => {
               return {
                 reviewId: review.reviewId,
+                education: review.education,
                 educationRating: review.educationRating,
+                instructor: review.instructor,
                 instructorRating: review.instructorRating,
+                facility: review.facility,
                 facilityRating: review.facilityRating,
+                atmosphere: review.atmosphere,
                 atmosphereRating: review.atmosphereRating,
+                management: review.management,
                 managementRating: review.managementRating,
+                later: review.later,
                 laterRating: review.laterRating,
                 academyName: review.academyName,
                 courseName: review.courseName,
@@ -122,12 +139,10 @@ export default {
         });
     },
     // 리뷰 디테일 페이지로 이동()
-    goToReviewDetail(reviewId) {
-      const courseId = this.$route.params.courseId;
-      const academyId = this.$route.params.academyId;
+    goToReviewDetail(academyId, reviewId, courseId) {
       this.$router.push({
-        name: "ReviewDetail",
-        params: { academyId, courseId, reviewId },
+        name: "MyReviewDetail",
+        params: { academyId: academyId, reviewId: reviewId, courseId: courseId },
       });
     },
   },
@@ -143,7 +158,7 @@ export default {
 
 .review-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 카드의 최소 크기를 설정하여 그리드로 나열 */
+  grid-template-columns: repeat(2, 1fr); /* 두 개씩 한 줄에 고정 */
   gap: 20px;
 }
 
@@ -152,6 +167,7 @@ export default {
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 10px;
+  box-sizing: border-box; /* 패딩과 보더를 포함한 전체 크기 계산 */
 }
 
 .stars {
