@@ -13,7 +13,7 @@
     <div class="header-row">
       <h2>평점 높은 교육 과정</h2>
       <!-- 더보기 버튼 -->
-      <MoreButton to="/academies/academy" />
+      <MoreButton to="/academies/courses" />
     </div>
     <div class="course-container">
       <div
