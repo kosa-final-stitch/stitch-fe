@@ -6,6 +6,7 @@
  2024.09.10 김호영 | 헤더 초기 설정
  2024.09.11 김호영 | 초기 헤더 완료.
  2024.09.20 김호영 | 관리자 정보 백앤드 연동.
+ 2024.10.04 김호영 | 수강목록 인증 관리 추가.
  -->
 
  <template>
@@ -47,6 +48,7 @@
         const routeMap = {
           '/admin/dashboard': '대시보드',
           '/admin/user-info': '사용자 정보',
+          '/admin/course-certificate': '수강목록 인증 관리',
           '/admin/post-management': '게시판 글 관리',
           '/admin/review-management': '수강평 관리',
           '/admin/report-inquiry': '신고 문의 관리',
