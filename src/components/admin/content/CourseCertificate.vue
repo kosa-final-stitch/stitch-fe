@@ -806,8 +806,10 @@ export default {
 }
 
 .certificate-image {
-  max-width: 100%;
-  height: auto;
+  width: 100%; /* 부모 컨테이너의 가로 폭에 맞춤 */
+  max-width: 400px; /* 최대 폭 설정 */
+  height: auto; /* 높이를 자동으로 맞춰 가로 세로 비율 유지 */
+  object-fit: contain; /* 이미지 크기가 변해도 내용 비율을 유지하도록 설정 */
   border: 1px solid #ddd;
   border-radius: 5px;
   padding: 5px;
