@@ -13,7 +13,7 @@
     <div class="header-row">
       <h2>인기 리뷰</h2>
       <!-- 더보기 버튼 -->
-      <MoreButton to="/academies/academy" />
+      <MoreButton to="/mypage/activities/review" />
     </div>
     <div class="review-container">
       <div
