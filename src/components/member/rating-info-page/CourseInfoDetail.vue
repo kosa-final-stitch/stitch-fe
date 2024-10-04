@@ -218,7 +218,7 @@ export default {
           const academyId = this.$route.params.academyId;
           const courseId = this.$route.params.courseId;
           this.$router.push({
-            name: "ReviewDetail", // ReviewForm으로 라우팅
+            name: "ReviewForm", // ReviewForm으로 라우팅
             params: { academyId, courseId },
           });
         } else {
