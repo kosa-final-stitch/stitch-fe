@@ -4,6 +4,7 @@
  설명: 로그인 컴포넌트
  ---------------------
  2024.09.04 김호영 | 기능 담을 디자인 구현
+ 2024.10.11 박요한 | 배포용 googleAuthUrl
 -->
 
 <template>
@@ -109,7 +110,7 @@ export default {
     googleLogin() {
       // 구글 소셜 로그인 URL로 리다이렉트
       // const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&scope=${encodeURIComponent(scope)}&state=${state}`;
-      const googleAuthUrl = 'http://localhost:8080/oauth2/authorization/google'
+      const googleAuthUrl = 'https://stitchkosa.store/oauth2/authorization/google'
       window.location.href = googleAuthUrl;
     },
     mounted() {
