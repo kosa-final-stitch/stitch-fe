@@ -1,5 +1,5 @@
 // 24.9.24. 박요한 | proxy target 환경변수로 전환.
-
+// 테스트
 const { defineConfig } = require("@vue/cli-service");
 const webpack = require("webpack"); // webpack 추가
 
