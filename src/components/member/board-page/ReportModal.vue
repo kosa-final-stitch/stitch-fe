@@ -101,7 +101,7 @@ export default {
       };
 
       // 서버로 신고 데이터 전송
-      axios.post('/api/member/report', reportData, {
+      axios.post('https://stitchkosa.store/api/member/report', reportData, {
         headers: {
           'Authorization': `Bearer ${token}` // 토큰을 헤더에 포함
         }

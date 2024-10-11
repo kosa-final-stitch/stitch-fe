@@ -169,7 +169,7 @@ export default {
     async fetchPosts() {
     try {
       // 공지사항 먼저 불러오기
-      const noticeResponse = await axios.get("/api/notices");
+      const noticeResponse = await axios.get("https://stitchkosa.store/api/notices");
       console.log("공지사항 데이터:", noticeResponse.data); // 여기에 작성자 정보가 포함되어 있는지 확인
       const notices = noticeResponse.data.map(notice => {
         return {
@@ -180,7 +180,7 @@ export default {
       
 
       // 게시글 불러오기
-      const postResponse = await axios.get("/api/board/community/all");
+      const postResponse = await axios.get("https://stitchkosa.store/api/board/community/all");
       const posts = postResponse.data.map(post => {
         return {
           ...post,

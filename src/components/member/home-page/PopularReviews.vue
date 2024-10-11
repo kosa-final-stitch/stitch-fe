@@ -60,7 +60,7 @@ export default {
   methods: {
     async fetchPopularReviews() {
       try {
-        const response = await axios.get("/api/member/reviews/top");
+        const response = await axios.get("https://stitchkosa.store/api/member/reviews/top");
         this.reviews = response.data;
       } catch (error) {
         console.error("Error fetching popular reviews:", error);

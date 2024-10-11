@@ -81,7 +81,7 @@ export default {
     async fetchCertificates() {
       try {
         // 로그인된 사용자 수료 정보 가져오기
-        const response = await axios.get('/api/certificate/list', {
+        const response = await axios.get('https://stitchkosa.store/api/certificate/list', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}` // JWT 토큰을 사용
           }

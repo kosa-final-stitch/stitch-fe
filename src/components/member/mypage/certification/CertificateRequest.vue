@@ -95,7 +95,7 @@ export default {
       try {
         const token = localStorage.getItem('token'); // JWT 토큰 가져오기
 
-        await axios.post('/api/certificate/register', formData, {
+        await axios.post('https://stitchkosa.store/api/certificate/register', formData, {
         headers: {
           Authorization: `Bearer ${token}`, // JWT 인증
           'Content-Type': 'multipart/form-data',

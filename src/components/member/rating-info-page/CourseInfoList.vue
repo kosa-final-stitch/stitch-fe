@@ -87,7 +87,7 @@ export default {
       const selectedStatus = this.selectedTab;
 
       axios
-        .get(`/api/courses`, {
+        .get(`https://stitchkosa.store/api/courses`, {
           params: {
             status: selectedStatus,
             pageNumber: this.currentPage,

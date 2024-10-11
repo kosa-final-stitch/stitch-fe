@@ -187,7 +187,7 @@ export default {
     async fetchMembers() {
       try {
         const token = localStorage.getItem('jwt');  // 저장된 JWT 토큰 가져오기
-        const response = await axios.get('/api/members', {
+        const response = await axios.get('https://stitchkosa.store/api/members', {
           headers: {
             Authorization: `Bearer ${token}`  // 토큰을 Authorization 헤더에 포함
           }
@@ -245,7 +245,7 @@ export default {
       try {
       // 실제 DB에서 사용자 삭제 요청
       const token = localStorage.getItem('jwt'); // 저장된 JWT 토큰 가져오기
-      await axios.delete(`/api/members/${this.memberToDelete.email}`, {
+      await axios.delete(`https://stitchkosa.store/api/members/${this.memberToDelete.email}`, {
         headers: {
           Authorization: `Bearer ${token}` // 토큰을 Authorization 헤더에 포함
         }

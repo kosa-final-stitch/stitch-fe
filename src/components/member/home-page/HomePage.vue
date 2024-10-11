@@ -79,7 +79,7 @@ export default {
       const memberStore = useMemberStore();
 
       // 사용자 정보를 백엔드에서 불러와 Pinia 스토어에 저장
-      axios.get('/api/member/info')
+      axios.get('https://stitchkosa.store/api/member/info')
           .then(response => {
             const memberData = response.data;
             memberStore.setMember(memberData); // 사용자 정보 설정

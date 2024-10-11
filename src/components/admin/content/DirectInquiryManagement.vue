@@ -177,7 +177,7 @@ export default {
     async fetchInquiries() {
       try {
         const token = localStorage.getItem('jwt'); // JWT 토큰 확인
-        const response = await axios.get("/api/member/inquiry", {
+        const response = await axios.get("https://stitchkosa.store/api/member/inquiry", {
           headers: {
             Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
           },
@@ -203,7 +203,7 @@ export default {
       try {
         const token = localStorage.getItem('jwt');
       // 관리자 답변 API 호출
-      await axios.post(`/api/member/inquiry/${this.selectedDirect.inquiryId}/answer`, 
+      await axios.post(`https://stitchkosa.store/api/member/inquiry/${this.selectedDirect.inquiryId}/answer`, 
         this.answerContent, // 답변 내용  
       {
       headers: {

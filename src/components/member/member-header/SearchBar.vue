@@ -58,7 +58,7 @@ export default {
     async search() {
       if (this.searchText.length > 0) {
         try {
-          const response = await axios.get(`/api/search?query=${this.searchText}`);
+          const response = await axios.get(`https://stitchkosa.store/api/search?query=${this.searchText}`);
           this.results = response.data;
           this.showResults = true;
         } catch (error) {

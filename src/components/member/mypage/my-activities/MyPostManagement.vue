@@ -74,11 +74,11 @@ export default {
 
       // 선택된 탭에 맞는 API 호출
       if (this.selectedTab === "info") {
-        apiUrl = `/api/board/info/${this.memberId}`; // 정보공유 게시판 API
+        apiUrl = `https://stitchkosa.store/api/board/info/${this.memberId}`; // 정보공유 게시판 API
       } else if (this.selectedTab === "qna") {
-        apiUrl = `/api/board/qna/${this.memberId}`; // Q&A 게시판 API
+        apiUrl = `https://stitchkosa.store/api/board/qna/${this.memberId}`; // Q&A 게시판 API
       } else if (this.selectedTab === "community") {
-        apiUrl = `/api/board/community/${this.memberId}`; // 자유게시판 API
+        apiUrl = `https://stitchkosa.store/api/board/community/${this.memberId}`; // 자유게시판 API
       }
 
       axios

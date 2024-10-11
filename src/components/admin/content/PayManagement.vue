@@ -218,7 +218,7 @@ export default {
 
         try {
         // 서버로 상태 업데이트 API 요청
-        await axios.post('/api/update-payment-status', { 
+        await axios.post('https://stitchkosa.store/api/update-payment-status', { 
           paymentId: this.payToChange.paymentId, 
           status: 'completed' });
         
@@ -243,7 +243,7 @@ export default {
   },
   mounted() {
   // 서버로부터 결제 데이터를 불러오는 로직
-  axios.get('/api/payments')
+  axios.get('https://stitchkosa.store/api/payments')
   .then(response => {
     console.log('결제 데이터:', response.data); // 데이터 확인
     this.paymentsData = response.data;

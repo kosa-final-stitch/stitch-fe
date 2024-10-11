@@ -54,7 +54,7 @@ export default {
     // 고 평점 교육 과정 가져오는 메서드
     async fetchTopRatedCourses() {
       try {
-        const response = await axios.get("/api/courses/top");
+        const response = await axios.get("https://stitchkosa.store/api/courses/top");
         console.log("2. Status Code:", response.status); // 상태 코드 확인
         console.log("2. Response Data:", response.data); // 응답 데이터 확인
         this.courses = response.data;

@@ -175,7 +175,7 @@ export default {
           console.error('JWT 토큰이 없습니다.');
           return;
         }
-        const response = await axios.get('/api/members', {
+        const response = await axios.get('https://stitchkosa.store/api/members', {
           headers: {
             Authorization: `Bearer ${token}`  // 토큰을 Authorization 헤더에 포함
           }
@@ -299,7 +299,7 @@ export default {
     async fetchTotalPayment() {
       try {
         const token = localStorage.getItem('jwt');
-        const paymentResponse = await axios.get('/api/payments', {
+        const paymentResponse = await axios.get('https://stitchkosa.store/api/payments', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -385,7 +385,7 @@ export default {
     async fetchTodayVisitors() {
       try {
         const token = localStorage.getItem('jwt');
-        const visitorResponse = await axios.get('/api/visitors/today', {
+        const visitorResponse = await axios.get('https://stitchkosa.store/api/visitors/today', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -400,7 +400,7 @@ export default {
     async fetchNotices() {
       try {
         const token = localStorage.getItem('jwt');
-        const response = await axios.get('/api/notices', {
+        const response = await axios.get('https://stitchkosa.store/api/notices', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -418,7 +418,7 @@ export default {
     async fetchDirects() {
       try {
         const token = localStorage.getItem('jwt');
-        const response = await axios.get('/api/member/inquiry', {
+        const response = await axios.get('https://stitchkosa.store/api/member/inquiry', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -436,7 +436,7 @@ export default {
     async fetchReports() {
       try {
         const token = localStorage.getItem('jwt');
-        const response = await axios.get('/api/member/report', {
+        const response = await axios.get('https://stitchkosa.store/api/member/report', {
           headers: {
             Authorization: `Bearer ${token}`
           }

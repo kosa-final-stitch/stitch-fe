@@ -204,7 +204,7 @@ export default {
     async fetchNotices() {
       try {
         const token = localStorage.getItem('jwt'); // JWT 토큰
-        const response = await axios.get('/api/notices', {
+        const response = await axios.get('https://stitchkosa.store/api/notices', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -227,7 +227,7 @@ export default {
         console.log("변경할 공지사항 ID:", this.noticeToChange.noticeId);
         console.log("변경할 상태:", this.noticeToChange.newStatus);
 
-        await axios.put(`/api/notices/${this.noticeToChange.noticeId}/status`, 
+        await axios.put(`https://stitchkosa.store/api/notices/${this.noticeToChange.noticeId}/status`, 
           this.noticeToChange.newStatus,  // 단순 문자열로 전송
         {
           headers: {
@@ -278,7 +278,7 @@ export default {
 
       try {
         const token = localStorage.getItem('jwt'); // JWT 토큰
-        const response = await axios.post('/api/notices', newNotice, {
+        const response = await axios.post('https://stitchkosa.store/api/notices', newNotice, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

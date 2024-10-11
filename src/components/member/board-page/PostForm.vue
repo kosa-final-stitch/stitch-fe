@@ -69,7 +69,7 @@ export default {
     async submitPost() {
       if (this.title && this.content && this.category) {
         try {
-          await axios.post("/api/member/board/community/create", {
+          await axios.post("https://stitchkosa.store/api/member/board/community/create", {
             headers: { 'Content-Type': 'application/json' },
             category: this.category,
             title: this.title,

@@ -48,7 +48,7 @@ export default {
     async fetchInquiry(inquiryId) {
       try {
         // 백엔드에서 문의 상세 데이터를 가져오는 API 요청
-        const response = await axios.get(`/api/member/inquiry/detail/${inquiryId}`);
+        const response = await axios.get(`https://stitchkosa.store/api/member/inquiry/detail/${inquiryId}`);
 
         // 데이터를 설정
         this.inquiry = response.data;
