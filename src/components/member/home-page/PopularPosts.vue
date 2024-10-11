@@ -19,7 +19,7 @@
           <h3>정보 공유</h3>
           <more-button to="/board/info-share" />
         </div>
-        <div class="post-card" @click="$router.push(`/board/info-share/post/${infoSharePost.boardId}`)">
+        <div class="post-card" @click="$router.push(`/board/info-share/${infoSharePost.boardId}`)">
           <p class="post-title">{{ infoSharePost.title }}</p>
           <p class="post-views">조회수: {{ infoSharePost.views }}</p>
         </div>
@@ -31,7 +31,7 @@
           <h3>자유 게시판</h3>
           <more-button to="/board/free-community" />
         </div>
-        <div class="post-card" @click="$router.push(`/board/free-community/post/${freeCommunityPost.boardId}`)">
+        <div class="post-card" @click="$router.push(`/board/free-community/${freeCommunityPost.boardId}`)">
           <p class="post-title">{{ freeCommunityPost.title }}</p>
           <p class="post-views">조회수: {{ freeCommunityPost.views }}</p>
         </div>
@@ -43,7 +43,7 @@
           <h3>Q&A 게시판</h3>
           <more-button to="/board/qna" />
         </div>
-        <div class="post-card" @click="$router.push(`/board/qna/post/${qnaPost.boardId}`)">
+        <div class="post-card" @click="$router.push(`/board/qna/${qnaPost.boardId}`)">
           <p class="post-title">{{ qnaPost.title }}</p>
           <p class="post-views">조회수: {{ qnaPost.views }}</p>
         </div>
