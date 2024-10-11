@@ -129,7 +129,7 @@ export default {
     // 사용자 정보를 백엔드에서 가져오는 함수
     async fetchUserInfo() {
       try {
-        const response = await axios.get("/api/member/info"); // API로 사용자 정보 요청
+        const response = await axios.get("https://stitchkosa.store/api/member/info"); // API로 사용자 정보 요청
         console.log("백엔드에서 가져온 사용자 정보:", response.data);
         const memberStore = useMemberStore();
 

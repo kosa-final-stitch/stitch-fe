@@ -204,7 +204,7 @@ export default {
       this.incrementViewCount(boardId);
 
       // 게시글 데이터를 가져오는 API 호출
-      axios.get(`/api/board/post/${boardId}`)
+      axios.get(`https://stitchkosa.store/api/board/post/${boardId}`)
           .then(response => {
             console.log("Response data: ", response.data); // 전체 응답 데이터를 확인
             this.post = response.data;
@@ -224,7 +224,7 @@ export default {
     },
     // 조회수 증가 메서드
     incrementViewCount(boardId) {
-      axios.post(`/api/board/post/increment-views/${boardId}`)
+      axios.post(`https://stitchkosa.store/api/board/post/increment-views/${boardId}`)
           .then(response => {
             console.log('View count incremented:', response.data);
           })
@@ -234,7 +234,7 @@ export default {
     },
     fetchComments(boardId) {
       // 댓글 데이터를 가져오는 API 호출
-      axios.get(`/api/comments/board/${boardId}`)
+      axios.get(`https://stitchkosa.store/api/comments/board/${boardId}`)
           .then(response => {
             console.log("Comments data: ", response.data); // 댓글 데이터를 확인
             this.comments = response.data; // 댓글 데이터를 저장
@@ -263,7 +263,7 @@ export default {
 
     // 게시글 저장 메서드
     savePost() {
-      axios.put(`/api/board/post/update/${this.boardId}`, this.editedPost)
+      axios.put(`https://stitchkosa.store/api/board/post/update/${this.boardId}`, this.editedPost)
           .then(response => {
             console.log('Post updated:', response.data);
             this.post = { ...this.editedPost }; // 저장 후 수정 내용을 게시글 데이터에 반영
@@ -291,7 +291,7 @@ export default {
     },
     // 댓글 수정 저장
     saveComment(commentId) {
-      axios.put(`/api/comments/update/${commentId}`, {
+      axios.put(`https://stitchkosa.store/api/comments/update/${commentId}`, {
         content: this.editedCommentContent,
       })
           .then(response => {
@@ -343,7 +343,7 @@ export default {
         return;
       }
 
-      axios.post(`/api/member/comments/create`,
+      axios.post(`https://stitchkosa.store/api/member/comments/create`,
           {
             boardId: this.boardId,
             content: this.newComment.content,
@@ -377,7 +377,7 @@ export default {
     deleteComment() {
       if (!this.commentToDelete) return;
 
-      axios.delete(`/api/comments/delete/${this.commentToDelete}`)
+      axios.delete(`https://stitchkosa.store/api/comments/delete/${this.commentToDelete}`)
           .then(response => {
             console.log('Comment deleted:', response.data);
             // 댓글 리스트에서 삭제된 댓글을 제거
@@ -398,7 +398,7 @@ export default {
     },
     // 게시글 삭제 메서드
     deletePost() {
-      axios.delete(`/api/board/post/delete/${this.boardId}`)
+      axios.delete(`https://stitchkosa.store/api/board/post/delete/${this.boardId}`)
           .then(response => {
             console.log('Post deleted:', response.data);
             this.showDeleteModal = false;

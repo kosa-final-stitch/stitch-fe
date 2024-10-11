@@ -220,7 +220,7 @@ export default {
       ];
       console.log("전송할 리뷰 데이터:", reviewData);
       axios
-        .post(`/api/member/reviews`, reviewData)
+        .post(`https://stitchkosa.store/api/member/reviews`, reviewData)
         .then((response) => {
           alert("리뷰가 성공적으로 저장되었습니다.");
           console.log("리뷰서버 응답:", response.data); // 서버 응답 데이터를 처리

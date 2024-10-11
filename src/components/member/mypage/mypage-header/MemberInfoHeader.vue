@@ -78,7 +78,7 @@ export default {
   },
   mounted() {
     axios
-      .get("/api/member/info")
+      .get("https://stitchkosa.store/api/member/info")
       .then((response) => {
         console.log("멤버헤드 서버 응답: ", response);
         this.member = response.data;

@@ -213,7 +213,7 @@ export default {
         return false;
       }
       try {
-        const res = await axios.post('/api/validate-email', { email: this.email });
+        const res = await axios.post('https://stitchkosa.store/api/validate-email', { email: this.email });
         if (!res.data.isValid) {
           this.emailError = '이미 사용 중인 이메일입니다.';
           return false;
@@ -245,7 +245,7 @@ export default {
         return false;
       }
       try {
-        const res = await axios.post('/api/validate-nickname', { nickname: this.nickname });
+        const res = await axios.post('https://stitchkosa.store/api/validate-nickname', { nickname: this.nickname });
         if (!res.data.isValid) {
           this.nicknameError = '이미 사용 중인 닉네임입니다.';
           return false;
@@ -302,7 +302,7 @@ export default {
       };
 
       try {
-        await axios.post('/api/signup', reqData, {
+        await axios.post('https://stitchkosa.store/api/signup', reqData, {
           headers: { 'Content-Type': 'application/json' },
           withCredentials : true,
         });

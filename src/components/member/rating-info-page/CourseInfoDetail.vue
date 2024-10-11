@@ -168,7 +168,7 @@ export default {
     async fetchCourseDetail() {
       const courseId = this.$route.params.courseId;
       axios
-        .get(`/api/courses/${courseId}`)
+        .get(`https://stitchkosa.store/api/courses/${courseId}`)
         .then((response) => {
           this.course = response.data;
           const reviewData = response.data;
@@ -232,7 +232,7 @@ export default {
     async fetchReviewData() {
       const courseId = this.$route.params.courseId;
       axios
-        .get(`/api/courses/${courseId}/reviews`)
+        .get(`https://stitchkosa.store/api/courses/${courseId}/reviews`)
         .then((response) => {
           const reviewData = response.data;
           console.log("받아온 리뷰 데이터:", reviewData); // 데이터를 확인

@@ -73,7 +73,7 @@ export default {
     async fetchPopularPosts() {
       try {
         // 정보 공유 게시판 인기 게시글 가져오기
-        const infoShareResponse = await axios.get("/api/home/posts/info-share/top");
+        const infoShareResponse = await axios.get("https://stitchkosa.store/api/home/posts/info-share/top");
         this.infoSharePost = infoShareResponse.data[0];
       } catch (error) {
         console.error("Error fetching info share post:", error);
@@ -81,7 +81,7 @@ export default {
 
       try {
         // 자유 게시판 인기 게시글 가져오기
-        const freeCommunityResponse = await axios.get("/api/home/posts/free-community/top");
+        const freeCommunityResponse = await axios.get("https://stitchkosa.store/api/home/posts/free-community/top");
         this.freeCommunityPost = freeCommunityResponse.data[0];
       } catch (error) {
         console.error("Error fetching free community post:", error);
@@ -89,7 +89,7 @@ export default {
 
       try {
         // Q&A 게시판 인기 게시글 가져오기
-        const qnaResponse = await axios.get("/api/home/posts/qna/top");
+        const qnaResponse = await axios.get("https://stitchkosa.store/api/home/posts/qna/top");
         this.qnaPost = qnaResponse.data[0];
       } catch (error) {
         console.error("Error fetching Q&A post:", error);

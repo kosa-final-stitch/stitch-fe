@@ -122,7 +122,7 @@ export default {
     async handlePaymentSuccess(paymentData) {
       try {
         // 결제 정보를 서버로 전송하여 저장
-        const response = await axios.post("/api/payment/complete", {
+        const response = await axios.post("https://stitchkosa.store/api/payment/complete", {
           amount: paymentData.paid_amount, // 결제 금액
           method: paymentData.pay_method, // 결제 방식 (예: 카드)
           category: "donation", // 결제 카테고리 (후원)

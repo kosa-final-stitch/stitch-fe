@@ -157,7 +157,7 @@ export default {
     // 학원 정보 가져오는 메서드
     fetchAcademyData() {
       axios
-        .get(`/api/academies/academy/${this.academyId}`) // props로 받은 id 사용
+        .get(`https://stitchkosa.store/api/academies/academy/${this.academyId}`) // props로 받은 id 사용
         .then((response) => {
           this.academy = response.data; // 서버에서 받아온 학원 정보 저장
           console.log("학원 정보: ", response.data);
@@ -170,7 +170,7 @@ export default {
     // 학원 평균 별점 가져오는 메서드
     fetchAcademyRating() {
       axios
-        .get(`/api/academies/academy/${this.academyId}/rating`)
+        .get(`https://stitchkosa.store/api/academies/academy/${this.academyId}/rating`)
         .then((response) => {
           this.academy.rating = response.data; // 서버에서 받아온 평균 별점 저장
           console.log("학원 평균 별점: ", response.data);
@@ -183,7 +183,7 @@ export default {
     // 강좌 정보 가져오는 메서드
     fetchCourses() {
       axios
-        .get(`/api/academies/courses/${this.academyId}`) // props로 받은 id 사용
+        .get(`https://stitchkosa.store/api/academies/courses/${this.academyId}`) // props로 받은 id 사용
         .then((response) => {
           console.log("아카데미 인포 강좌 목록 응답: ", response.data);
           const today = new Date(); // 오늘 날짜
@@ -229,7 +229,7 @@ export default {
     // 학원 모든 과정 리뷰 데이터를 가져오는 메서드
     fetchAllCourseReviews() {
       axios
-        .get(`/api/academies/reviews/all/${this.academyId}`)
+        .get(`https://stitchkosa.store/api/academies/reviews/all/${this.academyId}`)
         .then((response) => {
           const reviewData = response.data;
           console.log("모든 과정 리뷰 데이터: ", reviewData);
@@ -243,7 +243,7 @@ export default {
 
     async fetchCourseReviews(course) {
       axios
-        .get(`/api/courses/${course.course_id}/reviews`) // 각 과정의 리뷰 API 호출
+        .get(`https://stitchkosa.store/api/courses/${course.course_id}/reviews`) // 각 과정의 리뷰 API 호출
         .then((response) => {
           const reviews = response.data;
           console.log("강좌에 대한 리뷰 데이터를 가져와서 별점" + reviews);

@@ -228,7 +228,7 @@ export default {
 
       try {
       // API로 DELETE 요청 전송
-      await axios.delete(`/api/member/reviews/${this.reviewToDelete.reviewId}`);
+      await axios.delete(`https://stitchkosa.store/api/member/reviews/${this.reviewToDelete.reviewId}`);
       
       // 로컬 데이터에서 삭제
       this.reviews = this.reviews.filter(review => review.reviewId !== this.reviewToDelete.reviewId);
@@ -253,7 +253,7 @@ export default {
 
   mounted() {
       // 서버로부터 수강평 데이터를 불러오는 로직
-    axios.get('/api/member/reviews/all') // 모든 리뷰를 가져오는 API 호출
+    axios.get('https://stitchkosa.store/api/member/reviews/all') // 모든 리뷰를 가져오는 API 호출
       .then(response => {
         console.log('수강평 데이터:', response.data); // 데이터 확인
         this.reviews = response.data; // 데이터를 reviews 배열에 저장

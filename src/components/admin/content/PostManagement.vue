@@ -265,7 +265,7 @@ export default {
           return;
         }
 
-        await axios.put(`/api/admin/board/status/${post.boardId}`, {
+        await axios.put(`https://stitchkosa.store/api/admin/board/status/${post.boardId}`, {
           useYn: status // 여기서 status는 'Y' 또는 'N'
         }, { 
           headers: {
@@ -301,7 +301,7 @@ export default {
     this.searchCategory = 'all';
 
     // 자유게시판 데이터를 불러오는 API 호출
-    fetch('/api/board/community/all')
+    fetch('https://stitchkosa.store/api/board/community/all')
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch posts');
@@ -330,7 +330,7 @@ export default {
     // 모든 게시판 정보 불러오기
     loadAllBoards() {
       // 정보 공유 게시판 불러오기
-      fetch('/api/board/infoShare/all')
+      fetch('https://stitchkosa.store/api/board/infoShare/all')
         .then(response => {
           if (!response.ok) {
             throw new Error('Failed to fetch info share posts');
@@ -346,7 +346,7 @@ export default {
         });
 
       // 자유 게시판 불러오기
-      fetch('/api/board/community/all')
+      fetch('https://stitchkosa.store/api/board/community/all')
         .then(response => {
           if (!response.ok) {
             throw new Error('Failed to fetch community posts');
@@ -362,7 +362,7 @@ export default {
         });
 
       // Q&A 게시판 불러오기
-      fetch('/api/board/qna/all')
+      fetch('https://stitchkosa.store/api/board/qna/all')
         .then(response => {
           if (!response.ok) {
             throw new Error('Failed to fetch Q&A posts');

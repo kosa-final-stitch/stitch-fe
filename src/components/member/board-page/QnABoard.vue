@@ -151,7 +151,7 @@ export default {
 
     // 게시글 목록을 불러오는 메서드 정의
     fetchPosts() {
-      axios.get('/api/board/community/all')
+      axios.get('https://stitchkosa.store/api/board/community/all')
           .then(response => {
             this.items = response.data; // 받아온 데이터를 items 배열에 저장
             console.log('Fetched items:', this.items); // 데이터 확인

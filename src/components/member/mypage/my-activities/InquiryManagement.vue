@@ -67,7 +67,7 @@ export default {
   methods: {
     fetchInquiries() {
       axios
-        .get(`/api/member/inquiry/${this.memberId}`)
+        .get(`https://stitchkosa.store/api/member/inquiry/${this.memberId}`)
         .then((response) => {
           const inquiries = response.data || []; // 데이터가 없을 경우 빈 배열 처리
           console.log("문의 글들 :", inquiries); // 데이터를 확인

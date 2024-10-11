@@ -208,7 +208,7 @@ export default {
     async fetchCertificates() {
       try {
         const token = localStorage.getItem('token'); // JWT 토큰이 로컬 스토리지에 저장되어 있다고 가정
-        const response = await axios.get('/api/certificate/all', {
+        const response = await axios.get('https://stitchkosa.store/api/certificate/all', {
           headers: {
             Authorization: `Bearer ${token}` // 토큰을 Authorization 헤더에 포함
           }
@@ -267,7 +267,7 @@ export default {
       console.log('certificateId:', this.selectedCertificate.certificateId);
       console.log('status:', this.selectedCertificate.status);
 
-      const response = await axios.post('/api/certificate/updateStatus', {
+      const response = await axios.post('https://stitchkosa.store/api/certificate/updateStatus', {
         certificateId: this.selectedCertificate.certificateId,
         status: this.selectedCertificate.status
       }, {
@@ -305,7 +305,7 @@ export default {
     async getS3ImageUrl(filename) {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('/api/certificate/signed-url', {
+        const response = await axios.get('https://stitchkosa.store/api/certificate/signed-url', {
           params: { filename },  // filename 파라미터를 전달
           headers: {
             Authorization: `Bearer ${token}`

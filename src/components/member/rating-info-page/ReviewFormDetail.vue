@@ -89,7 +89,7 @@ export default {
   },
   methods: {
     fetchReviewData(academyId, courseId, reviewId) {
-      const apiUrl = `/api/member/reviews/${academyId}/course/${courseId}/review/${reviewId}`;
+      const apiUrl = `https://stitchkosa.store/api/member/reviews/${academyId}/course/${courseId}/review/${reviewId}`;
       console.log("API 요청 URL:", apiUrl); // API 경로 출력 확인
 
       axios

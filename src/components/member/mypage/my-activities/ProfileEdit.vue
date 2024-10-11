@@ -91,7 +91,7 @@ export default {
     // 사용자 정보를 서버에서 가져오는 함수
     fetchUserInfo() {
       axios
-        .get("/api/member/info")
+        .get("https://stitchkosa.store/api/member/info")
         .then((response) => {
           this.userInfo = response.data;
           console.log(JSON.stringify("사용자정보를 서버에서 가져오기" + JSON.stringify(this.userInfo)));
@@ -108,7 +108,7 @@ export default {
         return;
       }
       axios
-        .put("/api/member/info", this.editableUserInfo)
+        .put("https://stitchkosa.store/api/member/info", this.editableUserInfo)
         .then(() => {
           alert("회원 정보가 저장되었습니다.");
           this.userInfo = { ...this.editableUserInfo }; // 저장 후 현재 사용자 정보 업데이트

@@ -105,7 +105,7 @@ export default {
     fetchReviews() {
       const memberId = this.currentUser.memberId; // 로그인한 사용자의 ID 가져오기
       axios
-        .get(`/api/member/reviews/myreviews/${memberId}`)
+        .get(`https://stitchkosa.store/api/member/reviews/myreviews/${memberId}`)
         .then((response) => {
           const reviewData = response.data;
           console.log("마이페이지 리뷰 서버 응답:", reviewData);

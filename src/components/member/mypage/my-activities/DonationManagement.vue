@@ -63,7 +63,7 @@ export default {
   methods: {
     async fetchDonations() {
       try {
-        const response = await axios.get(`/api/member/payments`);
+        const response = await axios.get(`https://stitchkosa.store/api/member/payments`);
         this.donations = response.data;
       } catch (error) {
         console.error("Error fetching donations:", error);

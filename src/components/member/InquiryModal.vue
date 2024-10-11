@@ -71,7 +71,7 @@ export default {
       if (!this.categoryError && !this.titleError && !this.contentError) {
         try {
           // 문의 등록 처리
-          await axios.post("/api/member/inquiry", {
+          await axios.post("https://stitchkosa.store/api/member/inquiry", {
             category: this.selectedCategory,
             title: this.title,
             content: this.content,

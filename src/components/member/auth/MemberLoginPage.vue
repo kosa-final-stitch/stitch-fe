@@ -79,7 +79,7 @@ export default {
     async login() {
       if (this.email && this.password) {
         try {
-          const response = await axios.post('/api/login', {
+          const response = await axios.post('https://stitchkosa.store/api/login', {
             email: this.email,
             password: this.password
           });

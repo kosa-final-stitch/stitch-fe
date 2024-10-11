@@ -206,7 +206,7 @@ export default {
     async fetchReports() {
       try {
         const token = localStorage.getItem('token'); // JWT 토큰이 로컬 스토리지에 저장되어 있다고 가정
-        const response = await axios.get('/api/member/report', {
+        const response = await axios.get('https://stitchkosa.store/api/member/report', {
           headers: {
             Authorization: `Bearer ${token}` // 토큰을 Authorization 헤더에 포함
           }
@@ -284,7 +284,7 @@ export default {
     },
     async getWriterId(report) {
       try {
-        const response = await axios.get(`/api/member/report/${report.reportId}/writer`);
+        const response = await axios.get(`https://stitchkosa.store/api/member/report/${report.reportId}/writer`);
         console.log('Writer Response:', response.data);  // 확인
         return response.data;
       } catch (error) {
@@ -295,7 +295,7 @@ export default {
 
     async getPostContent(report) {
       try {
-        const response = await axios.get(`/api/member/report/${report.reportId}/content`);
+        const response = await axios.get(`https://stitchkosa.store/api/member/report/${report.reportId}/content`);
         console.log('Content Response:', response.data);  // 응답 데이터 확인
 
         // response.data가 Map<String, String> 형태라면
@@ -315,7 +315,7 @@ export default {
       try {
         // 서버로 상태 업데이트 전송
         const token = localStorage.getItem('token');
-        const response = await axios.post(`/api/member/report/${this.selectedReport.reportId}/answer`, {
+        const response = await axios.post(`https://stitchkosa.store/api/member/report/${this.selectedReport.reportId}/answer`, {
           status: 'answered',
           answer: this.answerContent
         }, {
